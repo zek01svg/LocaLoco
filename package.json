@@ -1,0 +1,16 @@
+{
+    "dependencies": {
+        "concurrently": "^9.2.1",
+        "wait-on": "^9.0.1"
+    },
+    "scripts": {
+        "dev": "cls && concurrently \"cd backend && npm run dev\" \"cd frontend2 && npm run dev\""
+    },
+    "prettier": {
+        "tabWidth": 4,
+        "useTabs": false
+    },
+    "devDependencies": {
+        "@types/node": "^24.9.1"
+    }
+}
