@@ -10,18 +10,5 @@ const db = drizzle(mysql.createPool({
     port: Number(process.env.DB_PORT)!
 }))
 
-// import { businesses } from './schema.js'
-// async function getrows () {
-//     const businessRows = await db.select().from(businesses)
-//     console.log('businesses:', businessRows)
-// }
-// getrows()
-
-// console.log(process.env.DB_HOST)
-// console.log(process.env.DB_USER)
-// console.log(process.env.DB_PASSWORD)
-// console.log(process.env.DB_NAME)
-// console.log(process.env.DB_PORT)
-// console.log(process.env.DATABASE_URL)
 
 export default db
