@@ -8,13 +8,18 @@ import { fileURLToPath } from 'url';
 import businessRouter from './routes/businessRoutes.js';
 import { Hono } from 'hono';
 // import userRouter from './routes/userRoutes.js';
+import { toNodeHandler } from 'better-auth/node';
+import auth from './lib/auth.js';
 
 dotenv.config();
 
 const app: Application = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:5173', // allow frontend to pass
+    credentials: true,
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -46,22 +51,29 @@ app.use(
   })
 );
 
-// Get __dirname equivalent in ES module
+// __dirname equivalent in ES module
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Resolve and serve frontend directory
-const frontendPath = path.resolve(__dirname, '../../frontend');
+// resolve and serve compiled frontend directory
+const frontendPath = path.resolve(__dirname, '../../frontend/dist');
 app.use(express.static(frontendPath));
 
-// resolve and serve the uploads directory
+// resolve and serve the uploads directory 
+// TODO: create azure storage acc and use bucket to store images instead
 const uploadsPath = path.resolve(__dirname, '../uploads');
 app.use('/uploads', express.static(uploadsPath));
 
-// For SPA routing
-app.get('/', async (req, res) => {
-    res.sendFile(path.join(frontendPath, 'index.html'));
+// frontend will call and wait for this first before running
+app.get('/health', async (req, res) => {
+    res.status(200).json({
+        "server_status": "ok"
+    })
 });
+
+//  handler for better auth
+app.all('/api/auth/{*any}', toNodeHandler(auth)); // handler for better-auth
+
 
 app.use(businessRouter)
 // app.use(userRouter)
