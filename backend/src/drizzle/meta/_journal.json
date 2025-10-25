@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1761366115924,
+      "tag": "0000_flowery_micromacro",
+      "breakpoints": true
+    }
+  ]
+}
