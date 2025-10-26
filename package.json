@@ -4,8 +4,8 @@
         "wait-on": "^9.0.1"
     },
     "scripts": {
-        "dev": "cls && concurrently \"cd backend && npm run dev\" \"cd frontend2 && npm run dev\"",
-        "install":"cls && concurrently \"cd backend && npm install\" \"cd frontend2 && npm run install\"",
+        "dev": "clear && concurrently \"cd backend && npm run dev\" \"cd frontend2 && npm run dev\"",
+        "install":"clear && npm install && concurrently \"cd backend && npm install\" \"cd frontend2 && npm run install\"",
         "auth:generate": "cd backend && npx @better-auth/cli@latest generate --output src/database/auth-schema.ts --config src/lib/auth.ts",
         "db:setup": "cd backend && npx drizzle-kit generate && npx drizzle-kit migrate"
     },
