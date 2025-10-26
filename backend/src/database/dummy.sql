@@ -3,46 +3,6 @@ DROP DATABASE IF EXISTS wad2_project;
 CREATE DATABASE wad2_project;
 USE wad2_project;
 
--- create businesses table
-CREATE TABLE businesses (
-    uen VARCHAR(20) NOT NULL PRIMARY KEY,
-    password VARCHAR(255) NOT NULL,
-    business_name VARCHAR(255) NOT NULL,
-    business_category VARCHAR(100),
-    description TEXT,
-    address VARCHAR(500),
-    open247 BOOLEAN DEFAULT FALSE,
-    email VARCHAR(100),
-    phone_number VARCHAR(20),
-    website_link VARCHAR(255),
-    social_media_link VARCHAR(255),
-    wallpaper VARCHAR(255),
-    date_of_creation DATE,
-    price_tier ENUM('low', 'medium', 'high'),
-    offers_delivery BOOLEAN DEFAULT FALSE,
-    offers_pickup BOOLEAN DEFAULT FALSE
-);
-
--- create payment options table (since there may be more than one payment option)
-CREATE TABLE business_payment_options (
-    id INT AUTO_INCREMENT,
-    uen VARCHAR(20) NOT NULL,
-    payment_option VARCHAR(50) NOT NULL,
-    PRIMARY KEY (id),
-    FOREIGN KEY (uen) REFERENCES businesses(uen) ON DELETE CASCADE
-);
-
--- create opening_hours table
-CREATE TABLE business_opening_hours (
-    id INT AUTO_INCREMENT,
-    uen VARCHAR(20) NOT NULL,
-    day_of_week ENUM('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday') NOT NULL,
-    open_time TIME NOT NULL,
-    close_time TIME NOT NULL,
-    PRIMARY KEY (id),
-    FOREIGN KEY (uen) REFERENCES businesses(uen) ON DELETE CASCADE
-);
-
 -- Businesses data
 INSERT INTO businesses (uen, password, business_name, business_category, description, address, open247, email, phone_number, website_link, social_media_link, wallpaper, date_of_creation, price_tier, offers_delivery, offers_pickup) VALUES
 ('202301234A', 'hash', 'The Daily Loaf Bakery', 'fnb', 'Artisanal breads and pastries baked fresh daily with premium ingredients', '123 Orchard Road, Singapore 238858', FALSE, 'hello@dailyloaf.sg', '+65 6234 5678', 'https://www.dailyloaf.sg', 'https://instagram.com/dailyloafbakery', 'The_Daily_Loaf_Bakery.jpg', '2023-01-15', 'medium', TRUE, TRUE),
