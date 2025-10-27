@@ -1,4 +1,4 @@
-import { betterAuth } from "better-auth";
+import { betterAuth, boolean } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import db from "../database/db.js";
 import { user, session, account, verification } from "../database/schema.js";
@@ -9,6 +9,14 @@ const auth = betterAuth({
         provider: "mysql", 
         schema: { user, session, account, verification }
     }),
+    user: {
+        additionalFields: {
+            hasBusiness: {
+                type: "boolean",
+                input: false
+            }
+        }
+    },
     emailAndPassword: { 
         enabled: true, 
         autoSignIn: true
