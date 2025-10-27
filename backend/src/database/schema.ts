@@ -46,6 +46,41 @@ export const businesses = mysqlTable("businesses", {
 	primaryKey({ columns: [table.uen], name: "businesses_uen"}),
 ]);
 
+export const forumPosts = mysqlTable("forum_posts", {
+    id: int().autoincrement().notNull(),
+    userEmail: varchar("user_email", { length: 255 }).notNull().references(() => user.email),
+    businessUen: varchar("business_uen", { length: 20 }).references(() => businesses.uen),
+    parentId: int("parent_id"),
+    title: varchar({ length: 255 }),
+    body: text().notNull(),
+    likeCount: int("like_count").default(0),
+    createdAt: timestamp("created_at", { mode: 'string' }),
+    updatedAt: timestamp("updated_at", { mode: 'string' }),
+},
+(table) => [
+    index("business_uen").on(table.businessUen),
+    index("parent_id").on(table.parentId),
+    index("user_email").on(table.userEmail),
+    foreignKey({
+            columns: [table.parentId],
+            foreignColumns: [table.id],
+            name: "forum_posts_ibfk_3"
+        }).onDelete("cascade"),
+    primaryKey({ columns: [table.id], name: "forum_posts_id"}),
+]);
+
+export const businessReviews = mysqlTable('business_reviews', {
+    id: int('id').primaryKey(),
+    userEmail: varchar('user_email', { length: 255 }).notNull().references(() => user.email),
+    businessUen: varchar('business_uen', { length: 20 }).references(() => businesses.uen),
+    rating: int('rating').notNull(),
+    body: text('body').notNull(),
+    likeCount: int('like_count').default(0),
+    createdAt: timestamp("created_at", { mode: 'string' })
+});
+
+// THIS BLOCK ONWARDS IS FOR BETTER-AUTH TABLES ONLY
+
 export const user = mysqlTable("user", {
   id: varchar("id", { length: 36 }).primaryKey(),
   name: text("name").notNull(),
@@ -57,6 +92,7 @@ export const user = mysqlTable("user", {
     .defaultNow()
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
+  hasBusiness: boolean("has_business"),
 });
 
 export const session = mysqlTable("session", {
