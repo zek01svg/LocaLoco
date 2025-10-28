@@ -209,7 +209,7 @@ function showDetails(uen) {
             } else {
                 const business = response.data
 
-                display_details_image.src = '/uploads/' + business.wallpaper
+                display_details_image.src = 'http://localhost:3000/uploads/' + business.wallpaper
                 description.innerText = business.description
                 address.innerHTML = `<strong>Address:</strong> ${business.address}`
                 phone.innerHTML = `<strong>Phone:</strong> ${business.phone}`
@@ -228,10 +228,50 @@ function showDetails(uen) {
                     }
                 }
                 
+                loadReviews(uen)
+
                 // hide main cards and show details
                 mainCardContainer.style.display = 'none'
                 filtering_bar.style.display = 'none'
                 detailsContainer.style.display = 'block'
+            }
+        });
+}
+
+/**
+ * Fetches reviews for a specific business and displays them in the Reviews tab
+ */
+function loadReviews(uen) {
+    const reviewsContainer = document.getElementById('reviewsContainer');
+    const reviewsCount = document.getElementById('reviewsCount');
+    reviewsContainer.innerHTML = ''; // clear old reviews
+
+    axios.get('http://localhost:3000/api/reviews', { params: { uen: uen } })
+        .then(response => {
+            const reviews = response.data || [];
+            reviewsCount.innerText = reviews.length;
+            console.log(reviews)
+            if (reviews.length === 0) {
+                reviewsContainer.innerHTML = '<p>No reviews yet.</p>';
+                return;
+            }
+
+            for (let review of reviews) {
+                const reviewDiv = document.createElement('div');
+                reviewDiv.className = 'card mb-3 p-3';
+
+                reviewDiv.innerHTML = `
+                    <div class="d-flex justify-content-between mb-2">
+                        <strong>${review.userEmail}</strong>
+                        <small>${new Date(review.createdAt).toDateString()}</small>
+                    </div>
+                    <div class="mb-2">
+                        ${'★'.repeat(review.rating) + '☆'.repeat(5 - review.rating)}
+                    </div>
+                    <p>${review.body}</p>
+                `;
+
+                reviewsContainer.appendChild(reviewDiv);
             }
         });
 }
@@ -251,4 +291,58 @@ function closeDetails() {
     filtering_bar.style.display = ''
 
     opening_hours.innerHTML = ''
+}
+
+function writeReview() {
+    const writeReviewBtn = document.getElementById('writeReviewBtn');
+    const reviewForm = document.getElementById('reviewForm');
+    const reviewsContainer = document.getElementById('reviewsContainer');
+    const stars = document.querySelectorAll('#starRating .star');
+    const submitReviewBtn = document.getElementById('submitReviewBtn');
+    let selectedRating = 0;
+
+    // Toggle form visibility
+    writeReviewBtn.addEventListener('click', () => {
+        reviewForm.style.display = reviewForm.style.display === 'none' ? 'block' : 'none';
+    });
+
+    // Star hover and click logic
+    stars.forEach(star => {
+        star.addEventListener('mouseover', () => {
+            highlightStars(star.dataset.value);
+        });
+        star.addEventListener('click', () => {
+            selectedRating = parseInt(star.dataset.value);
+            highlightStars(selectedRating);
+        });
+    });
+
+    function highlightStars(rating) {
+        stars.forEach(star => {
+            star.innerHTML = star.dataset.value <= rating ? '★' : '☆';
+        });
+    }
+
+    // Submit review
+    submitReviewBtn.addEventListener('click', () => {
+        const reviewText = document.getElementById('reviewText').value.trim();
+        if (!reviewText || selectedRating === 0) {
+            alert("Please enter review text and select a rating!");
+            return;
+        }
+
+        const reviewHTML = `
+            <div class="card mb-2 p-2">
+                <div>Rating: ${'★'.repeat(selectedRating)}${'☆'.repeat(5 - selectedRating)}</div>
+                <div>${reviewText}</div>
+            </div>
+        `;
+        reviewsContainer.innerHTML += reviewHTML;
+
+        // Reset form
+        reviewForm.style.display = 'none';
+        document.getElementById('reviewText').value = '';
+        selectedRating = 0;
+        highlightStars(0);
+    });
 }
