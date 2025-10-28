@@ -1,17 +1,15 @@
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import express, { type Application } from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
-import helmet from 'helmet'
-import path from 'path'
+import helmet from 'helmet';
 import logger from './middleware/logger.js';
-import { fileURLToPath } from 'url';
 import businessRouter from './routes/businessRoutes.js';
-import { Hono } from 'hono';
 // import userRouter from './routes/userRoutes.js';
 import { toNodeHandler } from 'better-auth/node';
-import auth from './lib/auth.js';
-
-dotenv.config();
+import auth from './lib/auth.js'; // This will now correctly have all process.env variables
+import featureRouter from './routes/featureRoutes.js';
 
 const app: Application = express();
 
@@ -77,6 +75,7 @@ app.all('/api/auth/{*any}', toNodeHandler(auth)); // handler for better-auth
 
 app.use(businessRouter)
 // app.use(userRouter)
+app.use(featureRouter)
 
 app.use(logger)
 
