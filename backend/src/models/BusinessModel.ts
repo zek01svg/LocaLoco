@@ -319,74 +319,74 @@ class BusinessModel {
      * Registers a new business, inserting data into three tables within a transaction.
      * Note: HASHES the password before insertion.
      */
-    // public static async registerBusiness(
-    //     business: Omit<Business, 'password' | 'open247' | 'offersDelivery' | 'offersPickup' | 'dateOfCreation'> & {
-    //         password: string, 
-    //         open247: boolean, 
-    //         offersDelivery: boolean, 
-    //         offersPickup: boolean,
-    //         dateOfCreation: string // Passed as a string (YYYY-MM-DD)
-    //     }
-    // ): Promise<boolean> {
-    //     const {
-    //         uen, password, businessName, businessCategory, description, address, open247,
-    //         openingHours, email, phoneNumber, websiteLink, socialMediaLink, wallpaper,
-    //         dateOfCreation, priceTier, offersDelivery, offersPickup, paymentOptions
-    //     } = business;
+    //  public static async registerBusiness(
+    //      business: Omit<Business, 'password' | 'open247' | 'offersDelivery' | 'offersPickup' | 'dateOfCreation'> & {
+    //          password: string, 
+    //          open247: boolean, 
+    //          offersDelivery: boolean, 
+    //          offersPickup: boolean,
+    //          dateOfCreation: string // Passed as a string (YYYY-MM-DD)
+    //      }
+    //  ): Promise<boolean> {
+    //      const {
+    //          uen, password, businessName, businessCategory, description, address, open247,
+    //          openingHours, email, phoneNumber, websiteLink, socialMediaLink, wallpaper,
+    //          dateOfCreation, priceTier, offersDelivery, offersPickup, paymentOptions
+    //      } = business;
 
-    //     try {
-    //         const hashedPassword = await argon2.hash(password);
+    //      try {
+    //          const hashedPassword = await argon2.hash(password);
 
-    //         await db.beginTransaction();
+    //          await db.beginTransaction();
 
-    //         // 1. Insert into the businesses table
-    //         const sql = `
-    //             INSERT INTO businesses (
-    //                 uen, password, business_name, business_category, description, address, open247,
-    //                 email, phone_number, website_link, social_media_link, wallpaper,
-    //                 date_of_creation, price_tier, offers_delivery, offers_pickup
-    //             ) VALUES (
-    //                 ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
-    //             )`;
+    //         //   1. Insert into the businesses table
+    //          const sql = `
+    //              INSERT INTO businesses (
+    //                  uen, password, business_name, business_category, description, address, open247,
+    //                  email, phone_number, website_link, social_media_link, wallpaper,
+    //                  date_of_creation, price_tier, offers_delivery, offers_pickup
+    //              ) VALUES (
+    //                  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+    //              )`;
 
-    //         const [result] = await db.execute<ResultSetHeader>(sql, [
-    //             uen, hashedPassword, businessName, businessCategory, description, address, open247,
-    //             email, phoneNumber, websiteLink, socialMediaLink, wallpaper,
-    //             dateOfCreation, priceTier, offersDelivery, offersPickup
-    //         ]);
+    //          const [result] = await db.execute<ResultSetHeader>(sql, [
+    //              uen, hashedPassword, businessName, businessCategory, description, address, open247,
+    //              email, phoneNumber, websiteLink, socialMediaLink, wallpaper,
+    //              dateOfCreation, priceTier, offersDelivery, offersPickup
+    //          ]);
 
-    //         if (result.affectedRows === 0) {
-    //             throw new Error("Failed to insert main business record.");
-    //         }
+    //          if (result.affectedRows === 0) {
+    //              throw new Error("Failed to insert main business record.");
+    //          }
 
-    //         // 2. Insert payment options
-    //         if (paymentOptions.length > 0) {
-    //             const sqlPayment = `INSERT INTO business_payment_options (uen, payment_option) VALUES (?, ?)`;
-    //             for (const option of paymentOptions) {
-    //                 await db.execute<ResultSetHeader>(sqlPayment, [uen, option]);
-    //             }
-    //         }
+    //         //   2. Insert payment options
+    //          if (paymentOptions.length > 0) {
+    //              const sqlPayment = `INSERT INTO business_payment_options (uen, payment_option) VALUES (?, ?)`;
+    //              for (const option of paymentOptions) {
+    //                  await db.execute<ResultSetHeader>(sqlPayment, [uen, option]);
+    //              }
+    //          }
 
-    //         // 3. Insert opening hours (if not open 24/7)
-    //         if (!open247) {
-    //             const sqlHours = `INSERT INTO business_opening_hours (uen, day_of_week, open_time, close_time) VALUES (?, ?, ?, ?)`;
-    //             for (const day in openingHours) {
-    //                 const times = openingHours[day as DayOfWeek];
-    //                 // PHP's ucfirst(strtolower($day)) logic is used to match DB's capitalization if needed
-    //                 const formattedDay = day.charAt(0).toUpperCase() + day.slice(1).toLowerCase();
-    //                 await db.execute<ResultSetHeader>(sqlHours, [uen, formattedDay, times.open, times.close]);
-    //             }
-    //         }
+    //         //   3. Insert opening hours (if not open 24/7)
+    //          if (!open247) {
+    //              const sqlHours = `INSERT INTO business_opening_hours (uen, day_of_week, open_time, close_time) VALUES (?, ?, ?, ?)`;
+    //              for (const day in openingHours) {
+    //                  const times = openingHours[day as DayOfWeek];
+    //                   PHP's ucfirst(strtolower($day)) logic is used to match DB's capitalization if needed
+    //                  const formattedDay = day.charAt(0).toUpperCase() + day.slice(1).toLowerCase();
+    //                  await db.execute<ResultSetHeader>(sqlHours, [uen, formattedDay, times.open, times.close]);
+    //              }
+    //          }
 
-    //         await db.commit();
-    //         return true;
+    //          await db.commit();
+    //          return true;
 
-    //     } catch (error) {
-    //         console.error("Error registering business:", error);
-    //         await db.rollback();
-    //         return false;
-    //     }
-    // }
+    //      } catch (error) {
+    //          console.error("Error registering business:", error);
+    //          await db.rollback();
+    //          return false;
+    //      }
+    //  }
 
 
     /**
