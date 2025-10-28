@@ -6,7 +6,7 @@
     "scripts": {
         "dev": "concurrently \"cd backend && npm run dev\" \"cd frontend2 && npm run dev\"",
         "start": "cd backend && npm start",
-        "install":"npm install && cd backend && npm install && cd ../frontend2 && npm install",
+        "setup":"npm install && cd backend && npm install && cd ../frontend2 && npm install",
         "auth:generate": "cd backend && npx @better-auth/cli generate --output src/database/auth-schema.ts --config src/lib/auth.ts",
         "db:setup": "cd backend && npx drizzle-kit push"
     },
