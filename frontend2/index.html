@@ -8,7 +8,7 @@
     <!-- axios -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <!-- for the browser logo -->
-    <link rel="icon" type="image/x-icon" href="public/stress.svg">
+    <link rel="icon" type="image/x-icon" href="/stress.svg">
 
     <style>
 
@@ -38,6 +38,10 @@
         }
         #display_details {
             display: none;
+        }
+        #reviewForm {
+            display: none;
+            margin-top: 20px;
         }
     </style>
 
@@ -130,26 +134,74 @@
                 <img src="" class="img-fluid" id="display_details_image" alt="Detail Image">
             </div>
 
-            <!-- About / Info Section -->
-            <div class="col-md-6 mb-4">
-                <div class="info-card bg-light p-3 rounded shadow-sm">
-                    <h3>About</h3>
-                    <p id="description"></p>
-                    <p id="address"></p>
-                    <p id="phone"></p>
-                    <p id="website_link"></p>
-                    <p id="social_media_link"></p>
+            <!-- TABS -->
+            <ul class="nav nav-tabs mb-3" id="detailsTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab">Overview</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab">Reviews (<span id="reviewsCount">0</span>)</button>
+            </li>
+            </ul>
+
+            <div class="tab-content">
+            <!-- Overview Tab -->
+            <div class="tab-pane fade show active" id="overview" role="tabpanel">
+                <div class="row">
+                    <!-- About / Info Section -->
+                    <div class="col-md-6 mb-4">
+                        <div class="info-card bg-light p-3 rounded shadow-sm">
+                            <h3>About</h3>
+                            <p id="description"></p>
+                            <hr>
+                            <p id="address"></p>
+                            <p id="phone"></p>
+                            <p id="website_link"></p>
+                            <p id="social_media_link"></p>
+                        </div>
+                    </div>
+
+                    <!-- Opening Hours Section -->
+                    <div class="col-md-6 mb-4">
+                        <div class="hours-card bg-light p-3 rounded shadow-sm">
+                            <h3>Opening Hours</h3>
+                            <p id="isOpen247"></p>
+                            <ul class="list-unstyled" id="opening_hours"></ul>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Opening Hours Section -->
-            <div class="col-md-6 mb-4">
-                <div class="hours-card bg-light p-3 rounded shadow-sm">
-                    <h3>Opening Hours</h3>
-                    <p id="isOpen247"></p>
-                    <ul class="list-unstyled" id="opening_hours"></ul>
+            <!-- Reviews Tab -->
+            <div class="tab-pane fade" id="reviews" role="tabpanel">
+                <div class="mb-3">
+                    <button class="btn btn-dark" id="writeReviewBtn">Write Review</button>
+                </div>
+                <div id="reviewsContainer">
+                    <!-- Reviews will be dynamically inserted here -->
+                </div>
+
+                <!-- Hidden Review Form -->
+                <div id="reviewForm">
+                    <div class="mb-2">
+                        <label for="reviewText" class="form-label">Your Review:</label>
+                        <textarea id="reviewText" class="form-control" rows="3" placeholder="Write your review here..."></textarea>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Your Rating:</label>
+                        <div id="starRating">
+                            <span class="star" data-value="1">&#9734;</span>
+                            <span class="star" data-value="2">&#9734;</span>
+                            <span class="star" data-value="3">&#9734;</span>
+                            <span class="star" data-value="4">&#9734;</span>
+                            <span class="star" data-value="5">&#9734;</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-success" id="submitReviewBtn">Submit Review</button>
                 </div>
             </div>
+            </div>
+
         </div>
     </div>
     <!-- END OF DISPLAY DETAILS CONTAINER -->
