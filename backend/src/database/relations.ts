@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm/relations";
-import { user, account, businesses, businessOpeningHours, businessPaymentOptions, forumPosts, session } from "./schema.js";
+import { user, account, businesses, businessOpeningHours, businessPaymentOptions, businessReviews, forumPosts, forumPostsReplies, session } from "./schema.js";
 
 export const accountRelations = relations(account, ({one}) => ({
 	user: one(user, {
@@ -10,7 +10,9 @@ export const accountRelations = relations(account, ({one}) => ({
 
 export const userRelations = relations(user, ({many}) => ({
 	accounts: many(account),
-	forumPosts: many(forumPosts),
+	businessReviews: many(businessReviews),
+	forumposts: many(forumPosts),
+	forumpostsreplies: many(forumPostsReplies),
 	sessions: many(session),
 }));
 
@@ -24,7 +26,8 @@ export const businessOpeningHoursRelations = relations(businessOpeningHours, ({o
 export const businessesRelations = relations(businesses, ({many}) => ({
 	businessOpeningHours: many(businessOpeningHours),
 	businessPaymentOptions: many(businessPaymentOptions),
-	forumPosts: many(forumPosts),
+	businessReviews: many(businessReviews),
+	forumposts: many(forumPosts),
 }));
 
 export const businessPaymentOptionsRelations = relations(businessPaymentOptions, ({one}) => ({
@@ -34,22 +37,37 @@ export const businessPaymentOptionsRelations = relations(businessPaymentOptions,
 	}),
 }));
 
-export const forumPostsRelations = relations(forumPosts, ({one, many}) => ({
+export const businessReviewsRelations = relations(businessReviews, ({one}) => ({
+	business: one(businesses, {
+		fields: [businessReviews.businessUen],
+		references: [businesses.uen]
+	}),
 	user: one(user, {
-		fields: [forumPosts.userEmail],
+		fields: [businessReviews.userEmail],
 		references: [user.email]
 	}),
+}));
+
+export const forumpostsRelations = relations(forumPosts, ({one, many}) => ({
 	business: one(businesses, {
 		fields: [forumPosts.businessUen],
 		references: [businesses.uen]
 	}),
-	forumPost: one(forumPosts, {
-		fields: [forumPosts.parentId],
-		references: [forumPosts.id],
-		relationName: "forumPosts_parentId_forumPosts_id"
+	user: one(user, {
+		fields: [forumPosts.userEmail],
+		references: [user.email]
 	}),
-	forumPosts: many(forumPosts, {
-		relationName: "forumPosts_parentId_forumPosts_id"
+	forumpostsreplies: many(forumPostsReplies),
+}));
+
+export const forumpostsrepliesRelations = relations(forumPostsReplies, ({one}) => ({
+	user: one(user, {
+		fields: [forumPostsReplies.userEmail],
+		references: [user.email]
+	}),
+	forumpost: one(forumPosts, {
+		fields: [forumPostsReplies.postId],
+		references: [forumPosts.id]
 	}),
 }));
 
