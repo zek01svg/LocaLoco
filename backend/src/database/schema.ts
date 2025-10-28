@@ -46,31 +46,40 @@ export const businesses = mysqlTable("businesses", {
 	primaryKey({ columns: [table.uen], name: "businesses_uen"}),
 ]);
 
-export const forumPosts = mysqlTable("forum_posts", {
-    id: int().autoincrement().notNull(),
-    userEmail: varchar("user_email", { length: 255 }).notNull().references(() => user.email),
-    businessUen: varchar("business_uen", { length: 20 }).references(() => businesses.uen),
-    parentId: int("parent_id"),
-    title: varchar({ length: 255 }),
-    body: text().notNull(),
-    likeCount: int("like_count").default(0),
-    createdAt: timestamp("created_at", { mode: 'string' }),
-    updatedAt: timestamp("updated_at", { mode: 'string' }),
-},
-(table) => [
-    index("business_uen").on(table.businessUen),
-    index("parent_id").on(table.parentId),
-    index("user_email").on(table.userEmail),
+export const forumPosts = mysqlTable('forumPosts', {
+    id: int('id').autoincrement().notNull(),
+    userEmail: varchar('user_email', { length: 255 }).notNull().references(() => user.email),
+    businessUen: varchar('business_uen', { length: 20 }).references(() => businesses.uen),
+    title: varchar('title', { length: 255 }),
+    body: text('body').notNull(),
+    likeCount: int('like_count').default(0),
+    createdAt: timestamp('created_at', { mode: 'string' }).defaultNow(),
+    }, (table) => [
+    index('business_uen').on(table.businessUen),
+    index('user_email').on(table.userEmail),
+    primaryKey({ columns: [table.id], name: 'posts_id' }),
+]);
+
+export const forumPostsReplies = mysqlTable('forumPostsReplies', {
+    id: int('id').autoincrement().notNull(),
+    postId: int('post_id').notNull(), 
+    userEmail: varchar('user_email', { length: 255 }).notNull().references(() => user.email),
+    body: text('body').notNull(),
+    likeCount: int('like_count').default(0),
+    createdAt: timestamp('created_at', { mode: 'string' }).defaultNow(),
+}, (table) => [
+    index('post_id').on(table.postId),
+    index('user_email').on(table.userEmail),
     foreignKey({
-            columns: [table.parentId],
-            foreignColumns: [table.id],
-            name: "forum_posts_ibfk_3"
-        }).onDelete("cascade"),
-    primaryKey({ columns: [table.id], name: "forum_posts_id"}),
+        columns: [table.postId],
+        foreignColumns: [forumPosts.id],
+        name: 'replies_post_id_fk',
+    }).onDelete('cascade'),
+    primaryKey({ columns: [table.id], name: 'forumPostsReplies_id' }),
 ]);
 
 export const businessReviews = mysqlTable('business_reviews', {
-    id: int('id').primaryKey(),
+    id: int('id').primaryKey().autoincrement(),
     userEmail: varchar('user_email', { length: 255 }).notNull().references(() => user.email),
     businessUen: varchar('business_uen', { length: 20 }).references(() => businesses.uen),
     rating: int('rating').notNull(),
