@@ -1,8 +1,7 @@
-interface User {
+export interface User {
     firstName: string,
     lastName: string,
     email: string,
-    password: string
+    password: string,
+    hasBusiness: boolean
 }
-
-export default User
