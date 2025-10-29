@@ -21,6 +21,6 @@
     "noUncheckedSideEffectImports": true,
     "skipLibCheck": true
   },
-  "include": ["src"],
+  "include": ["src", "src/loadEnv.ts"],
   "exclude": ["node_modules", "dist"]
 }
