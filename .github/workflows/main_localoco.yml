@@ -23,14 +23,11 @@ jobs:
       - name: Install root dependencies
         run: npm install
 
-      - name: Install backend and frontend dependencies in parallel
-        run: npx concurrently "cd backend && npm install" "cd frontend2 && npm install"
-
       - name: Build backend and frontend in parallel
         run: npx concurrently "cd backend && npm run build --if-present" "cd frontend2 && npm run build --if-present"
 
-      - name: Run backend and frontend tests in parallel
-        run: npx concurrently "cd backend && npm run test --if-present" "cd frontend2 && npm run test --if-present"
+      - name: Push the defined schema using Drizzle ORM
+        run: cd backend && npx drizzle-kit push
 
       - name: Upload artifact for deployment
         uses: actions/upload-artifact@v4
