@@ -7,14 +7,17 @@ import { error } from 'console';
 class ForumModel {
 
     // creates a new forum post
-    public static async newForumPost(post: Omit<ForumPost, 'id' | 'createdAt' | 'likeCount' | 'replies'>) {
+    public static async newForumPost(post: Omit<ForumPost, 'id' | 'replies'>) {
         
         try {
             await db.insert(forumPosts).values({
                 userEmail: post.userEmail,
-                businessUEN: post.businessUen || null,
+                businessUen: post.businessUen || null,
                 title: post.title || null,
                 body: post.body,
+                createdAt: post.createdAt,
+                likeCount: 0
+
             } as typeof forumPosts.$inferInsert)
         }
         catch (err) {

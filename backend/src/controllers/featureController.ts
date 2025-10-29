@@ -18,10 +18,12 @@ class FeatureController {
 
         const review = { 
             userEmail: req.body.userEmail, 
-            businessUEN: req.body.businessUEN,
+            businessUEN: req.body.businessUen,
             title: req.body.title,
             body: req.body.body,
-            rating: req.body.rating
+            rating: req.body.rating,
+            createdAt: new Date().toISOString(),
+            likeCount: 0
         };
 
 
@@ -51,9 +53,11 @@ class FeatureController {
 
         const post = { 
             userEmail: req.body.userEmail, 
-            businessUen: req.body.businessUEN, 
+            businessUen: req.body.businessUen, 
             title: req.body.title,
-            body: req.body.body
+            body: req.body.body,
+            createdAt: new Date().toISOString(),
+            likeCount: 0
          };
 
         try {

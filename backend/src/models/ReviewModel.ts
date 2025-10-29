@@ -6,14 +6,17 @@ import { eq } from 'drizzle-orm';
 class ReviewModel {
     
     // CREATE
-    public static async newReview (review: Omit<Review, 'id' | 'likeCount' | 'createdAt'>) {
+    public static async newReview (review: Omit<Review, 'id'>) {
 
         try {
             await db.insert(businessReviews).values({
                 userEmail: review.userEmail,
-                businessUEN: review.businessUEN,
+                businessUen: review.businessUEN,
                 rating: review.rating,
-                body: review.body ?? ''
+                body: review.body ?? '',
+                likeCount: review.likeCount,
+                createdAt:review.createdAt
+
             } as typeof businessReviews.$inferInsert)
         }
         catch (err) {
