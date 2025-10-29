@@ -1,4 +1,4 @@
-import { mysqlTable, mysqlSchema, AnyMySqlColumn, index, foreignKey, primaryKey, int, varchar, mysqlEnum, time, text, date, timestamp, tinyint, boolean } from "drizzle-orm/mysql-core"
+import { mysqlTable, mysqlSchema, AnyMySqlColumn, index, foreignKey, primaryKey, int, varchar, mysqlEnum, time, text, date, timestamp, tinyint, boolean, unique } from "drizzle-orm/mysql-core"
 import { sql, InferSelectModel, InferInsertModel } from "drizzle-orm"
 
 export const businessOpeningHours = mysqlTable("business_opening_hours", {
@@ -46,7 +46,7 @@ export const businesses = mysqlTable("businesses", {
 	primaryKey({ columns: [table.uen], name: "businesses_uen"}),
 ]);
 
-export const forumPosts = mysqlTable('forumPosts', {
+export const forumPosts = mysqlTable('forum_posts', {
     id: int('id').autoincrement().notNull(),
     userEmail: varchar('user_email', { length: 255 }).notNull().references(() => user.email),
     businessUen: varchar('business_uen', { length: 20 }).references(() => businesses.uen),
@@ -60,7 +60,7 @@ export const forumPosts = mysqlTable('forumPosts', {
     primaryKey({ columns: [table.id], name: 'posts_id' }),
 ]);
 
-export const forumPostsReplies = mysqlTable('forumPostsReplies', {
+export const forumPostsReplies = mysqlTable('forum_posts_replies', {
     id: int('id').autoincrement().notNull(),
     postId: int('post_id').notNull(), 
     userEmail: varchar('user_email', { length: 255 }).notNull().references(() => user.email),
@@ -88,6 +88,35 @@ export const businessReviews = mysqlTable('business_reviews', {
     createdAt: timestamp("created_at", { mode: 'string' })
 });
 
+export const referrals = mysqlTable("referrals", {
+    id: int().autoincrement().notNull(),
+    referrerUserId: varchar("referrer_user_id", { length: 36 }).notNull().references(() => user.id, { onDelete: "cascade" } ),
+    referredUserId: varchar("referred_user_id", { length: 36 }).notNull().references(() => user.id, { onDelete: "cascade" } ),
+    createdAt: timestamp("created_at", { mode: 'string' }).defaultNow(),
+},
+(table) => [
+    index("referred_user_idx").on(table.referredUserId),
+    index("referrer_user_idx").on(table.referrerUserId),
+    primaryKey({ columns: [table.id], name: "referrals_id"}),
+]);
+
+export const vouchers = mysqlTable("vouchers", {
+    id: int().autoincrement().notNull(),
+    referrerUserId: varchar("referrer_user_id", { length: 36 }).notNull().references(() => user.id, { onDelete: "cascade" } ),
+    referredUserId: varchar("referred_user_id", { length: 36 }).notNull().references(() => user.id, { onDelete: "cascade" } ),
+    referralCode: varchar("referral_code", { length: 10 }).notNull(),
+    amount: int().notNull(),
+    status: mysqlEnum(['issued','redeemed','expired']).default('issued'),
+    issuedAt: timestamp("issued_at", { mode: 'string' }).defaultNow(),
+    redeemedAt: timestamp("redeemed_at", { mode: 'string' }),
+},
+(table) => [
+    index("referred_user_idx").on(table.referredUserId),
+    index("referrer_user_idx").on(table.referrerUserId),
+    primaryKey({ columns: [table.id], name: "vouchers_id"}),
+    unique("referral_code").on(table.referralCode),
+]);
+
 // THIS BLOCK ONWARDS IS FOR BETTER-AUTH TABLES ONLY
 
 export const user = mysqlTable("user", {
@@ -102,6 +131,8 @@ export const user = mysqlTable("user", {
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
   hasBusiness: boolean("has_business"),
+  referralCode: text("referral_code"),
+  referredByUserID: text("referred_by_user_id"),
 });
 
 export const session = mysqlTable("session", {

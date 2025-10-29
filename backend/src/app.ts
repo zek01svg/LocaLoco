@@ -28,18 +28,20 @@ app.use(
     directives: {
       defaultSrc: ["'self'"],
       connectSrc: [
-        "'self'", 
+        "'self'",
+        "http://localhost:3000",
         "http://localhost:5000",
-        "https://cdn.jsdelivr.net"
-    ],
+        "https://cdn.jsdelivr.net",
+        "https://unpkg.com"
+      ],
       scriptSrc: [
-        "'self'", 
+        "'self'",
         "'unsafe-inline'",
         "https://cdn.jsdelivr.net",
         "https://unpkg.com"
       ],
       styleSrc: [
-        "'self'", 
+        "'self'",
         "'unsafe-inline'",
         "https://cdn.jsdelivr.net"
       ],
@@ -54,7 +56,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // resolve and serve compiled frontend directory
-const frontendPath = path.resolve(__dirname, '../../frontend/dist');
+const frontendPath = path.resolve(__dirname, '../../frontend2/dist');
 app.use(express.static(frontendPath));
 
 // resolve and serve the uploads directory 
@@ -76,6 +78,10 @@ app.all('/api/auth/{*any}', toNodeHandler(auth)); // handler for better-auth
 app.use(businessRouter)
 // app.use(userRouter)
 app.use(featureRouter)
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(frontendPath, 'index.html'));
+});
 
 app.use(logger)
 

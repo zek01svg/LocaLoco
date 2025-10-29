@@ -17,6 +17,9 @@ export const user = mysqlTable("user", {
     .defaultNow()
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
+  hasBusiness: boolean("has_business"),
+  referralCode: text("referral_code"),
+  referredByUserID: text("referred_by_user_id"),
 });
 
 export const session = mysqlTable("session", {
