@@ -22,6 +22,13 @@
       "when": 1761535594430,
       "tag": "0002_lazy_juggernaut",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1761749962576,
+      "tag": "0003_cooing_lily_hollister",
+      "breakpoints": true
     }
   ]
 }

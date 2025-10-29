@@ -36,8 +36,6 @@ coverage/
 .vercel/
 functions/
 serverless/
-drizzle/
-drizzle/meta/
 
 # ------------------------
 # Bun-specific Cache
