@@ -15,7 +15,9 @@ const app: Application = express();
 
 // Middleware
 app.use(cors({
-    origin: 'http://localhost:5173', // allow frontend to pass
+    origin: process.env.NODE_ENV === 'production' 
+        ? 'https://localoco.azurewebsites.net'
+        : 'http://localhost:5173',
     credentials: true,
 }));
 app.use(express.json());
