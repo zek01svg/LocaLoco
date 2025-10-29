@@ -21,7 +21,7 @@ class ReviewModel {
     // READ
     public static async getBusinessReviews(businessUEN:string) {
         return await db.select().from(businessReviews).where(eq(businessReviews.businessUen, businessUEN))
-    }
+    }    
 }
 
 export default ReviewModel

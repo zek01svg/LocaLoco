@@ -58,7 +58,6 @@ class BusinessModel {
             // build the business object from scratch to avoid type error
             const fullBusiness: Business = {
                 uen: business.uen,
-                password: business.password,
                 businessName: business.businessName,
                 businessCategory: business.businessCategory!, 
                 description: business.description!,
@@ -118,7 +117,6 @@ class BusinessModel {
 
         const fullBusiness:Business = {
             uen: business.uen,
-            password: business.password,
             businessName: business.businessName,
             businessCategory: business.businessCategory!, 
             description: business.description!,
@@ -288,7 +286,6 @@ class BusinessModel {
             // Map to Business objects
             const fullBusinesses: Business[] = businessRows.map(business => ({
                 uen: business.uen,
-                password: business.password,
                 businessName: business.businessName,
                 businessCategory: business.businessCategory!,
                 description: business.description!,
