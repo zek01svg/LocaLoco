@@ -12,7 +12,6 @@ export interface BusinessPaymentOption {
 
 export interface Business {
     uen: string; 
-    password: string;
     businessName: string;
     businessCategory: string;
     description: string;
