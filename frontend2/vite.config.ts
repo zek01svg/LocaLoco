@@ -1,6 +1,11 @@
 import path from 'path'
 
 export default {
+    resolve: {
+        alias: {
+            '@utils': path.resolve(__dirname, 'utils'),
+        },
+    },
     server: {
         proxy: {
             '/api': {
@@ -10,12 +15,13 @@ export default {
         }
     },
     build: {
-      outDir: "dist",
-      rollupOptions: {
-        input: {
-          main: path.resolve(__dirname, "index.html"),
-          404: path.resolve(__dirname, "404.html"),
+        outDir: "dist",
+        rollupOptions: {
+            input: {
+                main: path.resolve(__dirname, "index.html"),
+                login: path.resolve(__dirname, "login.html"),
+                404: path.resolve(__dirname, "404.html"),
+            },
         },
-      },
     }
 }
