@@ -57,7 +57,7 @@ jobs:
         run: npm install
 
       - name: Run Drizzle Migrations
-        run: cd backend && npx drizzle-kit migrate --config
+        run: cd backend && npx drizzle-kit migrate
         env:
           DATABASE_URL: ${{ secrets.AZURE_PROD_DATABASE_URL }}
       
