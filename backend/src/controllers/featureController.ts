@@ -13,6 +13,16 @@ class FeatureController {
             next(error);
         }
     }
+    
+    static async getAllForumPosts(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const forumPosts = await ForumModel.getAllForumPosts();
+            res.status(200).json(forumPosts)
+        } 
+        catch (error) {
+            next(error);
+        }
+    }
 }
 
 export default FeatureController
