@@ -14,6 +14,14 @@ const auth = betterAuth({
             hasBusiness: {
                 type: "boolean",
                 input: false
+            },
+            referralCode: {
+                type: 'string',
+                input: false
+            },
+            referredByUserID: {
+                type:'string',
+                input:false
             }
         }
     },
