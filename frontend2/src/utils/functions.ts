@@ -112,8 +112,8 @@ export async function displayAndFilterBusinesses(filters: Record<string, any>, c
 
   try {
     const response = Object.keys(filters).length === 0
-      ? await axios.get<Business[]>('http://localhost:3000/api/businesses')
-      : await axios.post<Business[]>('http://localhost:3000/api/businesses/filter', filters);
+      ? await axios.get<Business[]>('/api/businesses')
+      : await axios.post<Business[]>('/api/businesses/filter', filters);
 
     const businesses = response.data;
     if (businesses.length === 0) {
