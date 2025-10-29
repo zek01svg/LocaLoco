@@ -7,11 +7,7 @@ const db = drizzle(mysql.createPool({
     user: String(process.env.DB_USER),
     password: String(process.env.DB_PASSWORD),
     database: String(process.env.DB_NAME),
-    port: Number(process.env.DB_PORT),
-    ssl: {
-        // ca: fs.readFileSync(String(process.env.SSL_PATH))
-        rejectUnauthorized: false
-    }
+    port: Number(process.env.DB_PORT)
 }));
 
 // test for the connection

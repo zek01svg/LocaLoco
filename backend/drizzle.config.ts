@@ -6,5 +6,7 @@ export default defineConfig({
     dialect: 'mysql',
     dbCredentials: {
         url: String(process.env.DB_URL),
-    }
+    },
+    verbose:true,
+    strict:true
 });

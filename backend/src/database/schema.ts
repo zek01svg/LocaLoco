@@ -46,7 +46,7 @@ export const businesses = mysqlTable("businesses", {
 ]);
 
 export const forumPosts = mysqlTable('forum_posts', {
-    id: int('id').autoincrement().notNull(),
+    id: int('id').autoincrement().notNull().primaryKey(),
     userEmail: varchar('user_email', { length: 255 }).notNull().references(() => user.email),
     businessUen: varchar('business_uen', { length: 20 }).references(() => businesses.uen),
     title: varchar('title', { length: 255 }),
@@ -55,12 +55,11 @@ export const forumPosts = mysqlTable('forum_posts', {
     createdAt: timestamp('created_at', { mode: 'string' }).defaultNow(),
     }, (table) => [
     index('business_uen').on(table.businessUen),
-    index('user_email').on(table.userEmail),
-    primaryKey({ columns: [table.id], name: 'posts_id' }),
+    index('user_email').on(table.userEmail)
 ]);
 
 export const forumPostsReplies = mysqlTable('forum_posts_replies', {
-    id: int('id').autoincrement().notNull(),
+    id: int('id').autoincrement().notNull().primaryKey(),
     postId: int('post_id').notNull(), 
     userEmail: varchar('user_email', { length: 255 }).notNull().references(() => user.email),
     body: text('body').notNull(),
@@ -74,7 +73,6 @@ export const forumPostsReplies = mysqlTable('forum_posts_replies', {
         foreignColumns: [forumPosts.id],
         name: 'replies_post_id_fk',
     }).onDelete('cascade'),
-    primaryKey({ columns: [table.id], name: 'forumPostsReplies_id' }),
 ]);
 
 export const businessReviews = mysqlTable('business_reviews', {
