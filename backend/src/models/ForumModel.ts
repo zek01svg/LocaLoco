@@ -8,13 +8,18 @@ class ForumModel {
 
     // creates a new forum post
     public static async newForumPost(post: Omit<ForumPost, 'id' | 'createdAt' | 'likeCount' | 'replies'>) {
-        await db.insert(forumPosts).values({
-            userEmail: post.userEmail,
-            businessUen: post.businessUen || null,
-            title: post.title || null,
-            body: post.body,
-        })
-
+        
+        try {
+            await db.insert(forumPosts).values({
+                userEmail: post.userEmail,
+                businessUEN: post.businessUen || null,
+                title: post.title || null,
+                body: post.body,
+            } as typeof forumPosts.$inferInsert)
+        }
+        catch (err) {
+            console.error(err)
+        }
     }
 
     // get all forum posts
