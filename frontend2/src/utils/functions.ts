@@ -64,7 +64,7 @@ export function formatAsBootstrapCard(business: Business): HTMLDivElement {
   cardDiv.className = 'card h-100 shadow-sm';
 
   const img = document.createElement('img');
-  img.src = 'http://localhost:3000/uploads/' + business.wallpaper;
+  img.src = '/uploads/' + business.wallpaper;
   img.className = 'card-img-top h-50 object-fit-cover';
 
   const cardBody = document.createElement('div');
