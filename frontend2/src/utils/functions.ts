@@ -64,7 +64,7 @@ export function formatAsBootstrapCard(business: Business): HTMLDivElement {
   cardDiv.className = 'card h-100 shadow-sm';
 
   const img = document.createElement('img');
-  img.src = '/uploads/' + business.wallpaper;
+  img.src = 'https://localoco.blob.core.windows.net/images/' + business.wallpaper;
   img.className = 'card-img-top h-50 object-fit-cover';
 
   const cardBody = document.createElement('div');
@@ -144,7 +144,7 @@ export async function showDetails(uen: string) {
     const business = response.data;
 
     (document.getElementById('display_details_image') as HTMLImageElement).src =
-      '/uploads/' + business.wallpaper;
+      'https://localoco.blob.core.windows.net/images/' + business.wallpaper;
     (document.getElementById('description')!).innerText = business.description;
     (document.getElementById('address')!).innerHTML = `<strong>Address:</strong> ${business.address}`;
     (document.getElementById('phone')!).innerHTML = `<strong>Phone:</strong> ${business.phoneNumber}`;
