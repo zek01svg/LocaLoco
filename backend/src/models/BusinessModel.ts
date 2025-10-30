@@ -313,226 +313,74 @@ class BusinessModel {
     }
 
     /**
-     * Registers a new business, inserting data into three tables within a transaction.
-     * Note: HASHES the password before insertion.
+     * Registers a new business in the database.
+     * 
+     * Inserts a new record into the `businesses` table, followed by its associated 
+     * payment options and opening hours (if not open 24/7). 
+     * 
+     * Each business is identified by a unique UEN. 
+     * 
+     * @param {Business} business - The `Business` object containing all required fields.
+     * @returns {Promise<void>} Resolves when the business and its related data are successfully inserted.
      */
-    //  public static async registerBusiness(
-    //      business: Omit<Business, 'password' | 'open247' | 'offersDelivery' | 'offersPickup' | 'dateOfCreation'> & {
-    //          password: string, 
-    //          open247: boolean, 
-    //          offersDelivery: boolean, 
-    //          offersPickup: boolean,
-    //          dateOfCreation: string // Passed as a string (YYYY-MM-DD)
-    //      }
-    //  ): Promise<boolean> {
-    //      const {
-    //          uen, password, businessName, businessCategory, description, address, open247,
-    //          openingHours, email, phoneNumber, websiteLink, socialMediaLink, wallpaper,
-    //          dateOfCreation, priceTier, offersDelivery, offersPickup, paymentOptions
-    //      } = business;
+    public static async registerBusiness (business:Business) {
 
-    //      try {
-    //          const hashedPassword = await argon2.hash(password);
+        try {
+            //insert into businesses
+            await db.insert(businesses).values({
+                uen: business.uen,
+                businessName: business.businessName,
+                businessCategory: business.businessCategory,
+                description: business.description,
+                address: business.address,
+                open247: business.open247,
+                email: business.email,
+                phoneNumber: business.phoneNumber,
+                websiteLink: business.websiteLink,
+                socialMediaLink: business.socialMediaLink, 
+                wallpaper: business.wallpaper,
+                dateOfCreation: business.dateOfCreation, 
+                priceTier: business.priceTier,
+                offersDelivery: business.offersDelivery,
+                offersPickup: business.offersPickup,
+            } as typeof businesses.$inferInsert)
 
-    //          await db.beginTransaction();
+            // loop through the payment options and insert
+            if (business.paymentOptions?.length) {
+                await Promise.all(
+                    business.paymentOptions.map(option =>
+                        db.insert(businessPaymentOptions).values({
+                            uen: business.uen,
+                            paymentOption: option
+                        } as typeof businessPaymentOptions.$inferInsert)
+                    )
+                );
+            }
 
-    //         //   1. Insert into the businesses table
-    //          const sql = `
-    //              INSERT INTO businesses (
-    //                  uen, password, business_name, business_category, description, address, open247,
-    //                  email, phone_number, website_link, social_media_link, wallpaper,
-    //                  date_of_creation, price_tier, offers_delivery, offers_pickup
-    //              ) VALUES (
-    //                  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
-    //              )`;
-
-    //          const [result] = await db.execute<ResultSetHeader>(sql, [
-    //              uen, hashedPassword, businessName, businessCategory, description, address, open247,
-    //              email, phoneNumber, websiteLink, socialMediaLink, wallpaper,
-    //              dateOfCreation, priceTier, offersDelivery, offersPickup
-    //          ]);
-
-    //          if (result.affectedRows === 0) {
-    //              throw new Error("Failed to insert main business record.");
-    //          }
-
-    //         //   2. Insert payment options
-    //          if (paymentOptions.length > 0) {
-    //              const sqlPayment = `INSERT INTO business_payment_options (uen, payment_option) VALUES (?, ?)`;
-    //              for (const option of paymentOptions) {
-    //                  await db.execute<ResultSetHeader>(sqlPayment, [uen, option]);
-    //              }
-    //          }
-
-    //         //   3. Insert opening hours (if not open 24/7)
-    //          if (!open247) {
-    //              const sqlHours = `INSERT INTO business_opening_hours (uen, day_of_week, open_time, close_time) VALUES (?, ?, ?, ?)`;
-    //              for (const day in openingHours) {
-    //                  const times = openingHours[day as DayOfWeek];
-    //                   PHP's ucfirst(strtolower($day)) logic is used to match DB's capitalization if needed
-    //                  const formattedDay = day.charAt(0).toUpperCase() + day.slice(1).toLowerCase();
-    //                  await db.execute<ResultSetHeader>(sqlHours, [uen, formattedDay, times.open, times.close]);
-    //              }
-    //          }
-
-    //          await db.commit();
-    //          return true;
-
-    //      } catch (error) {
-    //          console.error("Error registering business:", error);
-    //          await db.rollback();
-    //          return false;
-    //      }
-    //  }
-
-
-    /**
-     * Updates the core details of a business in the 'businesses' table.
-     * Note: Includes password hashing.
-     */
-    // public static async updateCoreDetails(
-    //     uen: string, 
-    //     details: {
-    //         password: string, 
-    //         businessName: string, 
-    //         businessCategory: string, 
-    //         description: string, 
-    //         address: string,
-    //         open247: boolean, 
-    //         email: string, 
-    //         phoneNumber: string, 
-    //         websiteLink: string | null, 
-    //         socialMediaLink: string | null, 
-    //         wallpaper: string | null,
-    //         dateOfCreation: string, 
-    //         priceTier: string, 
-    //         offersDelivery: boolean, 
-    //         offersPickup: boolean
-    //     }
-    // ): Promise<boolean> {
-    //     try {
-    //         const hashedPassword = await argon2.hash(details.password);
-            
-    //         const sql = `
-    //             UPDATE businesses SET
-    //                 password = ?, business_name = ?, business_category = ?, description = ?, address = ?, 
-    //                 open247 = ?, email = ?, phone_number = ?, website_link = ?, social_media_link = ?, 
-    //                 wallpaper = ?, date_of_creation = ?, price_tier = ?, offers_delivery = ?, offers_pickup = ?
-    //             WHERE uen = ?`;
-            
-    //         const params = [
-    //             hashedPassword, details.businessName, details.businessCategory, details.description, details.address,
-    //             details.open247, details.email, details.phoneNumber, details.websiteLink, details.socialMediaLink,
-    //             details.wallpaper, details.dateOfCreation, details.priceTier, details.offersDelivery, details.offersPickup, uen
-    //         ];
-
-    //         const [result] = await db.execute<ResultSetHeader>(sql, params);
-            
-    //         if (result.affectedRows === 0) {
-    //             console.error(`Business with UEN ${uen} not found for core update.`);
-    //             return false;
-    //         }
-
-    //         return true;
-    //     } catch (error) {
-    //         console.error("Error updating core business details:", error);
-    //         return false;
-    //     }
-    // }
-
-    // /**
-    //  * Replaces all payment options for a business.
-    //  */
-    // public static async updatePaymentOptions(uen: string, paymentOptions: string[]): Promise<boolean> {
-    //     try {
-    //         await db.beginTransaction();
-
-    //         // 1. Delete existing options
-    //         await db.execute('DELETE FROM business_payment_options WHERE uen = ?', [uen]);
-
-    //         // 2. Insert new options
-    //         if (paymentOptions.length > 0) {
-    //             const insertSql = 'INSERT INTO business_payment_options (uen, payment_option) VALUES (?, ?)';
-    //             for (const option of paymentOptions) {
-    //                 await db.execute<ResultSetHeader>(insertSql, [uen, option]);
-    //             }
-    //         }
-
-    //         await db.commit();
-    //         return true;
-    //     } catch (error) {
-    //         console.error("Error updating payment options:", error);
-    //         await db.rollback();
-    //         return false;
-    //     }
-    // }
-
-    // /**
-    //  * Replaces all opening hours for a business. 
-    //  * Note: It deletes all hours, then inserts new ones only if open247 is false.
-    //  */
-    // public static async updateOpeningHours(
-    //     uen: string, 
-    //     open247: boolean, 
-    //     openingHours: Record<DayOfWeek, HourEntry>
-    // ): Promise<boolean> {
-    //     try {
-    //         await db.beginTransaction();
-
-    //         // 1. Delete all existing hours
-    //         await db.execute('DELETE FROM business_opening_hours WHERE uen = ?', [uen]);
-
-    //         // 2. Insert new hours only if not 24/7
-    //         if (!open247) {
-    //             const insertHours = `INSERT INTO business_opening_hours (uen, day_of_week, open_time, close_time) VALUES (?, ?, ?, ?)`;
-                
-    //             for (const day in openingHours) {
-    //                 const times = openingHours[day as DayOfWeek];
-    //                 // Match DB's capitalization (e.g., 'Monday')
-    //                 const formattedDay = day.charAt(0).toUpperCase() + day.slice(1).toLowerCase();
-    //                 await db.execute<ResultSetHeader>(insertHours, [uen, formattedDay, times.open, times.close]);
-    //             }
-    //         }
-
-    //         // Note: The 'open247' flag in the main 'businesses' table must be updated separately 
-    //         // using `updateCoreDetails` to reflect this change correctly.
-
-    //         await db.commit();
-    //         return true;
-    //     } catch (error) {
-    //         console.error("Error updating opening hours:", error);
-    //         await db.rollback();
-    //         return false;
-    //     }
-    // }
-    
-    // /**
-    //  * Deletes a business and all its dependent records within a transaction.
-    //  */
-    // public static async deleteBusiness(uen: string): Promise<boolean> {
-    //     try {
-    //         await db.beginTransaction();
-
-    //         // Delete dependent records first (ensures foreign key constraints are met)
-    //         await db.execute('DELETE FROM business_opening_hours WHERE uen = ?', [uen]); 
-    //         await db.execute('DELETE FROM business_payment_options WHERE uen = ?', [uen]);
-
-    //         // Delete main business record
-    //         const [result] = await db.execute<ResultSetHeader>('DELETE FROM businesses WHERE uen = ?', [uen]);
-            
-    //         if (result.affectedRows === 0) {
-    //             await db.rollback();
-    //             return false; // Business not found
-    //         }
-
-    //         await db.commit();
-    //         return true;
-    //     } catch (error) {
-    //         console.error("Error deleting business:", error);
-    //         await db.rollback();
-    //         return false;
-    //     }
-    // }
+            // if business isnt 24/7, loop through the opening hrs and insert
+            if (!business.open247) {
+                const openingHourEntries = Object.entries(business.openingHours) as [DayOfWeek, HourEntry][];
+                await Promise.all(
+                    openingHourEntries.map(([day, hours]) =>
+                        db.insert(businessOpeningHours).values({
+                            uen: business.uen,
+                            dayOfWeek: day,
+                            openTime: hours.open,
+                            closeTime: hours.close
+                        } as typeof businessOpeningHours.$inferInsert)
+                    )
+                );
+            }
+        }
+        catch (err:any) {
+            console.error('--- DETAILED DATABASE ERROR ---');
+            console.error(`Error Code: ${err.code}`);         // e.g., ER_DUP_ENTRY
+            console.error(`Error Number: ${err.errno}`);     // e.g., 1062
+            console.error(`SQL Message: ${err.sqlMessage}`); // The full MySQL error
+            console.error('Full Error Object:', err);
+            console.error('---------------------------------');
+        }
+    }
 
 
     
