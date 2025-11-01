@@ -1,103 +1,111 @@
 {
+  "id": "00000000-0000-0000-0000-000000000000",
+  "prevId": "",
   "version": "5",
   "dialect": "mysql",
-  "id": "02a47456-9484-4371-9b0f-9057b61a5106",
-  "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "account": {
       "name": "account",
       "columns": {
         "id": {
+          "autoincrement": false,
           "name": "id",
           "type": "varchar(36)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "account_id": {
+          "autoincrement": false,
           "name": "account_id",
           "type": "text",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "provider_id": {
+          "autoincrement": false,
           "name": "provider_id",
           "type": "text",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "user_id": {
+          "autoincrement": false,
           "name": "user_id",
           "type": "varchar(36)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "access_token": {
+          "autoincrement": false,
           "name": "access_token",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "refresh_token": {
+          "autoincrement": false,
           "name": "refresh_token",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "id_token": {
+          "autoincrement": false,
           "name": "id_token",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "access_token_expires_at": {
+          "autoincrement": false,
           "name": "access_token_expires_at",
           "type": "timestamp(3)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "refresh_token_expires_at": {
+          "autoincrement": false,
           "name": "refresh_token_expires_at",
           "type": "timestamp(3)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "scope": {
+          "autoincrement": false,
           "name": "scope",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "password": {
+          "autoincrement": false,
           "name": "password",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "created_at": {
+          "default": "(now())",
+          "autoincrement": false,
           "name": "created_at",
           "type": "timestamp(3)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "notNull": true
         },
         "updated_at": {
+          "autoincrement": false,
           "name": "updated_at",
           "type": "timestamp(3)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
+        }
+      },
+      "compositePrimaryKeys": {
+        "account_id": {
+          "name": "account_id",
+          "columns": [
+            "id"
+          ]
         }
       },
       "indexes": {},
@@ -116,14 +124,6 @@
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {
-        "account_id": {
-          "name": "account_id",
-          "columns": [
-            "id"
-          ]
-        }
-      },
       "uniqueConstraints": {},
       "checkConstraint": {}
     },
@@ -131,39 +131,47 @@
       "name": "business_opening_hours",
       "columns": {
         "id": {
+          "autoincrement": true,
           "name": "id",
           "type": "int",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
+          "notNull": true
         },
         "uen": {
+          "autoincrement": false,
           "name": "uen",
           "type": "varchar(20)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "day_of_week": {
+          "autoincrement": false,
           "name": "day_of_week",
           "type": "enum('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday')",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "open_time": {
+          "autoincrement": false,
           "name": "open_time",
           "type": "time",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "close_time": {
+          "autoincrement": false,
           "name": "close_time",
           "type": "time",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
+        }
+      },
+      "compositePrimaryKeys": {
+        "business_opening_hours_id": {
+          "name": "business_opening_hours_id",
+          "columns": [
+            "id"
+          ]
         }
       },
       "indexes": {
@@ -190,14 +198,6 @@
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {
-        "business_opening_hours_id": {
-          "name": "business_opening_hours_id",
-          "columns": [
-            "id"
-          ]
-        }
-      },
       "uniqueConstraints": {},
       "checkConstraint": {}
     },
@@ -205,25 +205,33 @@
       "name": "business_payment_options",
       "columns": {
         "id": {
+          "autoincrement": true,
           "name": "id",
           "type": "int",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
+          "notNull": true
         },
         "uen": {
+          "autoincrement": false,
           "name": "uen",
           "type": "varchar(20)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "payment_option": {
+          "autoincrement": false,
           "name": "payment_option",
           "type": "varchar(50)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
+        }
+      },
+      "compositePrimaryKeys": {
+        "business_payment_options_id": {
+          "name": "business_payment_options_id",
+          "columns": [
+            "id"
+          ]
         }
       },
       "indexes": {
@@ -250,12 +258,98 @@
           "onUpdate": "no action"
         }
       },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "business_reviews": {
+      "name": "business_reviews",
+      "columns": {
+        "id": {
+          "autoincrement": true,
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_email": {
+          "autoincrement": false,
+          "name": "user_email",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "business_uen": {
+          "autoincrement": false,
+          "name": "business_uen",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rating": {
+          "autoincrement": false,
+          "name": "rating",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "body": {
+          "autoincrement": false,
+          "name": "body",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "like_count": {
+          "default": 0,
+          "autoincrement": false,
+          "name": "like_count",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "autoincrement": false,
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
       "compositePrimaryKeys": {
-        "business_payment_options_id": {
-          "name": "business_payment_options_id",
+        "business_reviews_id": {
+          "name": "business_reviews_id",
           "columns": [
             "id"
           ]
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "business_reviews_business_uen_businesses_uen_fk": {
+          "name": "business_reviews_business_uen_businesses_uen_fk",
+          "tableFrom": "business_reviews",
+          "tableTo": "businesses",
+          "columnsFrom": [
+            "business_uen"
+          ],
+          "columnsTo": [
+            "uen"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "business_reviews_user_email_user_email_fk": {
+          "name": "business_reviews_user_email_user_email_fk",
+          "tableFrom": "business_reviews",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_email"
+          ],
+          "columnsTo": [
+            "email"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
       "uniqueConstraints": {},
@@ -264,130 +358,459 @@
     "businesses": {
       "name": "businesses",
       "columns": {
+        "owner_id": {
+          "autoincrement": false,
+          "name": "owner_id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
         "uen": {
+          "autoincrement": false,
           "name": "uen",
           "type": "varchar(20)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "password": {
-          "name": "password",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "business_name": {
+          "autoincrement": false,
           "name": "business_name",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "business_category": {
+          "autoincrement": false,
           "name": "business_category",
           "type": "varchar(100)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "description": {
+          "autoincrement": false,
           "name": "description",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "address": {
+          "autoincrement": false,
           "name": "address",
           "type": "varchar(500)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
+        },
+        "latitude": {
+          "autoincrement": false,
+          "name": "latitude",
+          "type": "decimal(9,6)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "longitude": {
+          "autoincrement": false,
+          "name": "longitude",
+          "type": "decimal(9,6)",
+          "primaryKey": false,
+          "notNull": false
         },
         "open247": {
+          "default": 0,
+          "autoincrement": false,
           "name": "open247",
           "type": "tinyint",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false,
-          "default": 0
+          "notNull": false
         },
         "email": {
+          "autoincrement": false,
           "name": "email",
           "type": "varchar(100)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "phone_number": {
+          "autoincrement": false,
           "name": "phone_number",
           "type": "varchar(20)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "website_link": {
+          "autoincrement": false,
           "name": "website_link",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "social_media_link": {
+          "autoincrement": false,
           "name": "social_media_link",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "wallpaper": {
+          "autoincrement": false,
           "name": "wallpaper",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "date_of_creation": {
+          "autoincrement": false,
           "name": "date_of_creation",
           "type": "date",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "price_tier": {
+          "autoincrement": false,
           "name": "price_tier",
           "type": "enum('low','medium','high')",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "offers_delivery": {
+          "default": 0,
+          "autoincrement": false,
           "name": "offers_delivery",
           "type": "tinyint",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false,
-          "default": 0
+          "notNull": false
         },
         "offers_pickup": {
+          "default": 0,
+          "autoincrement": false,
           "name": "offers_pickup",
           "type": "tinyint",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false,
-          "default": 0
+          "notNull": false
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
       "compositePrimaryKeys": {
         "businesses_uen": {
           "name": "businesses_uen",
           "columns": [
             "uen"
           ]
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "businesses_owner_id_user_id_fk": {
+          "name": "businesses_owner_id_user_id_fk",
+          "tableFrom": "businesses",
+          "tableTo": "user",
+          "columnsFrom": [
+            "owner_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "forum_posts": {
+      "name": "forum_posts",
+      "columns": {
+        "id": {
+          "autoincrement": true,
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_email": {
+          "autoincrement": false,
+          "name": "user_email",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "business_uen": {
+          "autoincrement": false,
+          "name": "business_uen",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "title": {
+          "autoincrement": false,
+          "name": "title",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "body": {
+          "autoincrement": false,
+          "name": "body",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "like_count": {
+          "default": 0,
+          "autoincrement": false,
+          "name": "like_count",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "default": "(now())",
+          "autoincrement": false,
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "compositePrimaryKeys": {
+        "forum_posts_id": {
+          "name": "forum_posts_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "indexes": {
+        "business_uen": {
+          "name": "business_uen",
+          "columns": [
+            "business_uen"
+          ],
+          "isUnique": false
+        },
+        "user_email": {
+          "name": "user_email",
+          "columns": [
+            "user_email"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "forum_posts_business_uen_businesses_uen_fk": {
+          "name": "forum_posts_business_uen_businesses_uen_fk",
+          "tableFrom": "forum_posts",
+          "tableTo": "businesses",
+          "columnsFrom": [
+            "business_uen"
+          ],
+          "columnsTo": [
+            "uen"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "forum_posts_user_email_user_email_fk": {
+          "name": "forum_posts_user_email_user_email_fk",
+          "tableFrom": "forum_posts",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_email"
+          ],
+          "columnsTo": [
+            "email"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "forum_posts_replies": {
+      "name": "forum_posts_replies",
+      "columns": {
+        "id": {
+          "autoincrement": true,
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "post_id": {
+          "autoincrement": false,
+          "name": "post_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_email": {
+          "autoincrement": false,
+          "name": "user_email",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "body": {
+          "autoincrement": false,
+          "name": "body",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "like_count": {
+          "default": 0,
+          "autoincrement": false,
+          "name": "like_count",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "default": "(now())",
+          "autoincrement": false,
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "compositePrimaryKeys": {
+        "forum_posts_replies_id": {
+          "name": "forum_posts_replies_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "indexes": {
+        "post_id": {
+          "name": "post_id",
+          "columns": [
+            "post_id"
+          ],
+          "isUnique": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "columns": [
+            "user_email"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "forum_posts_replies_user_email_user_email_fk": {
+          "name": "forum_posts_replies_user_email_user_email_fk",
+          "tableFrom": "forum_posts_replies",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_email"
+          ],
+          "columnsTo": [
+            "email"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "replies_post_id_fk": {
+          "name": "replies_post_id_fk",
+          "tableFrom": "forum_posts_replies",
+          "tableTo": "forum_posts",
+          "columnsFrom": [
+            "post_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "referrals": {
+      "name": "referrals",
+      "columns": {
+        "id": {
+          "autoincrement": true,
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "referrer_user_id": {
+          "autoincrement": false,
+          "name": "referrer_user_id",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "referred_user_id": {
+          "autoincrement": false,
+          "name": "referred_user_id",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "default": "(now())",
+          "autoincrement": false,
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "compositePrimaryKeys": {
+        "referrals_id": {
+          "name": "referrals_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "indexes": {
+        "referred_user_idx": {
+          "name": "referred_user_idx",
+          "columns": [
+            "referred_user_id"
+          ],
+          "isUnique": false
+        },
+        "referrer_user_idx": {
+          "name": "referrer_user_idx",
+          "columns": [
+            "referrer_user_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "referrals_referred_user_id_user_id_fk": {
+          "name": "referrals_referred_user_id_user_id_fk",
+          "tableFrom": "referrals",
+          "tableTo": "user",
+          "columnsFrom": [
+            "referred_user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "referrals_referrer_user_id_user_id_fk": {
+          "name": "referrals_referrer_user_id_user_id_fk",
+          "tableFrom": "referrals",
+          "tableTo": "user",
+          "columnsFrom": [
+            "referrer_user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
       "uniqueConstraints": {},
@@ -397,61 +820,69 @@
       "name": "session",
       "columns": {
         "id": {
+          "autoincrement": false,
           "name": "id",
           "type": "varchar(36)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "expires_at": {
+          "autoincrement": false,
           "name": "expires_at",
           "type": "timestamp(3)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "token": {
+          "autoincrement": false,
           "name": "token",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "created_at": {
+          "default": "(now())",
+          "autoincrement": false,
           "name": "created_at",
           "type": "timestamp(3)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "notNull": true
         },
         "updated_at": {
+          "autoincrement": false,
           "name": "updated_at",
           "type": "timestamp(3)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "ip_address": {
+          "autoincrement": false,
           "name": "ip_address",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "user_agent": {
+          "autoincrement": false,
           "name": "user_agent",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "user_id": {
+          "autoincrement": false,
           "name": "user_id",
           "type": "varchar(36)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
+        }
+      },
+      "compositePrimaryKeys": {
+        "session_id": {
+          "name": "session_id",
+          "columns": [
+            "id"
+          ]
         }
       },
       "indexes": {},
@@ -470,14 +901,6 @@
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {
-        "session_id": {
-          "name": "session_id",
-          "columns": [
-            "id"
-          ]
-        }
-      },
       "uniqueConstraints": {
         "session_token_unique": {
           "name": "session_token_unique",
@@ -492,60 +915,79 @@
       "name": "user",
       "columns": {
         "id": {
+          "autoincrement": false,
           "name": "id",
           "type": "varchar(36)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "name": {
+          "autoincrement": false,
           "name": "name",
           "type": "text",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "email": {
+          "autoincrement": false,
           "name": "email",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "email_verified": {
-          "name": "email_verified",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
+          "default": 0,
           "autoincrement": false,
-          "default": false
+          "name": "email_verified",
+          "type": "tinyint(1)",
+          "primaryKey": false,
+          "notNull": true
         },
         "image": {
+          "autoincrement": false,
           "name": "image",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": false
         },
         "created_at": {
+          "default": "(now())",
+          "autoincrement": false,
           "name": "created_at",
           "type": "timestamp(3)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "notNull": true
         },
         "updated_at": {
+          "default": "(now())",
+          "autoincrement": false,
           "name": "updated_at",
           "type": "timestamp(3)",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": true
+        },
+        "has_business": {
           "autoincrement": false,
-          "default": "(now())"
+          "name": "has_business",
+          "type": "tinyint(1)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "referral_code": {
+          "autoincrement": false,
+          "name": "referral_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "referred_by_user_id": {
+          "autoincrement": false,
+          "name": "referred_by_user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
       "compositePrimaryKeys": {
         "user_id": {
           "name": "user_id",
@@ -554,6 +996,8 @@
           ]
         }
       },
+      "indexes": {},
+      "foreignKeys": {},
       "uniqueConstraints": {
         "user_email_unique": {
           "name": "user_email_unique",
@@ -568,52 +1012,50 @@
       "name": "verification",
       "columns": {
         "id": {
+          "autoincrement": false,
           "name": "id",
           "type": "varchar(36)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "identifier": {
+          "autoincrement": false,
           "name": "identifier",
           "type": "text",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "value": {
+          "autoincrement": false,
           "name": "value",
           "type": "text",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "expires_at": {
+          "autoincrement": false,
           "name": "expires_at",
           "type": "timestamp(3)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "notNull": true
         },
         "created_at": {
+          "default": "(now())",
+          "autoincrement": false,
           "name": "created_at",
           "type": "timestamp(3)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "notNull": true
         },
         "updated_at": {
+          "default": "(now())",
+          "autoincrement": false,
           "name": "updated_at",
           "type": "timestamp(3)",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "notNull": true
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
       "compositePrimaryKeys": {
         "verification_id": {
           "name": "verification_id",
@@ -622,7 +1064,133 @@
           ]
         }
       },
+      "indexes": {},
+      "foreignKeys": {},
       "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "vouchers": {
+      "name": "vouchers",
+      "columns": {
+        "id": {
+          "autoincrement": true,
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "referrer_user_id": {
+          "autoincrement": false,
+          "name": "referrer_user_id",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "referred_user_id": {
+          "autoincrement": false,
+          "name": "referred_user_id",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "referral_code": {
+          "autoincrement": false,
+          "name": "referral_code",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "amount": {
+          "autoincrement": false,
+          "name": "amount",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "default": "'issued'",
+          "autoincrement": false,
+          "name": "status",
+          "type": "enum('issued','redeemed','expired')",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "issued_at": {
+          "default": "(now())",
+          "autoincrement": false,
+          "name": "issued_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "redeemed_at": {
+          "autoincrement": false,
+          "name": "redeemed_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "compositePrimaryKeys": {
+        "vouchers_id": {
+          "name": "vouchers_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "indexes": {
+        "referred_user_idx": {
+          "name": "referred_user_idx",
+          "columns": [
+            "referred_user_id"
+          ],
+          "isUnique": false
+        },
+        "referrer_user_idx": {
+          "name": "referrer_user_idx",
+          "columns": [
+            "referrer_user_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "vouchers_referred_user_id_user_id_fk": {
+          "name": "vouchers_referred_user_id_user_id_fk",
+          "tableFrom": "vouchers",
+          "tableTo": "user",
+          "columnsFrom": [
+            "referred_user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "vouchers_referrer_user_id_user_id_fk": {
+          "name": "vouchers_referrer_user_id_user_id_fk",
+          "tableFrom": "vouchers",
+          "tableTo": "user",
+          "columnsFrom": [
+            "referrer_user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "uniqueConstraints": {
+        "referral_code": {
+          "name": "referral_code",
+          "columns": [
+            "referral_code"
+          ]
+        }
+      },
       "checkConstraint": {}
     }
   },
@@ -633,7 +1201,70 @@
     "columns": {}
   },
   "internal": {
-    "tables": {},
+    "tables": {
+      "account": {
+        "columns": {
+          "created_at": {
+            "isDefaultAnExpression": true
+          }
+        }
+      },
+      "forum_posts": {
+        "columns": {
+          "created_at": {
+            "isDefaultAnExpression": true
+          }
+        }
+      },
+      "forum_posts_replies": {
+        "columns": {
+          "created_at": {
+            "isDefaultAnExpression": true
+          }
+        }
+      },
+      "referrals": {
+        "columns": {
+          "created_at": {
+            "isDefaultAnExpression": true
+          }
+        }
+      },
+      "session": {
+        "columns": {
+          "created_at": {
+            "isDefaultAnExpression": true
+          }
+        }
+      },
+      "user": {
+        "columns": {
+          "created_at": {
+            "isDefaultAnExpression": true
+          },
+          "updated_at": {
+            "isDefaultAnExpression": true
+          }
+        }
+      },
+      "verification": {
+        "columns": {
+          "created_at": {
+            "isDefaultAnExpression": true
+          },
+          "updated_at": {
+            "isDefaultAnExpression": true
+          }
+        }
+      },
+      "vouchers": {
+        "columns": {
+          "issued_at": {
+            "isDefaultAnExpression": true
+          }
+        }
+      }
+    },
     "indexes": {}
   }
 }
