@@ -67,6 +67,57 @@ class BusinessModel {
         return container
     }
 
+    public static async getOwnedBusinesses(ownerId:string) {
+
+        const ownedBusinesses = await db.select().from(businesses).where(eq(businesses.ownerID, ownerId))
+        const container: Business[] = [];
+
+        for (const business of ownedBusinesses) {
+            
+            // fetch the corresponding payment method
+            const paymentRows = await db.select().from(businessPaymentOptions).where(eq(businessPaymentOptions.uen, business.uen))
+            const paymentOptions = paymentRows.map(p => p.paymentOption)
+
+            const openingHours: Record<DayOfWeek, HourEntry> = {} as Record<DayOfWeek, HourEntry>
+            
+            // if not open247, get the opening hours
+            if (!business.open247) {
+                const hourRows = await db.select().from(businessOpeningHours).where(eq(businessOpeningHours.uen, business.uen))
+                for (const h of hourRows) {
+                    openingHours[h.dayOfWeek as DayOfWeek] = { open: h.openTime, close: h.closeTime }
+                }
+            }
+
+            // build the business object from scratch to avoid type error
+            const fullBusiness: Business = {
+                ownerID:business.ownerID,
+                uen: business.uen,
+                businessName: business.businessName,
+                businessCategory: business.businessCategory!, 
+                description: business.description!,
+                address: business.address!,
+                latitude: business.latitude!,
+                longitude: business.longitude!,
+                open247: Boolean(business.open247),
+                openingHours,
+                email: business.email!,
+                phoneNumber: business.phoneNumber!,
+                websiteLink: business.websiteLink ?? null,
+                socialMediaLink: business.socialMediaLink ?? null,
+                wallpaper: business.wallpaper!,
+                dateOfCreation: business.dateOfCreation!,
+                priceTier: business.priceTier!,
+                offersDelivery: Boolean(business.offersDelivery),
+                offersPickup: Boolean(business.offersPickup),
+                paymentOptions
+            }
+            // append to the array to be returned
+            container.push(fullBusiness)
+        }
+
+        return container
+    }
+
     /**
      * Fetches a business record by its UEN (Unique Entity Number).
      * 

@@ -12,6 +12,9 @@ businessRouter.post('/api/businesses/filter', businessController.getFilteredBusi
 // triggered by a user clicking the View Details button, this route fetches a single business from the database
 businessRouter.get('/api/business', businessController.getBusinessByUEN.bind(businessController))
 
+// triggered by a user clicking the My Businesses button, this route fetches the business/es owned by a user
+businessRouter.post('/api/businesses/owned', businessController.getOwnedBusinesses.bind(businessController))
+
 // this route handles business registration
 businessRouter.post('/api/register-business', businessController.registerBusiness.bind(businessController))
 

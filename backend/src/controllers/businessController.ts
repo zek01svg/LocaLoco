@@ -36,6 +36,18 @@ class businessController {
         }
     }
 
+    static async getOwnedBusinesses(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            console.log(req.body.ownerId)
+            const ownedBusinesses = await BusinessModel.getOwnedBusinesses(String(req.body.ownerId))
+            res.status(200).json(ownedBusinesses);
+        } 
+        catch (error) {
+            console.error(`There was a problem fetching the the owned business: ${error}`)
+            next(error);
+        }
+    }
+
     static async registerBusiness(req: Request, res: Response, next: NextFunction): Promise<void> {
 
         const business = {
