@@ -37,4 +37,20 @@ featureRouter.post('/api/like-forum-post', FeatureController.updatePostLikes.bin
 featureRouter.post('/api/like-forum-reply', FeatureController.updateReplyLikes.bind(FeatureController))
 
 
+// ---------------------------------------------------- ROUTES FOR THE ANNOUNCEMENT FEATURE -----------------------------------------------
+// this route fetches all the announcements for the newsletter
+featureRouter.get('/api/newsletter', FeatureController.getAllAnnouncements.bind(FeatureController))
+
+// this route fetches all the announcements for a business
+featureRouter.get('/api/announcements', FeatureController.getAnnouncementsByUEN.bind(FeatureController))
+
+// this route handles submissions for announcements
+featureRouter.post('/api/new-announcement', FeatureController.newAnnouncement.bind(FeatureController))
+
+// this route handles submissions to update announcements
+featureRouter.post('/api/update-announcement', FeatureController.updateAnnouncement.bind(FeatureController))
+
+// this route handles deletions for announcements
+featureRouter.post('/api/delete-announcement', FeatureController.deleteAnnouncement.bind(FeatureController))
+
 export default featureRouter
