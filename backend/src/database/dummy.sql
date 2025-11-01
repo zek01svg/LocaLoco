@@ -296,3 +296,57 @@ VALUES
 
 (10, 'user26@example.com', 'Love brands like The Daily Loaf and Artisan Alley — quality local stuff.', 4, '2025-10-25 19:10:00'),
 (10, 'user30@example.com', '+1 for Artisan Alley! Picked up cool handmade gifts there.', 2, '2025-10-25 19:20:00');
+
+
+user_id            INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  email              VARCHAR(255) NOT NULL,
+  password_hash      VARCHAR(255) NOT NULL,
+  name               VARCHAR(120) NOT NULL,
+  referral_code      CHAR(10)     NOT NULL,     
+  referrer_id INT UNSIGNED NULL,         -- who referred the user (if any)
+  created_at         DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (user_id),
+  UNIQUE KEY uq_user_email (email),
+  UNIQUE KEY uq_user_referral_code (referral_code),
+  KEY idx_user_referred_by (referrer_id),
+  CONSTRAINT fk_user_referred_by
+    FOREIGN KEY (referrer_id) REFERENCES user(user_id)
+    ON DELETE SET NULL ON UPDATE CASCADE
+);
+
+CREATE TABLE referrals (
+  ref_id                 BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  referrer_id   INT UNSIGNED NOT NULL,
+  referred_id   INT UNSIGNED NOT NULL,
+  referral_code      CHAR(10) NOT NULL,      -- snapshot of code used
+  status             ENUM('claimed','qualified','rewarded','rejected') NOT NULL DEFAULT 'claimed',
+  referred_at         DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (ref_id),
+  UNIQUE KEY uq_referrer_referred (referrer_id, referred_id),
+  KEY idx_referrer (referrer_id),
+  KEY idx_referred (referred_id),
+  CONSTRAINT fk_ref_referrer FOREIGN KEY (referrer_id) REFERENCES user(user_id)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT fk_ref_referred FOREIGN KEY (referred_id) REFERENCES user(user_id)
+    ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+
+
+CREATE TABLE vouchers (
+  voucher_id                 BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  referrer_id            INT UNSIGNED NOT NULL,             -- owner (referrer)
+  ref_id        BIGINT UNSIGNED NULL,              -- source referral row
+  amount      INT NOT NULL,                      -- store money in cents
+  status             ENUM('issued','used','expired','revoked') NOT NULL DEFAULT 'issued',
+  issued_at          DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  expires_at         DATETIME NULL,
+  PRIMARY KEY (voucher_id),
+  KEY idx_v_user (referrer_id),
+  KEY idx_v_status (status),
+  KEY idx_v_expires (expires_at),
+  CONSTRAINT fk_v_user FOREIGN KEY (referrer_id) REFERENCES user(user_id)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT fk_v_referral FOREIGN KEY (ref_id) REFERENCES referrals(ref_id)
+    ON DELETE SET NULL ON UPDATE CASCADE
+);

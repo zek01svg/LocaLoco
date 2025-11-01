@@ -1,27 +1,9 @@
-import { Business, HourEntry, DayOfWeek, BusinessPaymentOption } from "../types/Business.js";
+import { Business, HourEntry, DayOfWeek, BusinessPaymentOption, PriceTier, FilterOptions, BusinessToBeUpdated } from "../types/Business.js";
 import db from '../database/db.js'
-
-// for drizzle
-import { businesses } from '../database/schema.js';
+import { businesses, businessReviews, forumPosts, forumPostsReplies } from '../database/schema.js';
 import { businessPaymentOptions } from '../database/schema.js';
 import { businessOpeningHours } from '../database/schema.js';
 import { and, or, ilike, eq, inArray, gte, sql, asc, desc } from 'drizzle-orm';
-
-
-// helper interface and type for filtering purposes so that typescript wont complain
-type PriceTier = 'low' | 'medium' | 'high';
-interface FilterOptions {
-    search_query?: string;
-    price_tier?: PriceTier | PriceTier[]
-    business_category?: string | string[];
-    newly_added?: boolean;
-    open247?: boolean;
-    offers_delivery?: boolean;
-    offers_pickup?: boolean;
-    payment_options?: string[]; 
-    sort_by?: 'business_name' | 'date_of_creation' | 'price_tier';
-    sort_order?: 'asc' | 'desc';
-}
 
 class BusinessModel {
 
@@ -57,11 +39,14 @@ class BusinessModel {
 
             // build the business object from scratch to avoid type error
             const fullBusiness: Business = {
+                ownerID:business.ownerID,
                 uen: business.uen,
                 businessName: business.businessName,
                 businessCategory: business.businessCategory!, 
                 description: business.description!,
                 address: business.address!,
+                latitude: business.latitude!,
+                longitude: business.longitude!,
                 open247: Boolean(business.open247),
                 openingHours,
                 email: business.email!,
@@ -116,11 +101,14 @@ class BusinessModel {
         } 
 
         const fullBusiness:Business = {
+            ownerID: business.ownerID,
             uen: business.uen,
             businessName: business.businessName,
             businessCategory: business.businessCategory!, 
             description: business.description!,
             address: business.address!,
+            latitude: business.latitude!,
+            longitude: business.longitude!,
             open247: Boolean(business.open247),
             openingHours,
             email: business.email!,
@@ -285,11 +273,14 @@ class BusinessModel {
 
             // Map to Business objects
             const fullBusinesses: Business[] = businessRows.map(business => ({
+                ownerID:business.ownerID,
                 uen: business.uen,
                 businessName: business.businessName,
                 businessCategory: business.businessCategory!,
                 description: business.description!,
                 address: business.address!,
+                latitude: business.latitude!,
+                longitude: business.longitude!,
                 open247: Boolean(business.open247),
                 openingHours: openingHoursMap.get(business.uen) || ({} as Record<DayOfWeek, HourEntry>),
                 email: business.email!,
@@ -328,11 +319,14 @@ class BusinessModel {
         try {
             //insert into businesses
             await db.insert(businesses).values({
+                ownerID:business.ownerID,
                 uen: business.uen,
                 businessName: business.businessName,
                 businessCategory: business.businessCategory,
                 description: business.description,
                 address: business.address,
+                latitude: business.latitude,
+                longitude: business.longitude,
                 open247: business.open247,
                 email: business.email,
                 phoneNumber: business.phoneNumber,
@@ -373,17 +367,114 @@ class BusinessModel {
             }
         }
         catch (err:any) {
-            console.error('--- DETAILED DATABASE ERROR ---');
-            console.error(`Error Code: ${err.code}`);         // e.g., ER_DUP_ENTRY
-            console.error(`Error Number: ${err.errno}`);     // e.g., 1062
-            console.error(`SQL Message: ${err.sqlMessage}`); // The full MySQL error
-            console.error('Full Error Object:', err);
-            console.error('---------------------------------');
+            console.error(`Error: ${err}`)
         }
     }
 
-
+    /**
+     * Updates an existing business record in the database.
+     * 
+     * Modifies the main business details in the `businesses` table based on its UEN, 
+     * then refreshes the associated payment options and opening hours.
+     * 
+     * - Old payment options and opening hours are **deleted and reinserted** 
+     *   to ensure full synchronization.
+     * - If the business operates 24/7, any existing opening hours are removed.
+     * 
+     * @param {BusinessToBeUpdated} business - The updated business data, including UEN and new details.
+     * @returns {Promise<void>} Resolves when the business and its related data are successfully updated.
+     */
+    public static async updateBusiness(business:BusinessToBeUpdated): Promise<void> {          
     
+        try {
+            // update the details in the businesses tablae first
+            await db
+            .update(businesses)
+            .set({
+                ownerID: business.ownerID,
+                businessName: business.businessName,
+                businessCategory: business.businessCategory,
+                description: business.description,
+                address: business.address,
+                latitude: business.latitude,
+                longitude: business.longitude,
+                open247: business.open247,
+                email: business.email,
+                phoneNumber: business.phoneNumber,
+                websiteLink: business.websiteLink,
+                socialMediaLink: business.socialMediaLink,
+                wallpaper: business.wallpaper,
+                priceTier: business.priceTier,
+                offersDelivery: business.offersDelivery,
+                offersPickup: business.offersPickup
+            }).where(eq(businesses.uen, business.uen))
+
+            // followed by the payment options
+            if (business.paymentOptions?.length) {
+                // delete old ones first
+                await db.delete(businessPaymentOptions).where(eq(businessPaymentOptions.uen, business.uen))
+
+                // reinsert new ones
+                await Promise.all(
+                    business.paymentOptions.map(option =>
+                        db.insert(businessPaymentOptions).values({
+                            uen: business.uen,
+                            paymentOption: option
+                        } as typeof businessPaymentOptions.$inferInsert)
+                    )
+                );
+            }
+
+            // update opening hrs if not 24/7
+            if (!business.open247) {
+                const openingHourEntries = Object.entries(business.openingHours) as [DayOfWeek, HourEntry][]
+
+                // delete previous hours
+                await db.delete(businessOpeningHours).where(eq(businessOpeningHours.uen, business.uen))
+
+                // insert updated hours
+                await Promise.all(
+                    openingHourEntries.map(([day, hours]) =>
+                        db.insert(businessOpeningHours).values({
+                            uen: business.uen,
+                            dayOfWeek: day,
+                            openTime: hours.open,
+                            closeTime: hours.close
+                        } as typeof businessOpeningHours.$inferInsert)
+                    )
+                )
+            } 
+            // delete existing opening hrs if 24/7
+            else {
+                await db.delete(businessOpeningHours).where(eq(businessOpeningHours.uen, business.uen))
+            }
+        }
+        catch (err:any) {
+            console.error(`There was a problem updating the selected business: ${err}`)
+        }
+    }
+    
+    /**
+     * Deletes a business and all related records from the database.
+     * 
+     * Removes the business entry identified by its UEN from the `businesses` table.
+     * 
+     * All associated records (such as payment options, opening hours, reviews, 
+     * and forum posts) are automatically deleted by the database 
+     * through cascade delete constraints.
+     * 
+     * @param {string} uen - The Unique Entity Number of the business to delete.
+     * @returns {Promise<void>} Resolves when the business and all related records have been successfully removed.
+     */
+    public static async deleteBusiness(uen:string): Promise<void> {
+
+        try {
+            await db.delete(businesses).where(eq(businesses.uen, uen))
+        }
+        catch (err:any) {
+            console.error(`There was a problem deleting the selected business: ${err}`)
+        }
+    }
 }
 
 export default BusinessModel

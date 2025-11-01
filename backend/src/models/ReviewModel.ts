@@ -1,4 +1,4 @@
-import { Review } from '../types/Review.js';
+import { Review, UpdateReviewData } from '../types/Review.js';
 import db from '../database/db.js'
 import { businessReviews } from '../database/schema.js';
 import { eq } from 'drizzle-orm';
@@ -11,7 +11,7 @@ class ReviewModel {
         try {
             await db.insert(businessReviews).values({
                 userEmail: review.userEmail,
-                businessUen: review.businessUEN,
+                uen: review.businessUEN,
                 rating: review.rating,
                 body: review.body ?? '',
                 likeCount: review.likeCount,
@@ -24,14 +24,56 @@ class ReviewModel {
         }
     }
     // READ
-    public static async getBusinessReviews(businessUEN:string) {
+    public static async getBusinessReviews(uen:string) {
         try {
-            return await db.select().from(businessReviews).where(eq(businessReviews.businessUen, businessUEN))
+            const reviews = await db.select().from(businessReviews).where(eq(businessReviews.uen, uen))
+            return reviews
         } 
         catch (err) {
             console.error(err)
         }
     }    
+    // UPDATE
+    public static async updateReview(id:number, updatedReview:UpdateReviewData) {
+        try {
+            await db.update(businessReviews).set(updatedReview).where(eq(businessReviews.id, id))
+        } 
+        catch (err) {
+            console.error(`Error updating review: ${err}`)
+            throw err
+        }
+    }    
+    // DELETE
+    public static async deleteReview(id:number) {
+        try {
+            await db.delete(businessReviews).where(eq(businessReviews.id, id))
+        } 
+        catch (err) {
+            console.error(`Error deleting review: ${err}`)
+            throw err
+        }
+    }    
+    // handle likes for reviews
+    public static async updateReviewLikes(reviewId: number, clicked: boolean = false) {
+        const [review] = await db.select().from(businessReviews).where(eq(businessReviews.id, reviewId))
+
+        if (!review) {
+            throw new Error(`Reply with ID ${reviewId} not found.`)
+        }
+
+        const newLikeCount = clicked
+            ? (review.likeCount ?? 0) + 1
+            : Math.max((review.likeCount ?? 0) - 1, 0);
+
+        await db.update(businessReviews)
+            .set({ likeCount: newLikeCount })
+            .where(eq(businessReviews.id, reviewId));
+
+        return { 
+            ...review, 
+            likeCount: newLikeCount 
+        }
+    }
 }
 
 export default ReviewModel

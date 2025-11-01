@@ -12,13 +12,31 @@ class ForumModel {
         try {
             await db.insert(forumPosts).values({
                 userEmail: post.userEmail,
-                businessUen: post.businessUen || null,
-                title: post.title || null,
+                uen: post.businessUen,
+                title: post.title,
                 body: post.body,
                 createdAt: post.createdAt,
                 likeCount: 0
 
             } as typeof forumPosts.$inferInsert)
+        }
+        catch (err) {
+            console.error(err)
+        }
+    }
+
+    // creates a new forum post
+    public static async newForumPostReply(post: Omit<ForumPostReply, 'id'>) {
+        
+        try {
+            await db.insert(forumPostsReplies).values({
+                postId: post.postId,
+                userEmail: post.userEmail,
+                body: post.body,
+                createdAt: post.createdAt,
+                likeCount: post.likeCount
+
+            } as typeof forumPostsReplies.$inferInsert)
         }
         catch (err) {
             console.error(err)
@@ -52,7 +70,7 @@ class ForumModel {
             container.push({
                 id: post.id,
                 userEmail: post.userEmail,
-                businessUen: post.businessUen,
+                businessUen: post.uen,
                 title: post.title || null,
                 body: post.body,
                 likeCount: post.likeCount!,

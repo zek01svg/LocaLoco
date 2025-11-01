@@ -4,6 +4,7 @@ import ForumModel from "../models/ForumModel.js";
 
 class FeatureController {
 
+    // ---------------------- CONTROLLER FUNCTIONS FOR THE BUSINESS REVIEWS FEATURE  ----------------------    
     static async getBusinessReviews(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const reviews = await ReviewModel.getBusinessReviews(String(req.query.uen));
@@ -18,7 +19,7 @@ class FeatureController {
 
         const review = { 
             userEmail: req.body.userEmail, 
-            businessUEN: req.body.businessUen,
+            businessUEN: req.body.businessUEN,
             title: req.body.title,
             body: req.body.body,
             rating: req.body.rating,
@@ -26,10 +27,11 @@ class FeatureController {
             likeCount: 0
         };
 
-
         try {
             await ReviewModel.newReview(review);
-            res.status(200).json({ message: "Review added!" });
+            res.status(200).json({ 
+                message: "Review added!" 
+            });
         } 
         catch (error) {
             console.error("❌ Error adding review:", error);
@@ -37,7 +39,56 @@ class FeatureController {
         }
     }
 
-    // ---------------------- FORUM STUFF HERE ----------------------
+    static async updateReview(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+
+            const id = Number(req.body.id)
+            const UpdateReviewData = {
+                rating: Number(req.body.rating),
+                body: String(req.body.body)
+            }
+
+            await ReviewModel.updateReview(id, UpdateReviewData);
+            res.status(200).json({
+                message: 'update successful'
+            })
+        } 
+        catch (error) {
+            console.error(`Error updating review: ${error}`);
+            next(error);
+        }
+    }
+
+    static async deleteReview (req: Request, res: Response, next: NextFunction): Promise<void> {
+
+        try {
+
+            const id = Number(req.body.id)
+
+            await ReviewModel.deleteReview(id);
+            res.status(200).json({ 
+                message: "Review deleted" 
+            });
+        } 
+        catch (error) {
+            console.error(`Error deleting review: ${error}`);
+            next(error);
+        }
+    }
+
+    static async updateReviewLikes(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const { reviewId, clicked } = req.body;
+            const result = await ReviewModel.updateReviewLikes(reviewId, clicked);
+            res.status(200).json(result);
+        }
+        catch (error) {
+            console.error(`Error updating review likes: ${error}`);
+            next(error);
+        }
+    }
+
+    // ---------------------- CONTROLLER FUNCTIONS FOR THE FORUM FEATURE  ----------------------
 
     static async getAllForumPosts(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
@@ -53,8 +104,8 @@ class FeatureController {
 
         const post = { 
             userEmail: req.body.userEmail, 
-            businessUen: req.body.businessUen, 
-            title: req.body.title,
+            businessUen: req.body.businessUen || null, 
+            title: req.body.title || null,
             body: req.body.body,
             createdAt: new Date().toISOString(),
             likeCount: 0
@@ -62,10 +113,58 @@ class FeatureController {
 
         try {
             await ForumModel.newForumPost(post);
-            res.status(200).json({ message: "Post added!" });
+            res.status(200).json({ 
+                message: "Post added!" 
+            });
         } 
         catch (error) {
-            console.error("❌ Error adding post:", error);
+            console.error(`Error adding post: ${error}`);
+            next(error);
+        }
+    }
+
+    static async newForumPostReply(req: Request, res: Response, next: NextFunction): Promise<void> {
+
+        const postReply = { 
+            postId: req.body.postId,
+            userEmail: req.body.userEmail, 
+            body: req.body.body,
+            createdAt: new Date().toISOString(),
+            likeCount: 0
+         };
+
+        try {
+            await ForumModel.newForumPostReply(postReply);
+            res.status(200).json({ 
+                message: "Post reply added!" 
+            });
+        } 
+        catch (error) {
+            console.error(`Error adding post: ${error}`);
+            next(error);
+        }
+    }
+
+    static async updatePostLikes(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const { postId, clicked } = req.body;
+            const result = await ForumModel.updatePostLikes(postId, clicked);
+            res.status(200).json(result);
+        }
+        catch (error) {
+            console.error(`Error updating post likes: ${error}`);
+            next(error);
+        }
+    }
+
+    static async updateReplyLikes(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const { replyId, clicked } = req.body;
+            const result = await ForumModel.updateReplyLikes(replyId, clicked);
+            res.status(200).json(result);
+        }
+        catch (error) {
+            console.error(`Error updating post reply likes: ${error}`);
             next(error);
         }
     }

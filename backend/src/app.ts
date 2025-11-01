@@ -7,10 +7,10 @@ import helmet from 'helmet';
 import morgan from 'morgan'
 import businessRouter from './routes/businessRoutes.js';
 import imageUploadRouter from './routes/uploadRoutes.js';
-// import userRouter from './routes/userRoutes.js';
-import { toNodeHandler } from 'better-auth/node';
-import auth from './lib/auth.js'; // This will now correctly have all process.env variables
 import featureRouter from './routes/featureRoutes.js'
+import userRouter from './routes/userRoutes.js';
+import { toNodeHandler } from 'better-auth/node';
+import auth from './lib/auth.js'; 
 
 const app: Application = express();
 
@@ -80,15 +80,14 @@ app.get('/health', async (req, res) => {
     })
 });
 
+app.use(businessRouter) // router for business functionality
+app.use(userRouter) // router for user functionality
+app.use(featureRouter) // router for small features
+app.use(imageUploadRouter) // router for the images
 app.all('/api/auth/{*any}', toNodeHandler(auth)); // handler for better-auth
 
-app.use(businessRouter)
-// app.use(userRouter)
-app.use(featureRouter)
-app.use(imageUploadRouter)
-
 app.get('/', (req, res) => {
-    res.sendFile(path.join(frontendPath, 'index.html'));
+    res.sendFile(path.join(frontendPath, 'index.html'))
 });
 
 export default app
