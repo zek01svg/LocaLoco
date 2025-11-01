@@ -35,19 +35,21 @@ INSERT INTO user (id, name, email, email_verified, image, has_business) VALUES
 ('user-id-029', 'Chloe Wilson', 'user29@example.com', true, NULL, false),
 ('user-id-030', 'Dan Moore', 'user30@example.com', false, NULL, false);
 
--- Businesses data
-INSERT INTO businesses (uen, business_name, business_category, description, address, open247, email, phone_number, website_link, social_media_link, wallpaper, date_of_creation, price_tier, offers_delivery, offers_pickup) VALUES
-('202301234A', 'The Daily Loaf Bakery', 'fnb', 'Artisanal breads and pastries baked fresh daily with premium ingredients', '123 Orchard Road, Singapore 238858', FALSE, 'hello@dailyloaf.sg', '+65 6234 5678', 'https://www.dailyloaf.sg', 'https://instagram.com/dailyloafbakery', 'The_Daily_Loaf_Bakery.jpg', '2023-01-15', 'medium', TRUE, TRUE),
-('202302456B', 'Gents Grooming Parlor', 'services', 'Traditional barbershop offering classic cuts and modern styling for gentlemen', '456 Tanjong Pagar Road, Singapore 088463', FALSE, 'book@gentsgrooming.sg', '+65 6345 6789', 'https://www.gentsgrooming.sg', 'https://facebook.com/gentsgrooming', 'Gents_Grooming_Parlor.jpg', '2023-02-20', 'medium', FALSE, FALSE),
-('202303789C', 'Java Junction Cafe', 'fnb', 'Specialty coffee and light bites in a cozy atmosphere perfect for work or relaxation', '789 Bugis Street, Singapore 188735', FALSE, 'info@javajunction.sg', '+65 6456 7890', 'https://www.javajunction.sg', 'https://instagram.com/javajunctionsg', 'Java_Junction_Cafe.jpg', '2023-03-10', 'low', TRUE, TRUE),
-('202304012D', 'FitCore Studio', 'health_wellness', 'High-intensity fitness training with certified instructors and state-of-the-art equipment', '321 Marina Boulevard, Singapore 018985', FALSE, 'register@fitcorestudio.sg', '+65 6567 8901', 'https://www.fitcorestudio.sg', 'https://instagram.com/fitcoresg', 'FitCore_Studio.jpg', '2023-04-05', 'high', FALSE, FALSE),
-('202305345E', 'Artisan Alley Crafts', 'retail', 'Handmade crafts and unique gifts created by local artisans', '234 Haji Lane, Singapore 189218', FALSE, 'shop@artisanalley.sg', '+65 6678 9012', 'https://www.artisanalley.sg', 'https://instagram.com/artisanalleysg', 'Artisan_Alley_Crafts.jpg', '2023-05-18', 'medium', FALSE, TRUE),
-('202306678F', 'GreenScape Solutions', 'services', 'Professional landscaping and garden maintenance services for residential and commercial properties', '567 Changi Business Park, Singapore 486025', FALSE, 'enquiry@greenscape.sg', '+65 6789 0123', 'https://www.greenscape.sg', 'https://facebook.com/greenscapesg', 'GreenScape_Solutions.jpg', '2023-06-22', 'high', FALSE, FALSE),
-('202307901G', 'Chapter & Verse Books', 'retail', 'Independent bookstore featuring curated selections and rare finds for book lovers', '890 Bras Basah Road, Singapore 189555', FALSE, 'hello@chapterverse.sg', '+65 6890 1234', 'https://www.chapterverse.sg', 'https://instagram.com/chapterversesg', 'Chapter_&_Verse_Books.jpg', '2023-07-08', 'low', TRUE, TRUE),
-('202308234H', 'Chic Street Boutique', 'retail', 'Trendy fashion and accessories for the modern woman', '145 Arab Street, Singapore 199827', FALSE, 'shop@chicstreet.sg', '+65 6901 2345', 'https://www.chicstreet.sg', 'https://instagram.com/chicstreetsg', 'Chic_Street_Boutique.jpg', '2023-08-14', 'medium', TRUE, TRUE),
-('202309567I', 'Elegance & Co', 'retail', 'Premium designer fashion and luxury accessories for discerning customers', '2 Orchard Turn, ION Orchard, Singapore 238801', FALSE, 'concierge@eleganceco.sg', '+65 6012 3456', 'https://www.eleganceco.sg', 'https://instagram.com/elegancecosg', 'Elegance_&_Co.jpg', '2023-09-01', 'high', FALSE, TRUE),
-('202310890J', 'Mama\'s Kitchen', 'fnb', 'Home-style comfort food with authentic local flavors in a warm family setting', '678 Tiong Bahru Road, Singapore 158789', FALSE, 'reservations@mamaskitchen.sg', '+65 6123 4567', 'https://www.mamaskitchen.sg', 'https://facebook.com/mamaskitchensg', 'Mama\'s_Kitchen.jpg', '2023-10-12', 'low', TRUE, TRUE),
-('202312456L', 'Pawfect Grooming', 'services', 'Professional pet grooming services with gentle care for your furry friends', '234 Serangoon Road, Singapore 218078', FALSE, 'book@pawfectgrooming.sg', '+65 6345 6789', 'https://www.pawfectgrooming.sg', 'https://instagram.com/pawfectsg', 'Pawfect_Grooming.jpeg', '2023-12-05', 'medium', FALSE, TRUE);
+-- businesses data
+INSERT INTO businesses 
+(owner_id, uen, business_name, business_category, description, address, open247, email, phone_number, website_link, social_media_link, wallpaper, date_of_creation, price_tier, offers_delivery, offers_pickup)
+VALUES
+('user-id-001', '202301234A', 'The Daily Loaf Bakery', 'fnb', 'Artisanal breads and pastries baked fresh daily with premium ingredients', '123 Orchard Road, Singapore 238858', FALSE, 'hello@dailyloaf.sg', '+65 6234 5678', 'https://www.dailyloaf.sg', 'https://instagram.com/dailyloafbakery', 'The_Daily_Loaf_Bakery.jpg', '2023-01-15', 'medium', TRUE, TRUE),
+('user-id-002', '202302456B', 'Gents Grooming Parlor', 'services', 'Traditional barbershop offering classic cuts and modern styling for gentlemen', '456 Tanjong Pagar Road, Singapore 088463', FALSE, 'book@gentsgrooming.sg', '+65 6345 6789', 'https://www.gentsgrooming.sg', 'https://facebook.com/gentsgrooming', 'Gents_Grooming_Parlor.jpg', '2023-02-20', 'medium', FALSE, FALSE),
+('user-id-003', '202303789C', 'Java Junction Cafe', 'fnb', 'Specialty coffee and light bites in a cozy atmosphere perfect for work or relaxation', '789 Bugis Street, Singapore 188735', FALSE, 'info@javajunction.sg', '+65 6456 7890', 'https://www.javajunction.sg', 'https://instagram.com/javajunctionsg', 'Java_Junction_Cafe.jpg', '2023-03-10', 'low', TRUE, TRUE),
+('user-id-003', '202304012D', 'FitCore Studio', 'health_wellness', 'High-intensity fitness training with certified instructors and state-of-the-art equipment', '321 Marina Boulevard, Singapore 018985', FALSE, 'register@fitcorestudio.sg', '+65 6567 8901', 'https://www.fitcorestudio.sg', 'https://instagram.com/fitcoresg', 'FitCore_Studio.jpg', '2023-04-05', 'high', FALSE, FALSE),
+('user-id-004', '202305345E', 'Artisan Alley Crafts', 'retail', 'Handmade crafts and unique gifts created by local artisans', '234 Haji Lane, Singapore 189218', FALSE, 'shop@artisanalley.sg', '+65 6678 9012', 'https://www.artisanalley.sg', 'https://instagram.com/artisanalleysg', 'Artisan_Alley_Crafts.jpg', '2023-05-18', 'medium', FALSE, TRUE),
+('user-id-004', '202306678F', 'GreenScape Solutions', 'services', 'Professional landscaping and garden maintenance services for residential and commercial properties', '567 Changi Business Park, Singapore 486025', FALSE, 'enquiry@greenscape.sg', '+65 6789 0123', 'https://www.greenscape.sg', 'https://facebook.com/greenscapesg', 'GreenScape_Solutions.jpg', '2023-06-22', 'high', FALSE, FALSE),
+('user-id-005', '202307901G', 'Chapter & Verse Books', 'retail', 'Independent bookstore featuring curated selections and rare finds for book lovers', '890 Bras Basah Road, Singapore 189555', FALSE, 'hello@chapterverse.sg', '+65 6890 1234', 'https://www.chapterverse.sg', 'https://instagram.com/chapterversesg', 'Chapter_&_Verse_Books.jpg', '2023-07-08', 'low', TRUE, TRUE),
+('user-id-005', '202308234H', 'Chic Street Boutique', 'retail', 'Trendy fashion and accessories for the modern woman', '145 Arab Street, Singapore 199827', FALSE, 'shop@chicstreet.sg', '+65 6901 2345', 'https://www.chicstreet.sg', 'https://instagram.com/chicstreetsg', 'Chic_Street_Boutique.jpg', '2023-08-14', 'medium', TRUE, TRUE),
+('user-id-006', '202309567I', 'Elegance & Co', 'retail', 'Premium designer fashion and luxury accessories for discerning customers', '2 Orchard Turn, ION Orchard, Singapore 238801', FALSE, 'concierge@eleganceco.sg', '+65 6012 3456', 'https://www.eleganceco.sg', 'https://instagram.com/elegancecosg', 'Elegance_&_Co.jpg', '2023-09-01', 'high', FALSE, TRUE),
+('user-id-001', '202310890J', 'Mama\'s Kitchen', 'fnb', 'Home-style comfort food with authentic local flavors in a warm family setting', '678 Tiong Bahru Road, Singapore 158789', FALSE, 'reservations@mamaskitchen.sg', '+65 6123 4567', 'https://www.mamaskitchen.sg', 'https://facebook.com/mamaskitchensg', 'Mama\'s_Kitchen.jpg', '2023-10-12', 'low', TRUE, TRUE),
+('user-id-002', '202312456L', 'Pawfect Grooming', 'services', 'Professional pet grooming services with gentle care for your furry friends', '234 Serangoon Road, Singapore 218078', FALSE, 'book@pawfectgrooming.sg', '+65 6345 6789', 'https://www.pawfectgrooming.sg', 'https://instagram.com/pawfectsg', 'Pawfect_Grooming.jpeg', '2023-12-05', 'medium', FALSE, TRUE);
 
 -- Payment options
 INSERT INTO business_payment_options (uen, payment_option) VALUES
@@ -238,6 +240,7 @@ INSERT INTO business_reviews (user_email, business_uen, rating, body, like_count
 ('user23@example.com', '202312456L', 4, 'Good, clean cut for my poodle. The facility is clean and doesn''t have that strong "wet dog" smell. Booking was easy.', 9, '2025-10-22 14:30:00'),
 ('user24@example.com', '202312456L', 2, 'They missed trimming some of my dog''s nails and the cut was uneven. I had to point it out. Not very thorough.', 1, '2025-10-23 10:30:00'),
 ('user25@example.com', '202312456L', 4, 'Staff seem to genuinely love animals. Prices are fair for the area. My dog always comes back looking and smelling pawfect!', 8, '2025-10-24 16:30:00');
+
 -- ========================================
 -- Forum Posts
 -- ========================================
@@ -297,56 +300,71 @@ VALUES
 (10, 'user26@example.com', 'Love brands like The Daily Loaf and Artisan Alley — quality local stuff.', 4, '2025-10-25 19:10:00'),
 (10, 'user30@example.com', '+1 for Artisan Alley! Picked up cool handmade gifts there.', 2, '2025-10-25 19:20:00');
 
+INSERT INTO business_announcements 
+(business_uen, title, content, image_url, created_at, updated_at)
+VALUES
+-- The Daily Loaf Bakery
+('202301234A', 'New Croissant Series Launch!', 
+ 'We’re introducing a buttery new range of croissants — from almond to matcha. Come try them fresh out of the oven this weekend!',
+ 'https://www.dailyloaf.sg/images/croissant_series.jpg', 
+ '2024-01-10 09:30:00', '2024-01-10 09:30:00'),
 
-user_id            INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  email              VARCHAR(255) NOT NULL,
-  password_hash      VARCHAR(255) NOT NULL,
-  name               VARCHAR(120) NOT NULL,
-  referral_code      CHAR(10)     NOT NULL,     
-  referrer_id INT UNSIGNED NULL,         -- who referred the user (if any)
-  created_at         DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (user_id),
-  UNIQUE KEY uq_user_email (email),
-  UNIQUE KEY uq_user_referral_code (referral_code),
-  KEY idx_user_referred_by (referrer_id),
-  CONSTRAINT fk_user_referred_by
-    FOREIGN KEY (referrer_id) REFERENCES user(user_id)
-    ON DELETE SET NULL ON UPDATE CASCADE
-);
+-- Gents Grooming Parlor
+('202302456B', 'Movember Special: Free Beard Trim', 
+ 'In support of Movember, get a complimentary beard trim with any haircut this November!',
+ 'https://www.gentsgrooming.sg/images/movember_special.jpg', 
+ '2024-11-01 10:00:00', '2024-11-01 10:00:00'),
 
-CREATE TABLE referrals (
-  ref_id                 BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-  referrer_id   INT UNSIGNED NOT NULL,
-  referred_id   INT UNSIGNED NOT NULL,
-  referral_code      CHAR(10) NOT NULL,      -- snapshot of code used
-  status             ENUM('claimed','qualified','rewarded','rejected') NOT NULL DEFAULT 'claimed',
-  referred_at         DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (ref_id),
-  UNIQUE KEY uq_referrer_referred (referrer_id, referred_id),
-  KEY idx_referrer (referrer_id),
-  KEY idx_referred (referred_id),
-  CONSTRAINT fk_ref_referrer FOREIGN KEY (referrer_id) REFERENCES user(user_id)
-    ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT fk_ref_referred FOREIGN KEY (referred_id) REFERENCES user(user_id)
-    ON DELETE CASCADE ON UPDATE CASCADE
-);
+-- Java Junction Cafe
+('202303789C', 'Pumpkin Spice Latte Returns!', 
+ 'It’s back! Our autumn favorite — the Pumpkin Spice Latte — available for a limited time only!',
+ 'https://www.javajunction.sg/images/psl_promo.jpg', 
+ '2024-09-15 08:00:00', '2024-09-15 08:00:00'),
 
+-- FitCore Studio
+('202304012D', 'New Year, New You Challenge', 
+ 'Kick off the new year strong! Join our 6-week fitness challenge with exclusive FitCore merch for top performers.',
+ 'https://www.fitcorestudio.sg/images/new_year_challenge.jpg', 
+ '2025-01-01 07:00:00', '2025-01-01 07:00:00'),
 
+-- Artisan Alley Crafts
+('202305345E', 'Holiday Craft Fair 2024', 
+ 'Join us at our annual Holiday Craft Fair featuring over 50 local artists and live workshops.',
+ 'https://www.artisanalley.sg/images/holiday_fair.jpg', 
+ '2024-12-05 11:00:00', '2024-12-05 11:00:00'),
 
-CREATE TABLE vouchers (
-  voucher_id                 BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-  referrer_id            INT UNSIGNED NOT NULL,             -- owner (referrer)
-  ref_id        BIGINT UNSIGNED NULL,              -- source referral row
-  amount      INT NOT NULL,                      -- store money in cents
-  status             ENUM('issued','used','expired','revoked') NOT NULL DEFAULT 'issued',
-  issued_at          DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  expires_at         DATETIME NULL,
-  PRIMARY KEY (voucher_id),
-  KEY idx_v_user (referrer_id),
-  KEY idx_v_status (status),
-  KEY idx_v_expires (expires_at),
-  CONSTRAINT fk_v_user FOREIGN KEY (referrer_id) REFERENCES user(user_id)
-    ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT fk_v_referral FOREIGN KEY (ref_id) REFERENCES referrals(ref_id)
-    ON DELETE SET NULL ON UPDATE CASCADE
-);
+-- GreenScape Solutions
+('202306678F', 'EcoGarden Launch: Sustainable Landscaping Solutions', 
+ 'We’re proud to launch EcoGarden — our newest range of sustainable landscaping packages designed for greener living.',
+ 'https://www.greenscape.sg/images/ecogarden_launch.jpg', 
+ '2024-06-10 09:00:00', '2024-06-10 09:00:00'),
+
+-- Chapter & Verse Books
+('202307901G', 'Author Meet & Greet: Tan Wei Ming', 
+ 'Join us this Saturday for an intimate reading and Q&A session with local author Tan Wei Ming, featuring his new book *Whispers of the City*.',
+ 'https://www.chapterverse.sg/images/author_event.jpg', 
+ '2024-07-20 15:00:00', '2024-07-20 15:00:00'),
+
+-- Chic Street Boutique
+('202308234H', 'Summer Collection 2024 Drop', 
+ 'Our breezy Summer 2024 Collection is here — vibrant colors, comfy fabrics, and limited pieces only!',
+ 'https://www.chicstreet.sg/images/summer_collection.jpg', 
+ '2024-06-01 10:00:00', '2024-06-01 10:00:00'),
+
+-- Elegance & Co
+('202309567I', 'Private Sale for VIP Members', 
+ 'Exclusive invitation for our VIP members: enjoy up to 40% off select luxury pieces this weekend only.',
+ 'https://www.eleganceco.sg/images/vip_sale.jpg', 
+ '2024-11-10 12:00:00', '2024-11-10 12:00:00'),
+
+-- Mama’s Kitchen
+('202310890J', 'Grand Reopening After Renovation', 
+ 'We’re back with a brand new look! Join us for our reopening event and enjoy 10% off all menu items this week.',
+ 'https://www.mamaskitchen.sg/images/reopening.jpg', 
+ '2024-03-05 11:30:00', '2024-03-05 11:30:00'),
+
+-- Pawfect Grooming
+('202312456L', 'Pawfect Christmas Photo Booth!', 
+ 'Bring your furry friends for a festive grooming session and a free Christmas photo!',
+ 'https://www.pawfectgrooming.sg/images/xmas_photo_booth.jpg', 
+ '2024-12-01 10:00:00', '2024-12-01 10:00:00');
