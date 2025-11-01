@@ -7,3 +7,8 @@ export interface Review {
     likeCount: number,
     createdAt: string
 }
+
+export interface UpdateReviewData {
+    rating: number,
+    body: string,
+}

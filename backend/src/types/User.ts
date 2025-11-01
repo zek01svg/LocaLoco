@@ -7,3 +7,9 @@ export interface User {
     referralCode: string|null,
     referredByUserID: string|null
 }
+
+export interface UpdateProfileData {
+    name?: string,
+    image?: string,
+    email?: string 
+}
