@@ -1,5 +1,6 @@
-import { mysqlTable, mysqlSchema, AnyMySqlColumn, index, foreignKey, primaryKey, int, varchar, mysqlEnum, time, text, date, timestamp, tinyint, boolean, unique, decimal } from "drizzle-orm/mysql-core"
+import { mysqlTable, mysqlSchema, AnyMySqlColumn, index, foreignKey, primaryKey, int, varchar, mysqlEnum, time, text, date, timestamp, tinyint, boolean, unique, decimal, uniqueIndex } from "drizzle-orm/mysql-core"
 import { sql, InferSelectModel, InferInsertModel } from "drizzle-orm"
+import { timeStamp } from "console";
 
 // put these two tables first to avoid constraint issue
 export const businesses = mysqlTable("businesses", {
@@ -41,22 +42,6 @@ export const user = mysqlTable("user", {
   referralCode: text("referral_code"),
   referredByUserID: text("referred_by_user_id"),
 });
-
-// user_id            INT UNSIGNED NOT NULL AUTO_INCREMENT,
-//   email              VARCHAR(255) NOT NULL,
-//   password_hash      VARCHAR(255) NOT NULL,
-//   name               VARCHAR(120) NOT NULL,
-//   referral_code      CHAR(10)     NOT NULL,     
-//   referrer_id INT UNSIGNED NULL,         -- who referred the user (if any)
-//   created_at         DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-//   PRIMARY KEY (user_id), /
-//   UNIQUE KEY uq_user_email (email), /
-//   UNIQUE KEY uq_user_referral_code (referral_code),
-//   KEY idx_user_referred_by (referrer_id),
-//   CONSTRAINT fk_user_referred_by
-//     FOREIGN KEY (referrer_id) REFERENCES user(user_id)
-//     ON DELETE SET NULL ON UPDATE CASCADE
-// );
 
 // followed by the other business tables
 export const businessOpeningHours = mysqlTable("business_opening_hours", {
@@ -122,65 +107,48 @@ export const businessReviews = mysqlTable('business_reviews', {
 });
 
 export const referrals = mysqlTable("referrals", {
-    id: int().autoincrement().notNull(),
-    referrerUserId: varchar("referrer_user_id", { length: 36 }).notNull().references(() => user.id, { onDelete: "cascade" } ),
-    referredUserId: varchar("referred_user_id", { length: 36 }).notNull().references(() => user.id, { onDelete: "cascade" } ),
-    createdAt: timestamp("created_at", { mode: 'string' }).defaultNow(),
-},
-(table) => [
-    index("referred_user_idx").on(table.referredUserId),
-    index("referrer_user_idx").on(table.referrerUserId),
-    primaryKey({ columns: [table.id], name: "referrals_id"}),
-]);
-// CREATE TABLE referrals (
-//   ref_id                 BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-//   referrer_id   INT UNSIGNED NOT NULL,
-//   referred_id   INT UNSIGNED NOT NULL,
-//   referral_code      CHAR(10) NOT NULL,      -- snapshot of code used
-//   status             ENUM('claimed','qualified','rewarded','rejected') NOT NULL DEFAULT 'claimed',
-//   referred_at         DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-//   PRIMARY KEY (ref_id),
-//   UNIQUE KEY uq_referrer_referred (referrer_id, referred_id),
-//   KEY idx_referrer (referrer_id),
-//   KEY idx_referred (referred_id),
-//   CONSTRAINT fk_ref_referrer FOREIGN KEY (referrer_id) REFERENCES user(user_id)
-//     ON DELETE CASCADE ON UPDATE CASCADE,
-//   CONSTRAINT fk_ref_referred FOREIGN KEY (referred_id) REFERENCES user(user_id)
-//     ON DELETE CASCADE ON UPDATE CASCADE
-// );
-export const vouchers = mysqlTable("vouchers", {
-    id: int().autoincrement().notNull(),
-    referrerUserId: varchar("referrer_user_id", { length: 36 }).notNull().references(() => user.id, { onDelete: "cascade" } ),
-    referredUserId: varchar("referred_user_id", { length: 36 }).notNull().references(() => user.id, { onDelete: "cascade" } ),
+    id: int("ref_id").autoincrement().notNull(),
+    referrerUserId: varchar("referrer_id", { length: 36 }).notNull().references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    referredUserId: varchar("referred_id", { length: 36 }).notNull().references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
     referralCode: varchar("referral_code", { length: 10 }).notNull(),
-    amount: int().notNull(),
-    status: mysqlEnum(['issued','redeemed','expired']).default('issued'),
-    issuedAt: timestamp("issued_at", { mode: 'string' }).defaultNow(),
-    redeemedAt: timestamp("redeemed_at", { mode: 'string' }),
+    status: mysqlEnum("status", ["claimed","qualified","rewarded","rejected"]).notNull().default("claimed"),
+    referredAt: timestamp("referred_at").defaultNow().notNull(),
+    }, (table) => [
+    primaryKey({ columns: [table.id], name: "referrals_id" }),
+    index("idx_referrer").on(table.referrerUserId),
+    index("idx_referred").on(table.referredUserId),
+    uniqueIndex("uq_referrer_referred").on(table.referrerUserId, table.referredUserId)
+]);
+
+export const vouchers = mysqlTable("vouchers", {
+    id: int("voucher_id").autoincrement().notNull(),
+    userId: varchar("referrer_id", { length: 36 }).notNull().references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    refId: int("ref_id",).references(() => referrals.id, { onDelete: "set null", onUpdate: "cascade" }),
+    amount: int("amount").notNull(),
+    status: mysqlEnum("status", ["issued", "used", "expired", "revoked"]).notNull().default("issued"),
+    issuedAt: timestamp("issued_at").notNull().defaultNow(),
+    expiresAt: timestamp("expires_at"),
+    }, (table) => [
+    primaryKey({ columns: [table.id], name: "voucher_id" }),
+    index("idx_v_user").on(table.userId),
+    index("idx_v_status").on(table.status),
+    index("idx_v_expires").on(table.expiresAt),
+]);
+
+export const businessAnnouncements = mysqlTable("business_announcements", {
+    announcementId: int("announcement_id").autoincrement().notNull(),
+    businessUen: varchar("business_uen", { length: 20 }).notNull().references(() => businesses.uen),
+    title: varchar({ length: 255 }).notNull(),
+    content: text().notNull(),
+    imageUrl: varchar("image_url", { length: 500 }),
+    createdAt: timestamp("created_at", { mode: 'string' }).defaultNow(),
+    updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow(),
 },
 (table) => [
-    index("referred_user_idx").on(table.referredUserId),
-    index("referrer_user_idx").on(table.referrerUserId),
-    primaryKey({ columns: [table.id], name: "vouchers_id"}),
-    unique("referral_code").on(table.referralCode),
+    index("business_uen").on(table.businessUen),
+    primaryKey({ columns: [table.announcementId], name: "business_announcements_announcement_id"}),
 ]);
-// CREATE TABLE vouchers (
-//   voucher_id                 BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-//   referrer_id            INT UNSIGNED NOT NULL,             -- owner (referrer)
-//   ref_id        BIGINT UNSIGNED NULL,              -- source referral row
-//   amount      INT NOT NULL,                      -- store money in cents
-//   status             ENUM('issued','used','expired','revoked') NOT NULL DEFAULT 'issued',
-//   issued_at          DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-//   expires_at         DATETIME NULL,
-//   PRIMARY KEY (voucher_id),
-//   KEY idx_v_user (referrer_id),
-//   KEY idx_v_status (status),
-//   KEY idx_v_expires (expires_at),
-//   CONSTRAINT fk_v_user FOREIGN KEY (referrer_id) REFERENCES user(user_id)
-//     ON DELETE CASCADE ON UPDATE CASCADE,
-//   CONSTRAINT fk_v_referral FOREIGN KEY (ref_id) REFERENCES referrals(ref_id)
-//     ON DELETE SET NULL ON UPDATE CASCADE
-// );
+
 // lastly, the tables required by better-auth
 export const session = mysqlTable("session", {
   id: varchar("id", { length: 36 }).primaryKey(),
