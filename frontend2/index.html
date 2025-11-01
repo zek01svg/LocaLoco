@@ -43,6 +43,67 @@
             display: none;
             margin-top: 20px;
         }
+        .review-card {
+            background-color: #ffffff;
+            border: 1px solid #dcdfe3;
+            border-radius: 10px;
+            padding: 20px 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .review-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            border-bottom: 1px solid #f0f0f0;
+            padding-bottom: 8px;
+        }
+
+        .review-user {
+            font-weight: 600;
+            color: #212529;
+            margin: 0;
+            font-size: 1.05rem;
+        }
+
+        .review-date {
+            font-size: 0.9rem;
+            color: #868e96;
+        }
+
+        .review-body {
+            font-size: 1rem;
+            color: #495057;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .review-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 10px;
+            border-top: 1px solid #f1f3f5;
+        }
+
+        .review-rating {
+            color: #f1c40f;
+            font-weight: 500;
+        }
+
+        .review-likes {
+            color: #e03131;
+            font-weight: 500;
+        }
+
     </style>
 
     <title>LocaLoco</title>
