@@ -138,11 +138,24 @@ export async function showDetails(uen: string) {
   const detailsContainer = document.getElementById('display_details')!;
   const mainCardContainer = document.getElementById('cardContainer')!;
   const filteringBar = document.getElementById('filtering_bar')!;
+  const reviewsContainer = document.getElementById('reviewsContainer')!;
+  const writeReviewBtn = document.getElementById('writeReviewBtn')!;
+  const reviewForm = document.getElementById('reviewForm')!;
+  const submitReviewBtn = document.getElementById('submitReviewBtn')!;
+  const reviewText = document.getElementById('reviewText') as HTMLTextAreaElement;
+  const starRating = document.getElementById('starRating')!;
+
+  let selectedRating = 0; // track chosen rating
+
+  // Clear old reviews first
+  reviewsContainer.innerHTML = '';
 
   try {
-    const response = await axios.get<Business>('/api/business', { params: { uen } });
-    const business = response.data;
+    // --- Fetch business details ---
+    const { data: business } = await axios.get<Business>('/api/business', { params: { uen } });
+    const { data: reviews } = await axios.get('/api/reviews', { params: { uen } });
 
+    // Fill business info
     (document.getElementById('display_details_image') as HTMLImageElement).src =
       'https://localoco.blob.core.windows.net/images/' + business.wallpaper;
     (document.getElementById('description')!).innerText = business.description;
@@ -151,6 +164,7 @@ export async function showDetails(uen: string) {
     (document.getElementById('website_link')!).innerHTML = `<strong>Website:</strong> <a href="${business.website_link || '#'}" target="_blank">${business.website_link || '-'}</a>`;
     (document.getElementById('social_media_link')!).innerHTML = `<strong>Social Media:</strong> <a href="${business.social_media_link || '#'}" target="_blank">${business.social_media_link || '-'}</a>`;
 
+    // Opening hours
     const openingHoursList = document.getElementById('opening_hours')!;
     openingHoursList.innerHTML = '';
     if (business.open247 === 1) {
@@ -163,6 +177,97 @@ export async function showDetails(uen: string) {
       });
     }
 
+    // --- Display existing reviews ---
+    for (let obj of reviews) {
+      const review = document.createElement('div');
+      review.classList.add('review-card');
+      review.innerHTML = `
+          <div class="review-header">
+              <h5 class="review-user">${obj.userEmail}</h5>
+              <span class="review-date">${new Date(obj.createdAt).toLocaleDateString()}</span>
+          </div>
+          <div class="review-body">
+              <p>${obj.body}</p>
+          </div>
+          <div class="review-footer">
+              <span class="review-rating">⭐ ${obj.rating}/5</span>
+              <span class="review-likes">❤️ ${obj.likeCount}</span>
+          </div>
+      `;
+      reviewsContainer.appendChild(review);
+    }
+
+    // --- Write Review Button Toggle ---
+    writeReviewBtn.addEventListener('click', () => {
+      reviewForm.style.display = reviewForm.style.display === 'block' ? 'none' : 'block';
+    });
+
+    // --- Star Rating Selection ---
+    const stars = starRating.querySelectorAll('.star');
+    stars.forEach(star => {
+      star.addEventListener('click', () => {
+        selectedRating = parseInt(star.getAttribute('data-value')!);
+        stars.forEach(s => s.innerHTML = '☆');
+        for (let i = 0; i < selectedRating; i++) {
+          stars[i].innerHTML = '★';
+        }
+      });
+    });
+
+    // --- Submit Review ---
+    submitReviewBtn.addEventListener('click', async () => {
+      const body = reviewText.value.trim();
+
+      if (!body || selectedRating === 0) {
+        alert('Please provide both a review and a rating.');
+        return;
+      }
+
+      const reviewData = {
+        userEmail: 'user10@example.com',
+        businessUen: uen,
+        title: 'Customer Review',
+        body,
+        rating: selectedRating
+      };
+
+      try {
+        await axios.post('/api/submit-review', reviewData);
+        alert('✅ Review submitted successfully!');
+        reviewText.value = '';
+        selectedRating = 0;
+        stars.forEach(s => s.innerHTML = '☆');
+        reviewForm.style.display = 'none';
+
+        // Re-fetch updated reviews
+        reviewsContainer.innerHTML = '';
+        const { data: newReviews } = await axios.get('/api/reviews', { params: { uen } });
+        newReviews.forEach((obj: any) => {
+          const review = document.createElement('div');
+          review.classList.add('review-card');
+          review.innerHTML = `
+              <div class="review-header">
+                  <h5 class="review-user">${obj.userEmail}</h5>
+                  <span class="review-date">${new Date(obj.createdAt).toLocaleDateString()}</span>
+              </div>
+              <div class="review-body">
+                  <p>${obj.body}</p>
+              </div>
+              <div class="review-footer">
+                  <span class="review-rating">⭐ ${obj.rating}/5</span>
+                  <span class="review-likes">❤️ ${obj.likeCount}</span>
+              </div>
+          `;
+          reviewsContainer.appendChild(review);
+        });
+
+      } catch (err) {
+        console.error(err);
+        alert('❌ Failed to submit review. Please try again.');
+      }
+    });
+
+    // --- Display page ---
     mainCardContainer.style.display = 'none';
     filteringBar.style.display = 'none';
     detailsContainer.style.display = 'block';
@@ -170,6 +275,7 @@ export async function showDetails(uen: string) {
     console.error(err);
   }
 }
+
 
 /**
  * Close details view
