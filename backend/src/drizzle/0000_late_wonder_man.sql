@@ -1,6 +1,3 @@
--- Current sql file was generated after introspecting the database
--- If you want to run this migration please uncomment this code before executing migrations
-/*
 CREATE TABLE `account` (
 	`id` varchar(36) NOT NULL,
 	`account_id` text NOT NULL,
@@ -16,6 +13,17 @@ CREATE TABLE `account` (
 	`created_at` timestamp(3) NOT NULL DEFAULT (now()),
 	`updated_at` timestamp(3) NOT NULL,
 	CONSTRAINT `account_id` PRIMARY KEY(`id`)
+);
+--> statement-breakpoint
+CREATE TABLE `business_announcements` (
+	`announcement_id` int AUTO_INCREMENT NOT NULL,
+	`business_uen` varchar(20) NOT NULL,
+	`title` varchar(255) NOT NULL,
+	`content` text NOT NULL,
+	`image_url` varchar(500),
+	`created_at` timestamp DEFAULT (now()),
+	`updated_at` timestamp DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `business_announcements_announcement_id` PRIMARY KEY(`announcement_id`)
 );
 --> statement-breakpoint
 CREATE TABLE `business_opening_hours` (
@@ -89,11 +97,14 @@ CREATE TABLE `forum_posts_replies` (
 );
 --> statement-breakpoint
 CREATE TABLE `referrals` (
-	`id` int AUTO_INCREMENT NOT NULL,
-	`referrer_user_id` varchar(36) NOT NULL,
-	`referred_user_id` varchar(36) NOT NULL,
-	`created_at` timestamp DEFAULT (now()),
-	CONSTRAINT `referrals_id` PRIMARY KEY(`id`)
+	`ref_id` int AUTO_INCREMENT NOT NULL,
+	`referrer_id` varchar(36) NOT NULL,
+	`referred_id` varchar(36) NOT NULL,
+	`referral_code` varchar(10) NOT NULL,
+	`status` enum('claimed','qualified','rewarded','rejected') NOT NULL DEFAULT 'claimed',
+	`referred_at` timestamp NOT NULL DEFAULT (now()),
+	CONSTRAINT `referrals_id` PRIMARY KEY(`ref_id`),
+	CONSTRAINT `uq_referrer_referred` UNIQUE(`referrer_id`,`referred_id`)
 );
 --> statement-breakpoint
 CREATE TABLE `session` (
@@ -113,11 +124,11 @@ CREATE TABLE `user` (
 	`id` varchar(36) NOT NULL,
 	`name` text NOT NULL,
 	`email` varchar(255) NOT NULL,
-	`email_verified` tinyint(1) NOT NULL DEFAULT 0,
+	`email_verified` boolean NOT NULL DEFAULT false,
 	`image` text,
 	`created_at` timestamp(3) NOT NULL DEFAULT (now()),
 	`updated_at` timestamp(3) NOT NULL DEFAULT (now()),
-	`has_business` tinyint(1),
+	`has_business` boolean,
 	`referral_code` text,
 	`referred_by_user_id` text,
 	CONSTRAINT `user_id` PRIMARY KEY(`id`),
@@ -135,41 +146,41 @@ CREATE TABLE `verification` (
 );
 --> statement-breakpoint
 CREATE TABLE `vouchers` (
-	`id` int AUTO_INCREMENT NOT NULL,
-	`referrer_user_id` varchar(36) NOT NULL,
-	`referred_user_id` varchar(36) NOT NULL,
-	`referral_code` varchar(10) NOT NULL,
+	`voucher_id` int AUTO_INCREMENT NOT NULL,
+	`referrer_id` varchar(36) NOT NULL,
+	`ref_id` int,
 	`amount` int NOT NULL,
-	`status` enum('issued','redeemed','expired') DEFAULT 'issued',
-	`issued_at` timestamp DEFAULT (now()),
-	`redeemed_at` timestamp,
-	CONSTRAINT `vouchers_id` PRIMARY KEY(`id`),
-	CONSTRAINT `referral_code` UNIQUE(`referral_code`)
+	`status` enum('issued','used','expired','revoked') NOT NULL DEFAULT 'issued',
+	`issued_at` timestamp NOT NULL DEFAULT (now()),
+	`expires_at` timestamp,
+	CONSTRAINT `voucher_id` PRIMARY KEY(`voucher_id`)
 );
 --> statement-breakpoint
 ALTER TABLE `account` ADD CONSTRAINT `account_user_id_user_id_fk` FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE `business_announcements` ADD CONSTRAINT `business_announcements_business_uen_businesses_uen_fk` FOREIGN KEY (`business_uen`) REFERENCES `businesses`(`uen`) ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `business_opening_hours` ADD CONSTRAINT `business_opening_hours_uen_businesses_uen_fk` FOREIGN KEY (`uen`) REFERENCES `businesses`(`uen`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `business_payment_options` ADD CONSTRAINT `business_payment_options_uen_businesses_uen_fk` FOREIGN KEY (`uen`) REFERENCES `businesses`(`uen`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE `business_reviews` ADD CONSTRAINT `business_reviews_business_uen_businesses_uen_fk` FOREIGN KEY (`business_uen`) REFERENCES `businesses`(`uen`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `business_reviews` ADD CONSTRAINT `business_reviews_user_email_user_email_fk` FOREIGN KEY (`user_email`) REFERENCES `user`(`email`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE `business_reviews` ADD CONSTRAINT `business_reviews_business_uen_businesses_uen_fk` FOREIGN KEY (`business_uen`) REFERENCES `businesses`(`uen`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `businesses` ADD CONSTRAINT `businesses_owner_id_user_id_fk` FOREIGN KEY (`owner_id`) REFERENCES `user`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE `forum_posts` ADD CONSTRAINT `forum_posts_business_uen_businesses_uen_fk` FOREIGN KEY (`business_uen`) REFERENCES `businesses`(`uen`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `forum_posts` ADD CONSTRAINT `forum_posts_user_email_user_email_fk` FOREIGN KEY (`user_email`) REFERENCES `user`(`email`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE `forum_posts` ADD CONSTRAINT `forum_posts_business_uen_businesses_uen_fk` FOREIGN KEY (`business_uen`) REFERENCES `businesses`(`uen`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `forum_posts_replies` ADD CONSTRAINT `forum_posts_replies_user_email_user_email_fk` FOREIGN KEY (`user_email`) REFERENCES `user`(`email`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `forum_posts_replies` ADD CONSTRAINT `replies_post_id_fk` FOREIGN KEY (`post_id`) REFERENCES `forum_posts`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE `referrals` ADD CONSTRAINT `referrals_referred_user_id_user_id_fk` FOREIGN KEY (`referred_user_id`) REFERENCES `user`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE `referrals` ADD CONSTRAINT `referrals_referrer_user_id_user_id_fk` FOREIGN KEY (`referrer_user_id`) REFERENCES `user`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE `referrals` ADD CONSTRAINT `referrals_referrer_id_user_id_fk` FOREIGN KEY (`referrer_id`) REFERENCES `user`(`id`) ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
+ALTER TABLE `referrals` ADD CONSTRAINT `referrals_referred_id_user_id_fk` FOREIGN KEY (`referred_id`) REFERENCES `user`(`id`) ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE `session` ADD CONSTRAINT `session_user_id_user_id_fk` FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE `vouchers` ADD CONSTRAINT `vouchers_referred_user_id_user_id_fk` FOREIGN KEY (`referred_user_id`) REFERENCES `user`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE `vouchers` ADD CONSTRAINT `vouchers_referrer_user_id_user_id_fk` FOREIGN KEY (`referrer_user_id`) REFERENCES `user`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE `vouchers` ADD CONSTRAINT `vouchers_referrer_id_user_id_fk` FOREIGN KEY (`referrer_id`) REFERENCES `user`(`id`) ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
+ALTER TABLE `vouchers` ADD CONSTRAINT `vouchers_ref_id_referrals_ref_id_fk` FOREIGN KEY (`ref_id`) REFERENCES `referrals`(`ref_id`) ON DELETE set null ON UPDATE cascade;--> statement-breakpoint
+CREATE INDEX `business_uen` ON `business_announcements` (`business_uen`);--> statement-breakpoint
 CREATE INDEX `uen` ON `business_opening_hours` (`uen`);--> statement-breakpoint
 CREATE INDEX `uen` ON `business_payment_options` (`uen`);--> statement-breakpoint
 CREATE INDEX `business_uen` ON `forum_posts` (`business_uen`);--> statement-breakpoint
 CREATE INDEX `user_email` ON `forum_posts` (`user_email`);--> statement-breakpoint
 CREATE INDEX `post_id` ON `forum_posts_replies` (`post_id`);--> statement-breakpoint
 CREATE INDEX `user_id` ON `forum_posts_replies` (`user_email`);--> statement-breakpoint
-CREATE INDEX `referred_user_idx` ON `referrals` (`referred_user_id`);--> statement-breakpoint
-CREATE INDEX `referrer_user_idx` ON `referrals` (`referrer_user_id`);--> statement-breakpoint
-CREATE INDEX `referred_user_idx` ON `vouchers` (`referred_user_id`);--> statement-breakpoint
-CREATE INDEX `referrer_user_idx` ON `vouchers` (`referrer_user_id`);
-*/
+CREATE INDEX `idx_referrer` ON `referrals` (`referrer_id`);--> statement-breakpoint
+CREATE INDEX `idx_referred` ON `referrals` (`referred_id`);--> statement-breakpoint
+CREATE INDEX `idx_v_user` ON `vouchers` (`referrer_id`);--> statement-breakpoint
+CREATE INDEX `idx_v_status` ON `vouchers` (`status`);--> statement-breakpoint
+CREATE INDEX `idx_v_expires` ON `vouchers` (`expires_at`);
