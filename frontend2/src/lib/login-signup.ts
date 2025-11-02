@@ -21,7 +21,10 @@ document.addEventListener('DOMContentLoaded', (()=>{
                 email, name, password,
                 callbackURL: baseURL
             });
+
+            const session = await authClient.getSession()
             console.log({ data, error });
+            console.log(session)
         } catch (err) {
             console.error(err);
         }
@@ -37,21 +40,25 @@ document.addEventListener('DOMContentLoaded', (()=>{
                 email, password,
                 callbackURL: baseURL
             });
+           const session = await authClient.getSession()
             console.log({ data, error });
+            console.log(session)
         } catch (err) {
             console.error(err);
         }
 
         console.log('login button clicked')
     });
-
+    
     googleBtn.addEventListener("click", async () => {
         try {
             const { data, error } = await authClient.signIn.social({ 
                 provider: "google",
                 callbackURL: baseURL
             });
+            const session = await authClient.getSession()
             console.log({ data, error });
+            console.log(session)
         } 
         catch (err) {
             console.error(err);
