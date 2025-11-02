@@ -22,6 +22,10 @@ const auth = betterAuth({
             referredByUserID: {
                 type:'string',
                 input:false
+            },
+            bio: {
+                type: 'string',
+                input: false
             }
         }
     },
