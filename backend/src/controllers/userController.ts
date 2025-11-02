@@ -21,52 +21,28 @@ class UserController {
     // Update user profile
     static async updateProfile(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const { userId, name, image } = req.body;
 
-            console.log('Update profile request:', { userId, name, imageLength: image?.length });
+            const { userId, name, email, imageUrl, bio, hasBusiness } = req.body;
 
             if (!userId) {
                 res.status(400).json({ error: 'User ID is required' });
-                return;
+                process.exit(1)
             }
 
             // Prepare update data
             const updates: any = {};
             if (name !== undefined) updates.name = name;
-            if (image !== undefined) updates.image = image;
-
-            // Check if there's anything to update
-            if (Object.keys(updates).length === 0) {
-                res.status(400).json({ error: 'No fields to update' });
-                return;
-            }
-
-            console.log('Updates to apply:', Object.keys(updates));
+            if (email !== undefined) updates.email = email;
+            if (imageUrl !== undefined) updates.imageUrl = imageUrl;
+            if (bio !== undefined) updates.bio = bio;
+            if (hasBusiness !== undefined) updates.hasBusiness = hasBusiness;
+            updates.updatedAt = new Date().toISOString()
 
             const updatedUser = await UserModel.updateProfile(userId, updates);
-
-            if (!updatedUser) {
-                res.status(404).json({ error: 'User not found after update' });
-                return;
-            }
-
-            res.status(200).json({
-                message: 'Profile updated successfully',
-                user: {
-                    id: updatedUser.id,
-                    name: updatedUser.name,
-                    email: updatedUser.email,
-                    image: updatedUser.image,
-                    createdAt: updatedUser.createdAt,
-                }
-            });
-        } catch (error: any) {
-            if (error.message === 'User not found') {
-                res.status(404).json({ error: 'User not found' });
-            } else {
-                console.error('Error updating profile:', error);
-                res.status(500).json({ error: 'Failed to update profile' });
-            }
+            res.status(200).json(updatedUser)
+        } 
+        catch (error: any) {
+            console.error(`Error updating user details: ${error}`)
         }
     }
 

@@ -21,7 +21,7 @@ class UserModel {
             const availableVouchers = await db.select().from(vouchers).where(eq(vouchers.userId, userId))
             
             return {
-                profile: profile[0],
+                profile: profile,
                 vouchers: availableVouchers
             }
         } 
@@ -47,18 +47,20 @@ class UserModel {
             // Update only the fields that are provided
             const updateData: any = {};
             if (updates.name !== undefined) updateData.name = updates.name;
-            if (updates.image !== undefined) updateData.image = updates.image;
             if (updates.email !== undefined) updateData.email = updates.email;
+            if (updates.imageUrl !== undefined) updateData.imageUrl = updates.imageUrl;
+            if (updates.bio !== undefined) updateData.bio = updates.bio;
+            if (updates.hasBusiness !== undefined) updateData.hasBusiness = updates.hasBusiness;
+            updateData.updatedAt = updates.updatedAt
 
             // Perform the update
-            await db.update(user)
-                .set(updateData)
-                .where(eq(user.id, userId));
+            await db.update(user).set(updateData).where(eq(user.id, userId));
 
-            // Fetch and return the updated user
-            const updatedUser = await db.select().from(user).where(eq(user.id, userId)).limit(1);
+            // Return the updated user
+            const updatedUser = await db.select().from(user).where(eq(user.id, userId))
             return updatedUser[0];
-        } catch (error) {
+        } 
+        catch (error) {
             console.error('Error updating profile:', error);
             throw error;
         }
