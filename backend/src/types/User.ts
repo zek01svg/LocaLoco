@@ -4,7 +4,7 @@ export interface User {
     email: string,
     password: string,
     hasBusiness: boolean,
-    referralCode: string|null,
+    referralCode: string,
     referredByUserID: string|null
 }
 
