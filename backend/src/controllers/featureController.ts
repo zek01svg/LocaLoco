@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import ReviewModel from "../models/ReviewModel.js";
 import ForumModel from "../models/ForumModel.js";
 import AnnouncementModel from "../models/AnnouncementModel.js";
+import BookmarkModel from "../models/BookmarkModel.js";
 
 class FeatureController {
 
@@ -233,7 +234,7 @@ class FeatureController {
         }
     } 
 
-     static async deleteAnnouncement (req: Request, res: Response, next: NextFunction): Promise<void> {
+    static async deleteAnnouncement (req: Request, res: Response, next: NextFunction): Promise<void> {
         const announcementId = req.body.announcementId
         try  {
             await AnnouncementModel.deleteAnnouncement(announcementId)
@@ -243,6 +244,33 @@ class FeatureController {
             console.error(`Error deleting announcement: ${err}`)
         }
     } 
+
+    // ---------------------- CONTROLLER FUNCTIONS FOR THE BOOKMARK FEATURE  ----------------------
+    static async getUserBookmarks (req: Request, res: Response, next: NextFunction): Promise<void> {
+        const userId = req.body.userId
+
+        try  {
+            const userBookmarks = await BookmarkModel.getUserBookmarks(userId)
+            res.status(200).json(userBookmarks)
+        } 
+        catch (err:any){
+            console.error(`Error getting user bookmakrs: ${err}`)
+        }
+    }
+
+    static async updateBookmarks (req: Request, res: Response, next: NextFunction): Promise<void> {
+        const clicked = req.body.clicked
+        const userId = req.body.userId
+        const businessUen = req.body.businessUen
+
+        try  {
+            await BookmarkModel.updateBookmarks(userId, businessUen, clicked)
+            res.status(200).json({ message: "Announcement deleted!" })
+        } 
+        catch (err:any){
+            console.error(`Error updating bookmarks: ${err}`)
+        }
+    }
 }
 
 export default FeatureController

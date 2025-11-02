@@ -53,4 +53,12 @@ featureRouter.post('/api/update-announcement', FeatureController.updateAnnouncem
 // this route handles deletions for announcements
 featureRouter.post('/api/delete-announcement', FeatureController.deleteAnnouncement.bind(FeatureController))
 
+// ---------------------------------------------------- ROUTES FOR THE BOOKMARKS FEATURE ------------------------------------------
+
+// this route gets all the bookmarked businesses of a user
+featureRouter.post('/api/user/bookmarks', FeatureController.updateBookmarks.bind(FeatureController))
+
+// this route handles a bookmark button click
+featureRouter.post('/api/update-bookmark', FeatureController.updateBookmarks.bind(FeatureController))
+
 export default featureRouter
