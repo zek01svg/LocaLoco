@@ -40,7 +40,7 @@ export const user = mysqlTable("user", {
     .notNull(),
   hasBusiness: boolean("has_business"),
   referralCode: text("referral_code"),
-  referredByUserID: text("referred_by_user_id"),
+  referredByUserID: text("referred_by_user_id")
 });
 
 // followed by the other business tables
@@ -112,7 +112,7 @@ export const referrals = mysqlTable("referrals", {
     referredUserId: varchar("referred_id", { length: 36 }).notNull().references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
     referralCode: varchar("referral_code", { length: 10 }).notNull(),
     status: mysqlEnum("status", ["claimed","qualified","rewarded","rejected"]).notNull().default("claimed"),
-    referredAt: timestamp("referred_at").defaultNow().notNull(),
+    referredAt: timestamp("referred_at", { mode: 'string' }).defaultNow().notNull(),
     }, (table) => [
     primaryKey({ columns: [table.id], name: "referrals_id" }),
     index("idx_referrer").on(table.referrerUserId),
@@ -122,12 +122,12 @@ export const referrals = mysqlTable("referrals", {
 
 export const vouchers = mysqlTable("vouchers", {
     id: int("voucher_id").autoincrement().notNull(),
-    userId: varchar("referrer_id", { length: 36 }).notNull().references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    userId: varchar("user_id", { length: 36 }).notNull().references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
     refId: int("ref_id",).references(() => referrals.id, { onDelete: "set null", onUpdate: "cascade" }),
     amount: int("amount").notNull(),
     status: mysqlEnum("status", ["issued", "used", "expired", "revoked"]).notNull().default("issued"),
-    issuedAt: timestamp("issued_at").notNull().defaultNow(),
-    expiresAt: timestamp("expires_at"),
+    issuedAt: timestamp("issued_at", { mode: 'string' }).notNull().defaultNow(),
+    expiresAt: timestamp("expires_at", { mode: 'string' }),
     }, (table) => [
     primaryKey({ columns: [table.id], name: "voucher_id" }),
     index("idx_v_user").on(table.userId),
