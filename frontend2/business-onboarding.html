@@ -307,6 +307,17 @@
         }
     }
 
+    // add function to call google api to return back the lat/lng based on the address returned by getAddress
+    async function getLatLng (address:string) {
+        return {
+            lat: '',
+            lng: ''
+        }
+    }
+    const returedlatLng = getLatLng()
+    const latitude = returedlatLng.lat
+    const longitude = returedlatLng.lng
+
     const postalCodeInput = document.getElementById('postalCode');
     postalCodeInput.addEventListener('keyup', getAddress);
 
@@ -318,9 +329,9 @@
         submitButton.disabled = true;
 
         try {
-const fileInput = document.getElementById('wallpaper-upload');
-const file = fileInput.files[0];
-let finalWallpaperUrl = '';
+    const fileInput = document.getElementById('wallpaper-upload');
+    const file = fileInput.files[0];
+    let finalWallpaperUrl = '';
 
 // only execute the block if there is an attached file
 if (file) {
@@ -365,6 +376,8 @@ else {
             
             const finalPayload = {
                 ...data,
+                latitude: latitude,
+                longitude: longitude,
                 open247: data.open247 === "1",
                 offersDelivery: data.offersDelivery === "1",
                 offersPickup: data.offersPickup ==="1",
