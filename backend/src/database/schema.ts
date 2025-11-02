@@ -4,7 +4,7 @@ import { timeStamp } from "console";
 
 // put these two tables first to avoid constraint issue
 export const businesses = mysqlTable("businesses", {
-    ownerID: varchar('owner_id', { length: 255 }).notNull().references(() => user.id, { onDelete: "cascade" } ),
+    ownerID: varchar('owner_id', { length: 255 }).notNull().references(() => user.id, { onDelete: "cascade", onUpdate: 'cascade' } ),
 	uen: varchar({ length: 20 }).notNull(),
 	businessName: varchar("business_name", { length: 255 }).notNull(),
 	businessCategory: varchar("business_category", { length: 100 }),
@@ -40,13 +40,14 @@ export const user = mysqlTable("user", {
     .notNull(),
   hasBusiness: boolean("has_business"),
   referralCode: text("referral_code"),
-  referredByUserID: text("referred_by_user_id")
+  referredByUserID: text("referred_by_user_id"),
+  bio: text('bio')
 });
 
 // followed by the other business tables
 export const businessOpeningHours = mysqlTable("business_opening_hours", {
 	id: int().autoincrement().notNull(),
-	uen: varchar({ length: 20 }).notNull().references(() => businesses.uen, { onDelete: "cascade" } ),
+	uen: varchar({ length: 20 }).notNull().references(() => businesses.uen, { onDelete: "cascade", onUpdate: 'cascade' } ),
 	dayOfWeek: mysqlEnum("day_of_week", ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']).notNull(),
 	openTime: time("open_time").notNull(),
 	closeTime: time("close_time").notNull(),
@@ -58,7 +59,7 @@ export const businessOpeningHours = mysqlTable("business_opening_hours", {
 
 export const businessPaymentOptions = mysqlTable("business_payment_options", {
 	id: int().autoincrement().notNull(),
-	uen: varchar({ length: 20 }).notNull().references(() => businesses.uen, { onDelete: "cascade" } ),
+	uen: varchar({ length: 20 }).notNull().references(() => businesses.uen, { onDelete: "cascade", onUpdate: 'cascade' } ),
 	paymentOption: varchar("payment_option", { length: 50 }).notNull(),
 },
 (table) => [
@@ -68,7 +69,7 @@ export const businessPaymentOptions = mysqlTable("business_payment_options", {
 
 export const forumPosts = mysqlTable('forum_posts', {
     id: int('id').autoincrement().notNull().primaryKey(),
-    userEmail: varchar('user_email', { length: 255 }).notNull().references(() => user.email, { onDelete: "cascade" } ),
+    userEmail: varchar('user_email', { length: 255 }).notNull().references(() => user.email, { onDelete: "cascade", onUpdate: 'cascade' } ),
     uen: varchar('business_uen', { length: 20 }).references(() => businesses.uen, { onDelete: "cascade" } ),
     title: varchar('title', { length: 255 }),
     body: text('body').notNull(),
@@ -82,7 +83,7 @@ export const forumPosts = mysqlTable('forum_posts', {
 export const forumPostsReplies = mysqlTable('forum_posts_replies', {
     id: int('id').autoincrement().notNull().primaryKey(),
     postId: int('post_id').notNull(), 
-    userEmail: varchar('user_email', { length: 255 }).notNull().references(() => user.email, { onDelete: "cascade" } ),
+    userEmail: varchar('user_email', { length: 255 }).notNull().references(() => user.email, { onDelete: "cascade", onUpdate: 'cascade' } ),
     body: text('body').notNull(),
     likeCount: int('like_count').default(0),
     createdAt: timestamp('created_at', { mode: 'string' }).defaultNow(),
@@ -98,7 +99,7 @@ export const forumPostsReplies = mysqlTable('forum_posts_replies', {
 
 export const businessReviews = mysqlTable('business_reviews', {
     id: int('id').primaryKey().autoincrement(),
-    userEmail: varchar('user_email', { length: 255 }).notNull().references(() => user.email, { onDelete: "cascade" } ),
+    userEmail: varchar('user_email', { length: 255 }).notNull().references(() => user.email, { onDelete: "cascade", onUpdate: 'cascade' } ),
     uen: varchar('business_uen', { length: 20 }).references(() => businesses.uen, { onDelete: "cascade" } ),
     rating: int('rating').notNull(),
     body: text('body').notNull(),
@@ -137,7 +138,7 @@ export const vouchers = mysqlTable("vouchers", {
 
 export const businessAnnouncements = mysqlTable("business_announcements", {
     announcementId: int("announcement_id").autoincrement().notNull(),
-    businessUen: varchar("business_uen", { length: 20 }).notNull().references(() => businesses.uen),
+    businessUen: varchar("business_uen", { length: 20 }).notNull().references(() => businesses.uen, { onDelete: "cascade", onUpdate: 'cascade' } ),
     title: varchar({ length: 255 }).notNull(),
     content: text().notNull(),
     imageUrl: varchar("image_url", { length: 500 }),
@@ -147,6 +148,15 @@ export const businessAnnouncements = mysqlTable("business_announcements", {
 (table) => [
     index("business_uen").on(table.businessUen),
     primaryKey({ columns: [table.announcementId], name: "business_announcements_announcement_id"}),
+]);
+
+export const bookmarkedBusinesses = mysqlTable("bookmarked_businesses", {
+    userId: varchar("user_id", { length: 36 }).notNull().references(() => user.id),
+    businessUen: varchar("business_uen", { length: 20 }).notNull().references(() => businesses.uen, { onDelete: "cascade", onUpdate: 'cascade' } ),
+},
+(table) => [
+    index("business_uen").on(table.businessUen),
+    primaryKey({ columns: [table.userId, table.businessUen], name: "bookmarked_businesses_user_id_business_uen"}),
 ]);
 
 // lastly, the tables required by better-auth
