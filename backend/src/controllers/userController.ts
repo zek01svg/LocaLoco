@@ -4,19 +4,19 @@ import UserModel from "../models/UserModel.js";
 class UserController {
 
     // // Get user profile
-    // static async getProfile(req: Request, res: Response, next: NextFunction): Promise<void> {
-    //     try {
-    //         const userId = String(req.body.userId) 
-    //         console.log(userId)
-
-    //         const user = await UserModel.getUserById(userId);
-    //         res.status(200).json(user);
+    static async getProfile(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const userId = String(req.body.userId) 
+            console.log(userId)
             
-    //     } catch (error) {
-    //         console.error('Error fetching profile:', error);
-    //         res.status(500).json({ error: 'Failed to fetch profile' });
-    //     }
-    // }
+            const profile = await UserModel.getProfile(userId);
+            res.status(200).json(profile);
+            
+        } catch (error) {
+            console.error('Error fetching profile:', error);
+            res.status(500).json({ error: 'Failed to fetch profile' });
+        }
+    }
 
     // Update user profile
     static async updateProfile(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -91,7 +91,29 @@ class UserController {
         }
     }
 
-    
+    // handle referrals
+    static async handleReferral(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const referralCode = req.body.referralCode
+            const referredId = req.body.referredId
+
+            const userExists = await UserModel.handleReferral(referralCode, referredId)
+
+            if (userExists === false) {
+                res.status(404).json({
+                    message: 'The referral code entered doesnt exist.',
+                });
+            }
+
+            res.status(200).json({
+                message: 'Referral handled successfully',
+            });
+            
+        } 
+        catch (error: any) {
+            console.log(`Error handling referral: ${error}`)
+        }
+    }
 }
 
 export default UserController;
