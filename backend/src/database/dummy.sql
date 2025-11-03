@@ -6,6 +6,15 @@ USE wad2_project;
 -- //////////////////////////// CREATE TRIGGERS ////////////////////////////
 
 DELIMITER $$
+CREATE TRIGGER trg_user_set_referral_code
+BEFORE INSERT ON user
+FOR EACH ROW
+BEGIN
+    SET NEW.referral_code = UPPER(REPLACE(UUID(), '-', ''));
+END$$
+DELIMITER ;
+
+DELIMITER $$
 CREATE TRIGGER trg_add_points_forum_post
 AFTER INSERT ON forum_posts
 FOR EACH ROW
@@ -26,7 +35,7 @@ BEGIN
     ON DUPLICATE KEY UPDATE points = points + 5;
 END$$
 DELIMITER ;
-
+select * from user;
 DELIMITER $$
 CREATE TRIGGER trg_add_points_forum_reply
 AFTER INSERT ON forum_posts_replies
