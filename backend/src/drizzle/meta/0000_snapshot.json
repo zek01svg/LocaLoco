@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "8782ce48-834f-4e50-8411-05865638dc6c",
+  "id": "e295b08f-e576-49cd-9c90-db63a7f01549",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "account": {
@@ -127,6 +127,73 @@
       "uniqueConstraints": {},
       "checkConstraint": {}
     },
+    "bookmarked_businesses": {
+      "name": "bookmarked_businesses",
+      "columns": {
+        "user_id": {
+          "name": "user_id",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "business_uen": {
+          "name": "business_uen",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "business_uen": {
+          "name": "business_uen",
+          "columns": [
+            "business_uen"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "bookmarked_businesses_user_id_user_id_fk": {
+          "name": "bookmarked_businesses_user_id_user_id_fk",
+          "tableFrom": "bookmarked_businesses",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "bookmarked_businesses_business_uen_businesses_uen_fk": {
+          "name": "bookmarked_businesses_business_uen_businesses_uen_fk",
+          "tableFrom": "bookmarked_businesses",
+          "tableTo": "businesses",
+          "columnsFrom": [
+            "business_uen"
+          ],
+          "columnsTo": [
+            "uen"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {
+        "bookmarked_businesses_user_id_business_uen": {
+          "name": "bookmarked_businesses_user_id_business_uen",
+          "columns": [
+            "user_id",
+            "business_uen"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
     "business_announcements": {
       "name": "business_announcements",
       "columns": {
@@ -203,8 +270,8 @@
           "columnsTo": [
             "uen"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
         }
       },
       "compositePrimaryKeys": {
@@ -278,7 +345,7 @@
             "uen"
           ],
           "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "cascade"
         }
       },
       "compositePrimaryKeys": {
@@ -338,7 +405,7 @@
             "uen"
           ],
           "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "cascade"
         }
       },
       "compositePrimaryKeys": {
@@ -419,7 +486,7 @@
             "email"
           ],
           "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "cascade"
         },
         "business_reviews_business_uen_businesses_uen_fk": {
           "name": "business_reviews_business_uen_businesses_uen_fk",
@@ -592,7 +659,7 @@
             "id"
           ],
           "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "cascade"
         }
       },
       "compositePrimaryKeys": {
@@ -689,7 +756,7 @@
             "email"
           ],
           "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "cascade"
         },
         "forum_posts_business_uen_businesses_uen_fk": {
           "name": "forum_posts_business_uen_businesses_uen_fk",
@@ -792,7 +859,7 @@
             "email"
           ],
           "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "cascade"
         },
         "replies_post_id_fk": {
           "name": "replies_post_id_fk",
@@ -1100,6 +1167,13 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
+        },
+        "bio": {
+          "name": "bio",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
         }
       },
       "indexes": {},
@@ -1193,8 +1267,8 @@
           "notNull": true,
           "autoincrement": true
         },
-        "referrer_id": {
-          "name": "referrer_id",
+        "user_id": {
+          "name": "user_id",
           "type": "varchar(36)",
           "primaryKey": false,
           "notNull": true,
@@ -1242,7 +1316,7 @@
         "idx_v_user": {
           "name": "idx_v_user",
           "columns": [
-            "referrer_id"
+            "user_id"
           ],
           "isUnique": false
         },
@@ -1262,12 +1336,12 @@
         }
       },
       "foreignKeys": {
-        "vouchers_referrer_id_user_id_fk": {
-          "name": "vouchers_referrer_id_user_id_fk",
+        "vouchers_user_id_user_id_fk": {
+          "name": "vouchers_user_id_user_id_fk",
           "tableFrom": "vouchers",
           "tableTo": "user",
           "columnsFrom": [
-            "referrer_id"
+            "user_id"
           ],
           "columnsTo": [
             "id"
