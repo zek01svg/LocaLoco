@@ -21,7 +21,8 @@ export default {
                 main: path.resolve(__dirname, "index.html"),
                 login: path.resolve(__dirname, "login.html"),
                 404: path.resolve(__dirname, "404.html"),
-                businessOnboarding: path.resolve(__dirname, "business-onboarding.html")
+                businessOnboarding: path.resolve(__dirname, "business-onboarding.html"),
+                passwordReset: path.resolve(__dirname, "password-reset.html")
             }
         }
     }
