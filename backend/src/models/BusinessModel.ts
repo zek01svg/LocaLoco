@@ -39,7 +39,7 @@ class BusinessModel {
 
             // build the business object from scratch to avoid type error
             const fullBusiness: Business = {
-                ownerID:business.ownerID,
+                ownerID:business.ownerId,
                 uen: business.uen,
                 businessName: business.businessName,
                 businessCategory: business.businessCategory!, 
@@ -69,7 +69,7 @@ class BusinessModel {
 
     public static async getOwnedBusinesses(ownerId:string) {
 
-        const ownedBusinesses = await db.select().from(businesses).where(eq(businesses.ownerID, ownerId))
+        const ownedBusinesses = await db.select().from(businesses).where(eq(businesses.ownerId, ownerId))
         const container: Business[] = [];
 
         for (const business of ownedBusinesses) {
@@ -90,7 +90,7 @@ class BusinessModel {
 
             // build the business object from scratch to avoid type error
             const fullBusiness: Business = {
-                ownerID:business.ownerID,
+                ownerID:business.ownerId,
                 uen: business.uen,
                 businessName: business.businessName,
                 businessCategory: business.businessCategory!, 
@@ -136,7 +136,7 @@ class BusinessModel {
             return null
         }
         
-        const business = businessRow[0] as Business
+        const business = businessRow[0]!
         const paymentRow = await db.select().from(businessPaymentOptions).where(eq(businessPaymentOptions.uen,uen))
         
         const paymentOptions = paymentRow.map(p => p.paymentOption)
@@ -152,7 +152,7 @@ class BusinessModel {
         } 
 
         const fullBusiness:Business = {
-            ownerID: business.ownerID,
+            ownerID: business.ownerId,
             uen: business.uen,
             businessName: business.businessName,
             businessCategory: business.businessCategory!, 
@@ -324,7 +324,7 @@ class BusinessModel {
 
             // Map to Business objects
             const fullBusinesses: Business[] = businessRows.map(business => ({
-                ownerID:business.ownerID,
+                ownerID:business.ownerId,
                 uen: business.uen,
                 businessName: business.businessName,
                 businessCategory: business.businessCategory!,
@@ -370,7 +370,7 @@ class BusinessModel {
         try {
             //insert into businesses
             await db.insert(businesses).values({
-                ownerID:business.ownerID,
+                ownerId:business.ownerID,
                 uen: business.uen,
                 businessName: business.businessName,
                 businessCategory: business.businessCategory,
@@ -442,7 +442,7 @@ class BusinessModel {
             await db
             .update(businesses)
             .set({
-                ownerID: business.ownerID,
+                ownerId: business.ownerID,
                 businessName: business.businessName,
                 businessCategory: business.businessCategory,
                 description: business.description,

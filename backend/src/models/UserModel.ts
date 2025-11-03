@@ -1,6 +1,6 @@
 import { User, UpdateProfileData } from '../types/User.js';
 import db from '../database/db.js'
-import { referrals, user, vouchers } from '../database/schema.js';
+import { referrals, user, userPoints, vouchers } from '../database/schema.js';
 import { and, or, ilike, eq, inArray, gte, sql, asc, desc } from 'drizzle-orm';
 import { date } from 'better-auth';
 
@@ -19,10 +19,12 @@ class UserModel {
         try {
             const profile = await db.select().from(user).where(eq(user.id, userId))
             const availableVouchers = await db.select().from(vouchers).where(eq(vouchers.userId, userId))
+            const availablePoints = await db.select().from(userPoints).where(eq(userPoints.userEmail, profile[0]!.email))
             
             return {
-                profile: profile,
-                vouchers: availableVouchers
+                profile: profile[0],
+                vouchers: availableVouchers,
+                points: availablePoints[0]!.points
             }
         } 
         catch (error) {
@@ -107,7 +109,7 @@ class UserModel {
 
             // Check if user (referredId) has already been referred
             const referredUserCheck = await db.select({ 
-                    referredByUserID: user.referredByUserID 
+                    referredByUserID: user.referredByUserId 
                 }).from(user).where(eq(user.id, referredId));
 
             if (referredUserCheck[0]?.referredByUserID) {
@@ -124,8 +126,8 @@ class UserModel {
                 
                 // Insert the referral record
                 const referralInsertResult = await tx.insert(referrals).values({
-                    referrerUserId: referrerUser.id,
-                    referredUserId: referredId,
+                    referrerId: referrerUser.id,
+                    referredId: referredId,
                     referralCode,
                     status: "claimed",
                     referredAt: now.toISOString() // Use 'now' for consistency
@@ -155,7 +157,7 @@ class UserModel {
 
                 // update the new user referredByUserID column
                 await tx.update(user).set({
-                    referredByUserID: referrerUser.id,
+                    referredByUserId: referrerUser.id,
                 }).where(eq(user.id, referredId))
 
                 return true;

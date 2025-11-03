@@ -70,7 +70,7 @@ class ForumModel {
             container.push({
                 id: post.id,
                 userEmail: post.userEmail,
-                businessUen: post.uen,
+                businessUen: post.businessUen,
                 title: post.title || null,
                 body: post.body,
                 likeCount: post.likeCount!,
