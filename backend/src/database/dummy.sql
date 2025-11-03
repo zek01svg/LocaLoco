@@ -1,7 +1,77 @@
--- create db and use
+-- //////////////////////////// CREATE DB AND USE ////////////////////////////
 DROP DATABASE IF EXISTS wad2_project;
 CREATE DATABASE wad2_project;
 USE wad2_project;
+
+-- //////////////////////////// CREATE TRIGGERS ////////////////////////////
+
+DELIMITER $$
+CREATE TRIGGER trg_add_points_forum_post
+AFTER INSERT ON forum_posts
+FOR EACH ROW
+BEGIN
+    INSERT INTO user_points (user_email, points)
+    VALUES (NEW.user_email, 5)
+    ON DUPLICATE KEY UPDATE points = points + 5;
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE TRIGGER trg_add_points_business_review
+AFTER INSERT ON business_reviews
+FOR EACH ROW
+BEGIN
+    INSERT INTO user_points (user_email, points)
+    VALUES (NEW.user_email, 5)
+    ON DUPLICATE KEY UPDATE points = points + 5;
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE TRIGGER trg_add_points_forum_reply
+AFTER INSERT ON forum_posts_replies
+FOR EACH ROW
+BEGIN
+    INSERT INTO user_points (user_email, points)
+    VALUES (NEW.user_email, 2)
+    ON DUPLICATE KEY UPDATE points = points + 2;
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE TRIGGER trg_subtract_points_forum_post
+AFTER DELETE ON forum_posts
+FOR EACH ROW
+BEGIN
+    UPDATE user_points
+    SET points = GREATEST(0, points - 5)
+    WHERE user_email = OLD.user_email;
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE TRIGGER trg_subtract_points_business_review
+AFTER DELETE ON business_reviews
+FOR EACH ROW
+BEGIN
+    UPDATE user_points
+    SET points = GREATEST(0, points - 5)
+    WHERE user_email = OLD.user_email;
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE TRIGGER trg_subtract_points_forum_reply
+AFTER DELETE ON forum_posts_replies
+FOR EACH ROW
+BEGIN
+    UPDATE user_points
+    SET points = GREATEST(0, points - 2)
+    WHERE user_email = OLD.user_email;
+END$$
+DELIMITER ;
+
+-- //////////////////////////// INSERT DATA ////////////////////////////
 
 INSERT INTO user (id, name, email, email_verified, image, has_business) VALUES
 ('user-id-001', 'Alice Smith', 'user1@example.com', true, 'https://example.com/img/alice.png', true),
@@ -368,3 +438,95 @@ VALUES
  'Bring your furry friends for a festive grooming session and a free Christmas photo!',
  'https://www.pawfectgrooming.sg/images/xmas_photo_booth.jpg', 
  '2024-12-01 10:00:00', '2024-12-01 10:00:00');
+ 
+ -- ========================================
+-- REFERRALS & VOUCHERS DUMMY DATA
+-- ========================================
+
+-- First, we must UPDATE a few users to have known, simple referral codes
+-- so we can realistically simulate someone using them.
+-- The trigger only runs on INSERT, so we do this manually for existing data.
+
+UPDATE user SET referral_code = 'ALICE123' WHERE id = 'user-id-001';
+UPDATE user SET referral_code = 'EMILY456' WHERE id = 'user-id-005';
+UPDATE user SET referral_code = 'JACK789' WHERE id = 'user-id-010';
+
+-- ----------------------------------------
+-- SIMULATION 1: Alice (user-id-001) refers Bob (user-id-002)
+-- Status: Bob (referred) has ALREADY USED his voucher.
+-- ----------------------------------------
+
+-- 1. Create the referral record (This will have ref_id = 1)
+INSERT INTO referrals (referrer_id, referred_id, referral_code, status, referred_at)
+VALUES ('user-id-001', 'user-id-002', 'ALICE123', 'claimed', '2025-10-15 10:00:00');
+
+-- 2. Update Bob (referred) to link to Alice (referrer)
+UPDATE user SET referred_by_user_id = 'user-id-001' WHERE id = 'user-id-002';
+
+-- 3. Issue vouchers (ref_id = 1)
+-- Voucher for referred (Bob, user-id-002) - marked as 'used'
+INSERT INTO vouchers (user_id, ref_id, amount, status, issued_at, expires_at)
+VALUES ('user-id-002', 1, 5, 'used', '2025-10-15 10:00:00', '2025-11-15 10:00:00');
+-- Voucher for referrer (Alice, user-id-001) - still 'issued'
+INSERT INTO vouchers (user_id, ref_id, amount, status, issued_at, expires_at)
+VALUES ('user-id-001', 1, 5, 'issued', '2025-10-15 10:00:00', '2025-11-15 10:00:00');
+
+-- ----------------------------------------
+-- SIMULATION 2: Alice (user-id-001) refers Charlie (user-id-003)
+-- Status: Both vouchers are active and 'issued'.
+-- ----------------------------------------
+
+-- 1. Create the referral record (This will have ref_id = 2)
+INSERT INTO referrals (referrer_id, referred_id, referral_code, status, referred_at)
+VALUES ('user-id-001', 'user-id-003', 'ALICE123', 'claimed', '2025-10-20 11:00:00');
+
+-- 2. Update Charlie (referred) to link to Alice (referrer)
+UPDATE user SET referred_by_user_id = 'user-id-001' WHERE id = 'user-id-003';
+
+-- 3. Issue vouchers (ref_id = 2)
+-- Voucher for referred (Charlie, user-id-003)
+INSERT INTO vouchers (user_id, ref_id, amount, status, issued_at, expires_at)
+VALUES ('user-id-003', 2, 5, 'issued', '2025-10-20 11:00:00', '2025-11-20 11:00:00');
+-- Voucher for referrer (Alice, user-id-001)
+INSERT INTO vouchers (user_id, ref_id, amount, status, issued_at, expires_at)
+VALUES ('user-id-001', 2, 5, 'issued', '2025-10-20 11:00:00', '2025-11-20 11:00:00');
+
+-- ----------------------------------------
+-- SIMULATION 3: Emily (user-id-005) refers Grace (user-id-007)
+-- Status: Both vouchers are active and 'issued' (very recent).
+-- ----------------------------------------
+
+-- 1. Create the referral record (This will have ref_id = 3)
+INSERT INTO referrals (referrer_id, referred_id, referral_code, status, referred_at)
+VALUES ('user-id-005', 'user-id-007', 'EMILY456', 'claimed', '2025-11-01 14:30:00');
+
+-- 2. Update Grace (referred) to link to Emily (referrer)
+UPDATE user SET referred_by_user_id = 'user-id-005' WHERE id = 'user-id-007';
+
+-- 3. Issue vouchers (ref_id = 3)
+-- Voucher for referred (Grace, user-id-007)
+INSERT INTO vouchers (user_id, ref_id, amount, status, issued_at, expires_at)
+VALUES ('user-id-007', 3, 5, 'issued', '2025-11-01 14:30:00', '2025-12-01 14:30:00');
+-- Voucher for referrer (Emily, user-id-005)
+INSERT INTO vouchers (user_id, ref_id, amount, status, issued_at, expires_at)
+VALUES ('user-id-005', 3, 5, 'issued', '2025-11-01 14:30:00', '2025-12-01 14:30:00');
+
+-- ----------------------------------------
+-- SIMULATION 4: Jack (user-id-010) refers Kate (user-id-011)
+-- Status: Vouchers were issued > 1 month ago and are now 'expired'.
+-- ----------------------------------------
+
+-- 1. Create the referral record (This will have ref_id = 4)
+INSERT INTO referrals (referrer_id, referred_id, referral_code, status, referred_at)
+VALUES ('user-id-010', 'user-id-011', 'JACK789', 'claimed', '2025-09-01 09:00:00');
+
+-- 2. Update Kate (referred) to link to Jack (referrer)
+UPDATE user SET referred_by_user_id = 'user-id-010' WHERE id = 'user-id-011';
+
+-- 3. Issue vouchers (ref_id = 4) - marked as 'expired'
+-- Voucher for referred (Kate, user-id-011)
+INSERT INTO vouchers (user_id, ref_id, amount, status, issued_at, expires_at)
+VALUES ('user-id-011', 4, 5, 'expired', '2025-09-01 09:00:00', '2025-10-01 09:00:00');
+-- Voucher for referrer (Jack, user-id-010)
+INSERT INTO vouchers (user_id, ref_id, amount, status, issued_at, expires_at)
+VALUES ('user-id-010', 4, 5, 'expired', '2025-09-01 09:00:00', '2025-10-01 09:00:00');

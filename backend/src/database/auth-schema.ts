@@ -20,6 +20,7 @@ export const user = mysqlTable("user", {
   hasBusiness: boolean("has_business"),
   referralCode: text("referral_code"),
   referredByUserID: text("referred_by_user_id"),
+  bio: text("bio"),
 });
 
 export const session = mysqlTable("session", {

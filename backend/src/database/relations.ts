@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm/relations";
-import { user, account, bookmarkedBusinesses, businesses, businessAnnouncements, businessOpeningHours, businessPaymentOptions, businessReviews, forumPosts, forumPostsReplies, referrals, session, vouchers } from "./schema.js";
+import { user, account, businesses, bookmarkedBusinesses, businessAnnouncements, businessOpeningHours, businessPaymentOptions, businessReviews, forumPosts, forumPostsReplies, referrals, session, userPoints, vouchers } from "./schema.js";
 
 export const accountRelations = relations(account, ({one}) => ({
 	user: one(user, {
@@ -22,17 +22,18 @@ export const userRelations = relations(user, ({many}) => ({
 		relationName: "referrals_referrerId_user_id"
 	}),
 	sessions: many(session),
+	userPoints: many(userPoints),
 	vouchers: many(vouchers),
 }));
 
 export const bookmarkedBusinessesRelations = relations(bookmarkedBusinesses, ({one}) => ({
-	user: one(user, {
-		fields: [bookmarkedBusinesses.userId],
-		references: [user.id]
-	}),
 	business: one(businesses, {
 		fields: [bookmarkedBusinesses.businessUen],
 		references: [businesses.uen]
+	}),
+	user: one(user, {
+		fields: [bookmarkedBusinesses.userId],
+		references: [user.id]
 	}),
 }));
 
@@ -43,7 +44,7 @@ export const businessesRelations = relations(businesses, ({one, many}) => ({
 	businessPaymentOptions: many(businessPaymentOptions),
 	businessReviews: many(businessReviews),
 	user: one(user, {
-		fields: [businesses.ownerID],
+		fields: [businesses.ownerId],
 		references: [user.id]
 	}),
 	forumPosts: many(forumPosts),
@@ -72,7 +73,7 @@ export const businessPaymentOptionsRelations = relations(businessPaymentOptions,
 
 export const businessReviewsRelations = relations(businessReviews, ({one}) => ({
 	business: one(businesses, {
-		fields: [businessReviews.uen],
+		fields: [businessReviews.businessUen],
 		references: [businesses.uen]
 	}),
 	user: one(user, {
@@ -83,7 +84,7 @@ export const businessReviewsRelations = relations(businessReviews, ({one}) => ({
 
 export const forumPostsRelations = relations(forumPosts, ({one, many}) => ({
 	business: one(businesses, {
-		fields: [forumPosts.uen],
+		fields: [forumPosts.businessUen],
 		references: [businesses.uen]
 	}),
 	user: one(user, {
@@ -106,12 +107,12 @@ export const forumPostsRepliesRelations = relations(forumPostsReplies, ({one}) =
 
 export const referralsRelations = relations(referrals, ({one, many}) => ({
 	user_referredId: one(user, {
-		fields: [referrals.referredUserId],
+		fields: [referrals.referredId],
 		references: [user.id],
 		relationName: "referrals_referredId_user_id"
 	}),
 	user_referrerId: one(user, {
-		fields: [referrals.referrerUserId],
+		fields: [referrals.referrerId],
 		references: [user.id],
 		relationName: "referrals_referrerId_user_id"
 	}),
@@ -125,10 +126,17 @@ export const sessionRelations = relations(session, ({one}) => ({
 	}),
 }));
 
+export const userPointsRelations = relations(userPoints, ({one}) => ({
+	user: one(user, {
+		fields: [userPoints.userEmail],
+		references: [user.email]
+	}),
+}));
+
 export const vouchersRelations = relations(vouchers, ({one}) => ({
 	referral: one(referrals, {
 		fields: [vouchers.refId],
-		references: [referrals.id]
+		references: [referrals.refId]
 	}),
 	user: one(user, {
 		fields: [vouchers.userId],
