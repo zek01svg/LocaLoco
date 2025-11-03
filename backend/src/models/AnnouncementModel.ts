@@ -2,25 +2,6 @@ import { Announcement, UpdatedAnnouncement } from '../types/Announcement.js';
 import db from '../database/db.js'
 import { businessAnnouncements } from '../database/schema.js';
 import { eq } from 'drizzle-orm';
-import { error } from 'console';
-
-// export interface Announcement {
-//     announcementId: number,
-//     businessUen: string,
-//     title: string,
-//     content: string,
-//     imageURL: string,
-//     createdAt:string,
-//     updatedAt:string
-// }
-
-// announcementId: int("announcement_id").autoincrement().notNull(),
-// businessUen: varchar("business_uen", { length: 20 }).notNull().references(() => businesses.uen),
-// title: varchar({ length: 255 }).notNull(),
-// content: text().notNull(),
-// imageUrl: varchar("image_url", { length: 500 }),
-// createdAt: timestamp("created_at", { mode: 'string' }).defaultNow(),
-// updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow(),
 
 class AnnouncementModel {
     
