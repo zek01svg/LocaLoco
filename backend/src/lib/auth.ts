@@ -2,13 +2,15 @@ import { betterAuth, boolean } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import db from "../database/db.js";
 import { user, session, account, verification } from "../database/schema.js";
-import dotenv from 'dotenv'
+import sendEmail from "./mailer.js";
 
 const auth = betterAuth({
     database: drizzleAdapter(db, {
         provider: "mysql", 
         schema: { user, session, account, verification }
     }),
+    baseURL: 'http://localhost:3000',
+    secret: String(process.env.BETTER_AUTH_SECRET),
     user: {
         additionalFields: {
             hasBusiness: {
@@ -31,8 +33,26 @@ const auth = betterAuth({
     },
     emailAndPassword: { 
         enabled: true, 
-        autoSignIn: true
+        autoSignIn: true,
+        sendResetPassword: async ({ user, url }, _request) => {
+            await sendEmail(
+                user.email,
+                'Reset your password',
+                `Click the link to reset your password: ${url}`
+            )
+        }
     }, 
+    emailVerification: {
+        sendVerificationEmail: async ({ user, url, token }, _request) => {
+            await sendEmail(
+                user.email,
+                'Verify your email address',
+                `Click the link to verify your email: ${url}`
+            )
+        },
+        sendOnSignUp: true,
+        
+    },
     trustedOrigins: [
         "http://localhost:3000", // for testing
         "http://localhost:5173", // for dev
