@@ -85,6 +85,7 @@
         "@types/express": "^5.0.3",
         "@types/morgan": "^1.9.10",
         "@types/node": "^24.9.1",
+        "@types/react-dom": "^19.2.2",
         "@types/react-router-dom": "^5.3.3",
         "@types/uuid": "^10.0.0",
         "@vitejs/plugin-react-swc": "^3.10.2",
@@ -97,12 +98,7 @@
         "vite": "^7.1.7"
     },
     "scripts": {
-        "dev": "concurrently \"npm run dev-frontend\" \"npm run dev-backend\"",
-        "dev-frontend": "vite",
-        "dev-backend": "cd backend && npm run dev",
-        "build": "vite build",
-        "start": "npm run build && cd backend && npm start",
-        "setup": "npm install && cd backend && npm run db:push && cd ../ && npm start",
+        "start": "cd frontend && npm run build && cd ../backend && npm start",
         "db:setup": "cd backend && npm run db:push"
     }
 }
