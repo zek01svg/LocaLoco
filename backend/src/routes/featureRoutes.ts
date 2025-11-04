@@ -23,6 +23,11 @@ featureRouter.post('/api/like-review', FeatureController.updateReviewLikes.bind(
 // ---------------------------------------------------- ROUTES FOR THE FORUM FEATURE ----------------------------------------------------
 // this route fetches all the posts for the forum page
 featureRouter.get('/api/forum-posts', FeatureController.getAllForumPosts.bind(FeatureController))
+featureRouter.get('/api/forum-posts/business', FeatureController.getForumPostsByBusinessUEN.bind(FeatureController))
+featureRouter.post('/api/forum-posts', FeatureController.createForumPost.bind(FeatureController))
+featureRouter.post('/api/forum-replies', FeatureController.createForumReply.bind(FeatureController))
+featureRouter.put('/api/forum-posts/likes', FeatureController.updatePostLikes.bind(FeatureController))
+featureRouter.put('/api/forum-replies/likes', FeatureController.updateReplyLikes.bind(FeatureController))
 
 // this route handles submissions for forum posts
 featureRouter.post('/api/submit-post', FeatureController.newForumPost.bind(FeatureController))
@@ -56,7 +61,7 @@ featureRouter.post('/api/delete-announcement', FeatureController.deleteAnnouncem
 // ---------------------------------------------------- ROUTES FOR THE BOOKMARKS FEATURE ------------------------------------------
 
 // this route gets all the bookmarked businesses of a user
-featureRouter.post('/api/user/bookmarks', FeatureController.updateBookmarks.bind(FeatureController))
+featureRouter.post('/api/user/bookmarks', FeatureController.getUserBookmarks.bind(FeatureController))
 
 // this route handles a bookmark button click
 featureRouter.post('/api/update-bookmark', FeatureController.updateBookmarks.bind(FeatureController))

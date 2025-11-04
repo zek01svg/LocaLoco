@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import BusinessModel from '../models/BusinessModel.js';
+import UserModel from '../models/UserModel.js';
 
 class businessController {
 
@@ -29,9 +30,33 @@ class businessController {
         try {
             const business = await BusinessModel.getBusinessByUEN(String(req.query.uen))
             res.status(200).json(business);
-        } 
+        }
         catch (error) {
             console.error(`There was a problem fetching the selected business: ${error}`)
+            next(error);
+        }
+    }
+
+    static async searchBusinessByName(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const searchName = String(req.query.name || '').trim();
+
+            if (!searchName) {
+                res.status(400).json({ error: 'Name parameter is required' });
+                return;
+            }
+
+            const business = await BusinessModel.searchBusinessByName(searchName);
+
+            if (!business) {
+                res.status(404).json({ error: 'Business not found' });
+                return;
+            }
+
+            res.status(200).json(business);
+        }
+        catch (error) {
+            console.error(`There was a problem searching for business: ${error}`)
             next(error);
         }
     }
@@ -41,7 +66,7 @@ class businessController {
             console.log(req.body.ownerId)
             const ownedBusinesses = await BusinessModel.getOwnedBusinesses(String(req.body.ownerId))
             res.status(200).json(ownedBusinesses);
-        } 
+        }
         catch (error) {
             console.error(`There was a problem fetching the the owned business: ${error}`)
             next(error);
@@ -51,7 +76,7 @@ class businessController {
     static async registerBusiness(req: Request, res: Response, next: NextFunction): Promise<void> {
 
         const business = {
-            ownerID: req.body.ownerID,
+            ownerId: req.body.userId,
             uen: req.body.uen,
             businessName: req.body.businessName,
             businessCategory: req.body.businessCategory,
@@ -75,7 +100,16 @@ class businessController {
 
         try {
             await BusinessModel.registerBusiness(business)
-            res.status(200).json({ message: 'business registered' });
+            console.log('✅ Business registered, now updating user hasBusiness flag for:', business.ownerId);
+
+            // Update user's hasBusiness flag
+            await UserModel.updateProfile(business.ownerId, {
+                hasBusiness: true,
+                updatedAt: new Date().toISOString()
+            });
+
+            console.log('✅ User hasBusiness flag updated successfully');
+            res.status(200).json({ success: true, message: 'business registered' });
         }
         catch (err:any) {
             console.error(`There was a problem registering the selected business: ${err}`)

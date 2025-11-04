@@ -1,4 +1,4 @@
-import { betterAuth, boolean } from "better-auth";
+import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import db from "../database/db.js";
 import { user, session, account, verification } from "../database/schema.js";
@@ -6,24 +6,35 @@ import sendEmail from "./mailer.js";
 
 const auth = betterAuth({
     database: drizzleAdapter(db, {
-        provider: "mysql", 
+        provider: "mysql",
         schema: { user, session, account, verification }
     }),
-    baseURL: 'http://localhost:3000',
+    baseURL: String(process.env.BETTER_AUTH_URL),
     secret: String(process.env.BETTER_AUTH_SECRET),
     user: {
         additionalFields: {
             hasBusiness: {
                 type: "boolean",
-                input: false
+                input: false,
+                defaultValue: false
+            },
+            firstName: {
+                type: "string",
+                input: true
+            },
+            lastName: {
+                type: "string",
+                input: true
             },
             referralCode: {
                 type: 'string',
-                input: false
+                input: false,
+                required: false
             },
             referredByUserID: {
-                type:'string',
-                input:false
+                type: 'string',
+                input: false,
+                required: false
             },
             bio: {
                 type: 'string',
@@ -31,8 +42,13 @@ const auth = betterAuth({
             }
         }
     },
-    emailAndPassword: { 
-        enabled: true, 
+    advanced: {
+        crossSubDomainCookies: {
+            enabled: true,
+        },
+    },
+    emailAndPassword: {
+        enabled: true,
         autoSignIn: true,
         sendResetPassword: async ({ user, url }, _request) => {
             await sendEmail(
@@ -41,7 +57,7 @@ const auth = betterAuth({
                 `Click the link to reset your password: ${url}`
             )
         }
-    }, 
+    },
     emailVerification: {
         sendVerificationEmail: async ({ user, url, token }, _request) => {
             await sendEmail(
@@ -51,12 +67,10 @@ const auth = betterAuth({
             )
         },
         sendOnSignUp: true,
-        
     },
     trustedOrigins: [
         "http://localhost:3000", // for testing
-        "http://localhost:5173", // for dev
-        "https://localoco.azurewebsites.net" // for staging and prod 
+        "https://localoco.azurewebsites.net" // for staging and prod
     ],
     socialProviders: {
         google: {
@@ -86,4 +100,5 @@ const auth = betterAuth({
     }
 })
 
-export default auth
+
+export default auth;

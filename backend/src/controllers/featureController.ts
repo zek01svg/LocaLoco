@@ -31,8 +31,9 @@ class FeatureController {
 
         try {
             await ReviewModel.newReview(review);
-            res.status(200).json({ 
-                message: "Review added!" 
+            res.status(200).json({
+                message: "Review added!",
+                pointsEarned: 5
             });
         } 
         catch (error) {
@@ -96,7 +97,68 @@ class FeatureController {
         try {
             const forumPosts = await ForumModel.getAllForumPosts();
             res.status(200).json(forumPosts)
-        } 
+        }
+        catch (error) {
+            next(error);
+        }
+    }
+
+    static async getForumPostsByBusinessUEN(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const businessUen = String(req.query.uen || '').trim();
+
+            if (!businessUen) {
+                res.status(400).json({ error: 'UEN parameter is required' });
+                return;
+            }
+
+            const forumPosts = await ForumModel.getForumPostsByBusinessUEN(businessUen);
+            res.status(200).json(forumPosts);
+        }
+        catch (error) {
+            next(error);
+        }
+    }
+
+    static async createForumPost(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const postData = req.body;
+            await ForumModel.newForumPost(postData);
+            res.status(201).json({ message: 'Forum post created successfully' });
+        }
+        catch (error) {
+            next(error);
+        }
+    }
+
+    static async createForumReply(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const replyData = req.body;
+            await ForumModel.newForumReply(replyData);
+            res.status(201).json({ message: 'Reply created successfully' });
+        }
+        catch (error) {
+            next(error);
+        }
+    }
+
+    static async updatePostLikes(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const { postId, clicked } = req.body;
+            const result = await ForumModel.updatePostLikes(postId, clicked);
+            res.status(200).json(result);
+        }
+        catch (error) {
+            next(error);
+        }
+    }
+
+    static async updateReplyLikes(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const { replyId, clicked } = req.body;
+            const result = await ForumModel.updateReplyLikes(replyId, clicked);
+            res.status(200).json(result);
+        }
         catch (error) {
             next(error);
         }
@@ -115,8 +177,9 @@ class FeatureController {
 
         try {
             await ForumModel.newForumPost(post);
-            res.status(200).json({ 
-                message: "Post added!" 
+            res.status(200).json({
+                message: "Post added!",
+                pointsEarned: 5
             });
         } 
         catch (error) {
@@ -127,9 +190,9 @@ class FeatureController {
 
     static async newForumPostReply(req: Request, res: Response, next: NextFunction): Promise<void> {
 
-        const postReply = { 
+        const postReply = {
             postId: req.body.postId,
-            userEmail: req.body.userEmail, 
+            userEmail: req.body.userEmail,
             body: req.body.body,
             createdAt: new Date().toISOString(),
             likeCount: 0
@@ -137,36 +200,13 @@ class FeatureController {
 
         try {
             await ForumModel.newForumPostReply(postReply);
-            res.status(200).json({ 
-                message: "Post reply added!" 
+            res.status(200).json({
+                message: "Post reply added!",
+                pointsEarned: 2
             });
-        } 
+        }
         catch (error) {
             console.error(`Error adding post: ${error}`);
-            next(error);
-        }
-    }
-
-    static async updatePostLikes(req: Request, res: Response, next: NextFunction): Promise<void> {
-        try {
-            const { postId, clicked } = req.body;
-            const result = await ForumModel.updatePostLikes(postId, clicked);
-            res.status(200).json(result);
-        }
-        catch (error) {
-            console.error(`Error updating post likes: ${error}`);
-            next(error);
-        }
-    }
-
-    static async updateReplyLikes(req: Request, res: Response, next: NextFunction): Promise<void> {
-        try {
-            const { replyId, clicked } = req.body;
-            const result = await ForumModel.updateReplyLikes(replyId, clicked);
-            res.status(200).json(result);
-        }
-        catch (error) {
-            console.error(`Error updating post reply likes: ${error}`);
             next(error);
         }
     }

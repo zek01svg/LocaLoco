@@ -12,7 +12,6 @@ export interface User {
 }
 
 export interface UpdateProfileData {
-    userId:string,
     name?: string,
     email?:string,
     imageUrl?:string,

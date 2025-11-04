@@ -10,15 +10,15 @@ import imageUploadRouter from './routes/uploadRoutes.js';
 import featureRouter from './routes/featureRoutes.js'
 import userRouter from './routes/userRoutes.js';
 import { toNodeHandler } from 'better-auth/node';
-import auth from './lib/auth.js'; 
+import auth from './lib/auth.js';
 
 const app: Application = express();
 
 // Middleware
 app.use(cors({
-    origin: process.env.NODE_ENV === 'production' 
+    origin: process.env.NODE_ENV === 'production'
         ? 'https://localoco.azurewebsites.net'
-        : 'http://localhost:5173',
+        : 'http://localhost:3000', 
     credentials: true,
 }));
 app.use(express.json())
@@ -37,24 +37,35 @@ app.use(
         "http://localhost:5000",
         "https://cdn.jsdelivr.net",
         "https://unpkg.com",
-        "https://localoco.blob.core.windows.net"
+        "https://localoco.blob.core.windows.net",
+        "https://*.googleapis.com",      // Wildcard for all googleapis subdomains
+        "https://*.gstatic.com",          // Wildcard for gstatic subdomains
+        "https://maps.googleapis.com",    // Explicit for maps API
+        "https://maps.gstatic.com"        // Explicit for map tiles
       ],
       scriptSrc: [
         "'self'",
         "'unsafe-inline'",
         "https://cdn.jsdelivr.net",
-        "https://unpkg.com"
+        "https://unpkg.com",
+        "https://maps.googleapis.com"// Add this
       ],
       styleSrc: [
         "'self'",
         "'unsafe-inline'",
-        "https://cdn.jsdelivr.net"
+        "https://cdn.jsdelivr.net",
+        "https://fonts.googleapis.com"
       ],
       imgSrc: [
         "'self'", 
         "data:", 
         "https://cdn.jsdelivr.net",
-        "https://localoco.blob.core.windows.net"
+        "https://localoco.blob.core.windows.net",
+        "https://maps.gstatic.com",
+        "https://*.googleapis.com",
+        "*.google.com",
+        "https://*.ggpht.com",
+        "https://images.unsplash.com"
     ],
       fontSrc: [
         "'self'", 
@@ -69,16 +80,9 @@ app.use(
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// resolve and serve compiled frontend directory
-const frontendPath = path.resolve(__dirname, '../../frontend2/dist');
+// resolve and serve compiled frontend
+const frontendPath = path.resolve(__dirname, '../../frontend/dist');
 app.use(express.static(frontendPath));
-
-// frontend will call and wait for this first before running
-app.get('/health', async (req, res) => {
-    res.status(200).json({
-        "server_status": "ok"
-    })
-});
 
 app.use(businessRouter) // router for business functionality
 app.use(userRouter) // router for user functionality

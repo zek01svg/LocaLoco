@@ -11,14 +11,14 @@ export interface BusinessPaymentOption {
 }
 
 export interface Business {
-    ownerID: string,
+    ownerId: string,
     uen: string; 
     businessName: string;
     businessCategory: string;
     description: string;
     address: string;
-    latitude: string;
-    longitude: string;
+    latitude: string | null;
+    longitude: string | null;
     open247: boolean | number; 
     openingHours: Record<DayOfWeek, HourEntry>; 
     email: string;

@@ -3,15 +3,26 @@ import UserModel from "../models/UserModel.js";
 
 class UserController {
 
-    // // Get user profile
+    // Get user profile by ID from URL parameter
     static async getProfile(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const userId = String(req.body.userId) 
-            console.log(userId)
-            
-            const profile = await UserModel.getProfile(userId);
-            res.status(200).json(profile);
-            
+            const userId = String(req.params.userId);
+            console.log('🔍 Getting profile for userId:', userId);
+
+            if (!userId) {
+                res.status(400).json({ error: 'User ID is required' });
+                return;
+            }
+
+            const user = await UserModel.getUserById(userId);
+
+            if (!user) {
+                res.status(404).json({ error: 'User not found' });
+                return;
+            }
+
+            res.status(200).json(user);
+
         } catch (error) {
             console.error('Error fetching profile:', error);
             res.status(500).json({ error: 'Failed to fetch profile' });
@@ -21,10 +32,15 @@ class UserController {
     // Update user profile
     static async updateProfile(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
+            console.log('🔵 updateProfile endpoint hit');
+            console.log('🔵 Request body:', JSON.stringify(req.body, null, 2));
 
             const { userId, name, email, imageUrl, bio, hasBusiness } = req.body;
 
+            console.log('🔵 Extracted values:', { userId, name, email, imageUrl: imageUrl?.length, bio, hasBusiness });
+
             if (!userId) {
+                console.log('❌ Missing userId');
                 res.status(400).json({ error: 'User ID is required' });
                 process.exit(1)
             }
@@ -36,13 +52,51 @@ class UserController {
             if (imageUrl !== undefined) updates.imageUrl = imageUrl;
             if (bio !== undefined) updates.bio = bio;
             if (hasBusiness !== undefined) updates.hasBusiness = hasBusiness;
-            updates.updatedAt = new Date().toISOString()
+            updates.updatedAt = new Date()
 
+            console.log('🔵 Updates object:', JSON.stringify(updates, null, 2));
+
+            console.log('🔵 Calling UserModel.updateProfile with userId:', userId);
             const updatedUser = await UserModel.updateProfile(userId, updates);
+            console.log('🔵 Result from UserModel.updateProfile:', JSON.stringify(updatedUser, null, 2));
+
+            if (!updatedUser) {
+                console.log('❌ User not found after update');
+                res.status(404).json({ error: 'User not found after update' });
+                return;
+            }
+
+            console.log('✅ Profile updated successfully, sending response');
             res.status(200).json(updatedUser)
-        } 
-        catch (error: any) {
-            console.error(`Error updating user details: ${error}`)
+        } catch (error: any) {
+            if (error.message === 'User not found') {
+                console.log('❌ Error: User not found');
+                res.status(404).json({ error: 'User not found' });
+            } else {
+                console.error('❌ Error updating profile:', error);
+                res.status(500).json({ error: 'Failed to update profile' });
+            }
+        }
+    }
+
+    // Get user's auth provider (check if they use Google, email/password, etc.)
+    static async getAuthProvider(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const userId = String(req.params.userId);
+            console.log('🔍 Checking auth provider for userId:', userId);
+
+            if (!userId) {
+                res.status(400).json({ error: 'User ID is required' });
+                return;
+            }
+
+            const provider = await UserModel.getAuthProvider(userId);
+
+            res.status(200).json({ provider });
+
+        } catch (error) {
+            console.error('Error checking auth provider:', error);
+            res.status(500).json({ error: 'Failed to check auth provider' });
         }
     }
 
@@ -73,21 +127,79 @@ class UserController {
             const referralCode = req.body.referralCode
             const referredId = req.body.referredId
 
-            const userExists = await UserModel.handleReferral(referralCode, referredId)
-
-            if (userExists === false) {
-                res.status(404).json({
-                    message: 'The referral code entered doesnt exist.',
+            if (!referralCode || !referredId) {
+                res.status(400).json({
+                    message: 'Referral code and user ID are required',
                 });
+                return;
+            }
+
+            const result = await UserModel.handleReferral(referralCode, referredId)
+
+            if (result === false) {
+                res.status(400).json({
+                    message: 'Invalid referral code or already used',
+                });
+                return;
             }
 
             res.status(200).json({
                 message: 'Referral handled successfully',
+                success: true
             });
-            
-        } 
+
+        }
         catch (error: any) {
-            console.log(`Error handling referral: ${error}`)
+            console.error(`Error handling referral:`, error);
+            res.status(500).json({
+                message: 'Server error processing referral',
+            });
+        }
+    }
+
+    // Get user vouchers
+    static async getUserVouchers(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const userId = String(req.params.userId);
+            const status = req.query.status as string | undefined;
+            const page = parseInt(req.query.page as string) || 1;
+            const limit = parseInt(req.query.limit as string) || 100;
+
+            console.log('🎟️ Getting vouchers for userId:', userId, { status, page, limit });
+
+            if (!userId) {
+                res.status(400).json({ error: 'User ID is required' });
+                return;
+            }
+
+            const result = await UserModel.getUserById(userId);
+
+            if (!result || !result.profile) {
+                res.status(404).json({ error: 'User not found' });
+                return;
+            }
+
+            // Filter vouchers by status if provided
+            let vouchers = result.vouchers;
+            if (status) {
+                vouchers = vouchers.filter((v: any) => v.status === status);
+            }
+
+            // Implement pagination
+            const startIndex = (page - 1) * limit;
+            const endIndex = startIndex + limit;
+            const paginatedVouchers = vouchers.slice(startIndex, endIndex);
+
+            res.status(200).json({
+                vouchers: paginatedVouchers,
+                total: vouchers.length,
+                page,
+                limit
+            });
+
+        } catch (error) {
+            console.error('Error fetching vouchers:', error);
+            res.status(500).json({ error: 'Failed to fetch vouchers' });
         }
     }
 }

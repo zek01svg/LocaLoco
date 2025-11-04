@@ -3,8 +3,11 @@ import UserController from "../controllers/userController.js";
 
 const userRouter = Router();
 
-// Get user profile by ID
-userRouter.post('/api/user/profile', UserController.getProfile.bind(UserController));
+// Get user profile by ID (GET request with userId as URL parameter)
+userRouter.get('/api/users/profile/:userId', UserController.getProfile.bind(UserController));
+
+// Get user's auth provider (Google, email/password, etc.)
+userRouter.get('/api/users/auth-provider/:userId', UserController.getAuthProvider.bind(UserController));
 
 // Update user profile
 userRouter.post('/api/user/update-profile', UserController.updateProfile.bind(UserController));
@@ -15,6 +18,7 @@ userRouter.post('/api/user/delete-profile', UserController.deleteProfile.bind(Us
 // handle referral user
 userRouter.post('/api/user/referral', UserController.handleReferral.bind(UserController));
 
-// insert new user referral code
+// Get user vouchers
+userRouter.get('/api/users/:userId/vouchers', UserController.getUserVouchers.bind(UserController));
 
 export default userRouter

@@ -1,6 +1,7 @@
 export interface ForumPost {
     id: number,
     userEmail: string,
+    businessName: string | null,
     businessUen: string | null,
     title: string | null,
     body: string,
