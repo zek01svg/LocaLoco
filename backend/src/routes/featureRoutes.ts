@@ -47,7 +47,7 @@ featureRouter.post('/api/like-forum-reply', FeatureController.updateReplyLikes.b
 featureRouter.get('/api/newsletter', FeatureController.getAllAnnouncements.bind(FeatureController))
 
 // this route fetches all the announcements for a business
-featureRouter.get('/api/announcements', FeatureController.getAnnouncementsByUEN.bind(FeatureController))
+featureRouter.post('/api/announcements', FeatureController.getAnnouncementsByUEN.bind(FeatureController))
 
 // this route handles submissions for announcements
 featureRouter.post('/api/new-announcement', FeatureController.newAnnouncement.bind(FeatureController))
