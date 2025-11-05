@@ -174,7 +174,7 @@ export function ResetPasswordPage({ email, onSuccess }: ResetPasswordPageProps) 
                   onChange={(e) => setPassword(e.target.value)}
                   onBlur={() => setTouched(true)}
                   required
-                  className="bg-input-background pr-10"
+                  className="bg-input-background pl-10"
                 />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -193,7 +193,7 @@ export function ResetPasswordPage({ email, onSuccess }: ResetPasswordPageProps) 
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   onBlur={() => setTouched(true)}
                   required
-                  className="bg-input-background pr-10"
+                  className="bg-input-background pl-10"
                 />
                 <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                   {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
