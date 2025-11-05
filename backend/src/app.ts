@@ -80,9 +80,8 @@ app.use(
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// resolve and serve compiled frontend
+// __dirname equivalent in ES module
 const frontendPath = path.resolve(__dirname, '../../frontend/dist');
-app.use(express.static(frontendPath));
 
 app.use(businessRouter) // router for business functionality
 app.use(userRouter) // router for user functionality
@@ -90,8 +89,17 @@ app.use(featureRouter) // router for small features
 app.use(imageUploadRouter) // router for the images
 app.all('/api/auth/{*any}', toNodeHandler(auth)); // handler for better-auth
 
+// Serve landing page at root
 app.get('/', (req, res) => {
+    res.sendFile(path.join(frontendPath, 'landing.html'))
+});
+
+// Serve React app for /map
+app.get('/map', (req, res) => {
     res.sendFile(path.join(frontendPath, 'index.html'))
 });
+
+// Serve static assets (CSS, JS, images) - MUST come after custom routes
+app.use(express.static(frontendPath));
 
 export default app
