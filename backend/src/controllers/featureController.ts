@@ -248,7 +248,7 @@ class FeatureController {
 
     static async getAnnouncementsByUEN(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const uen = String(req.query.uen)
+            const uen = String(req.body.uen)
             const announcements = await AnnouncementModel.getAnnouncementsByUEN(uen);
             res.status(200).json(announcements)
         } 
