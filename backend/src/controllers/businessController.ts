@@ -76,7 +76,7 @@ class businessController {
     static async registerBusiness(req: Request, res: Response, next: NextFunction): Promise<void> {
 
         const business = {
-            ownerId: req.body.userId,
+            ownerId: req.body.ownerId,
             uen: req.body.uen,
             businessName: req.body.businessName,
             businessCategory: req.body.businessCategory,
@@ -100,16 +100,10 @@ class businessController {
 
         try {
             await BusinessModel.registerBusiness(business)
-            console.log('✅ Business registered, now updating user hasBusiness flag for:', business.ownerId);
-
-            // Update user's hasBusiness flag
-            await UserModel.updateProfile(business.ownerId, {
-                hasBusiness: true,
-                updatedAt: new Date().toISOString()
+            res.status(200).json({ 
+                success: true, 
+                message: 'business registered' 
             });
-
-            console.log('✅ User hasBusiness flag updated successfully');
-            res.status(200).json({ success: true, message: 'business registered' });
         }
         catch (err:any) {
             console.error(`There was a problem registering the selected business: ${err}`)

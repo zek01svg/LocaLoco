@@ -1,8 +1,6 @@
 import { Business, HourEntry, DayOfWeek, BusinessPaymentOption, PriceTier, FilterOptions, BusinessToBeUpdated } from "../types/Business.js";
 import db from '../database/db.js'
-import { businesses, businessReviews, forumPosts, forumPostsReplies } from '../database/schema.js';
-import { businessPaymentOptions } from '../database/schema.js';
-import { businessOpeningHours } from '../database/schema.js';
+import { businesses, businessReviews, forumPosts, forumPostsReplies, businessPaymentOptions, businessOpeningHours, user } from '../database/schema.js';
 import { and, or, ilike, eq, inArray, gte, sql, asc, desc } from 'drizzle-orm';
 
 
@@ -303,6 +301,10 @@ class BusinessModel {
 
     public static async registerBusiness (business: Business) {
         try {
+
+            // update hasBusiness first
+            await db.update(user).set({hasBusiness:1}).where(eq(user.id, business.ownerId))
+
             // ✅ Insert only into businesses table as database schema defines
             await db.insert(businesses).values({
                 ownerId:business.ownerId,
@@ -324,8 +326,6 @@ class BusinessModel {
                 offersDelivery: business.offersDelivery ? 1 : 0,
                 offersPickup: business.offersPickup ? 1 : 0,
             } as typeof businesses.$inferInsert)
-
-
                 
             // ✅ Insert payment options into separate table
             if (business.paymentOptions?.length) {

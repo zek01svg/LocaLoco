@@ -551,7 +551,7 @@ export function SignupPage({ onSignup, onBack }: SignupPageProps = {}) {
             }
 
             return {
-              ownerID: userData.user.id, // Link business to user
+              ownerId: userData.user.id, // Link business to user
               uen: business.uen,
               businessName: business.businessName,
               businessCategory: business.businessCategory,
