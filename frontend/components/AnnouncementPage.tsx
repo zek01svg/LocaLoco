@@ -46,11 +46,20 @@ export function AnnouncementsPage({
     const [selectedAnnouncement, setSelectedAnnouncement] =
         useState<Announcement | null>(null);
 
+    // ✨ NEW: State for handling submission and upload status
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [uploadStatus, setUploadStatus] = useState("");
+
+    const [imageFile, setImageFile] = useState<File | null>(null);
+
     const [formData, setFormData] = useState({
         title: "",
         content: "",
-        imageUrl: "",
+        // The image URL is now managed separately
     });
+    const [existingImageUrl, setExistingImageUrl] = useState<string | null>(
+        null
+    );
 
     const bgColor = isDarkMode ? "#1a1a1a" : "#ffffff";
     const cardBgColor = isDarkMode ? "#2a2a2a" : "#f9fafb";
@@ -62,16 +71,13 @@ export function AnnouncementsPage({
     const fetchAnnouncements = async () => {
         setLoading(true);
         try {
-            const cacheBuster = `_=${new Date().getTime()}`;
-            // const response = await fetch(
-            //     `/api/announcements?businessUen=${businessUen}&${cacheBuster}`
-            // );
-
-            const response = axios.post('http://localhost:3000/api/announcements', {
-                uen: businessUen
-            })
-
-            const data = (await response).data
+            const response = axios.post(
+                "http://localhost:3000/api/announcements",
+                {
+                    uen: businessUen,
+                }
+            );
+            const data = (await response).data;
             setAnnouncements(data || []);
         } catch (error) {
             console.error(error);
@@ -81,13 +87,55 @@ export function AnnouncementsPage({
         }
     };
 
-    //  ✅ UPDATE THIS FUNCTION
+    // ✅ 2. Integrate your upload function
+    const uploadImage = async (file: File): Promise<string> => {
+        setIsSubmitting(true); // Indicate that an upload is in progress
+        const toastId = toast.loading("Uploading image...");
+
+        try {
+            const sasResponse = await fetch(
+                `/api/url-generator?filename=${encodeURIComponent(file.name)}`
+            );
+            if (!sasResponse.ok) throw new Error("Failed to get upload URL");
+            const sasData = await sasResponse.json();
+
+            const uploadResponse = await fetch(sasData.uploadUrl, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": file.type,
+                    "x-ms-blob-type": "BlockBlob",
+                },
+                body: file,
+            });
+            if (!uploadResponse.ok) throw new Error("Image upload failed");
+
+            const finalUrl = `https://localoco.blob.core.windows.net/images/${sasData.blobName}`;
+            toast.success("Image uploaded!", { id: toastId });
+            return finalUrl;
+        } catch (error) {
+            const errorMessage =
+                error instanceof Error ? error.message : "Upload failed";
+            toast.error(`Upload error: ${errorMessage}`, { id: toastId });
+            throw error;
+        } finally {
+            setIsSubmitting(false); // Reset submission status
+        }
+    };
+
     const createAnnouncement = async () => {
         if (!formData.title || !formData.content) {
             toast.error("Title and content are required.");
             return;
         }
+
         try {
+            let finalImageUrl =
+                "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800";
+
+            if (imageFile) {
+                finalImageUrl = await uploadImage(imageFile);
+            }
+
             const response = await fetch("/api/new-announcement", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -95,18 +143,12 @@ export function AnnouncementsPage({
                     businessUen,
                     title: formData.title,
                     content: formData.content,
-                    imageUrl:
-                        formData.imageUrl ||
-                        "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800",
+                    imageUrl: finalImageUrl,
                 }),
             });
             if (!response.ok) throw new Error("Failed to create announcement");
 
-            // Add a small delay before re-fetching
-            setTimeout(() => {
-                fetchAnnouncements();
-            }, 300);
-
+            setTimeout(fetchAnnouncements, 300);
             setShowCreateDialog(false);
             toast.success("Announcement created!");
         } catch (error) {
@@ -114,25 +156,7 @@ export function AnnouncementsPage({
         }
     };
 
-    // ✅ UPDATE THIS FUNCTION
-    const updateAnnouncement = async () => {
-        if (!selectedAnnouncement) return;
-        try {
-            const response = await axios.post("/api/update-announcement", {
-                announcementId: selectedAnnouncement.announcementId,
-                title: formData.title,
-                content: formData.content,
-                imageUrl: formData.imageUrl,
-            });
-
-            setShowEditDialog(false)
-            toast.success("Announcement updated!");
-        } catch (error) {
-            toast.error("Failed to update announcement.");
-        }
-    };
-    
-    // ✅ UPDATE THIS FUNCTION
+    // (This function remains unchanged, as it sends JSON)
     const deleteAnnouncement = async () => {
         if (!selectedAnnouncement) return;
         try {
@@ -145,7 +169,6 @@ export function AnnouncementsPage({
             });
             if (!response.ok) throw new Error("Failed to delete announcement");
 
-            // Add a small delay before re-fetching
             setTimeout(() => {
                 fetchAnnouncements();
             }, 300);
@@ -157,13 +180,41 @@ export function AnnouncementsPage({
         }
     };
 
+    const updateAnnouncement = async () => {
+        if (!selectedAnnouncement) return;
+
+        try {
+            let finalImageUrl = existingImageUrl; // Start with the current image URL
+
+            if (imageFile) {
+                finalImageUrl = await uploadImage(imageFile);
+            }
+
+            const response = await axios.post("/api/update-announcement", {
+                announcementId: selectedAnnouncement.announcementId,
+                title: formData.title,
+                content: formData.content,
+                imageUrl: finalImageUrl,
+            });
+
+            setTimeout(fetchAnnouncements, 300);
+            setShowEditDialog(false);
+            toast.success("Announcement updated!");
+        } catch (error) {
+            toast.error("Failed to update announcement.");
+        }
+    };
+
     useEffect(() => {
         fetchAnnouncements();
     }, [businessUen]);
 
-    // --- Dialog Handlers (No changes needed below this line) ---
+    // --- Dialog Handlers ---
+
     const handleOpenCreateDialog = () => {
-        setFormData({ title: "", content: "", imageUrl: "" });
+        setFormData({ title: "", content: "" });
+        setImageFile(null);
+        setExistingImageUrl(null);
         setShowCreateDialog(true);
     };
 
@@ -172,8 +223,9 @@ export function AnnouncementsPage({
         setFormData({
             title: announcement.title,
             content: announcement.content,
-            imageUrl: announcement.imageUrl ?? "",
         });
+        setImageFile(null);
+        setExistingImageUrl(announcement.imageUrl ?? null);
         setShowEditDialog(true);
     };
 
@@ -237,6 +289,7 @@ export function AnnouncementsPage({
                         className="p-12 text-center"
                         style={{ backgroundColor: cardBgColor, borderColor }}
                     >
+                        {/* ... No changes in this 'empty' block ... */}
                         <div className="max-w-md mx-auto">
                             <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
                                 <Calendar className="w-8 h-8 text-primary" />
@@ -265,6 +318,7 @@ export function AnnouncementsPage({
                     </Card>
                 ) : (
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                        {/* ... No changes in this 'map' block ... */}
                         {announcements.map((announcement) => (
                             <Card
                                 key={announcement.announcementId}
@@ -344,13 +398,15 @@ export function AnnouncementsPage({
                 )}
             </div>
 
-            {/* Dialogs */}
+            {/* ✅ 6. Update the Dialog Content */}
             <Dialog
                 open={showCreateDialog || showEditDialog}
-                onOpenChange={(open) =>
-                    !open &&
-                    (setShowCreateDialog(false), setShowEditDialog(false))
-                }
+                onOpenChange={(open) => {
+                    if (!open) {
+                        setShowCreateDialog(false);
+                        setShowEditDialog(false);
+                    }
+                }}
             >
                 <DialogContent
                     className={
@@ -366,6 +422,14 @@ export function AnnouncementsPage({
                                 : "Edit Announcement"}
                         </DialogTitle>
                     </DialogHeader>
+
+                    {/* ✨ NEW: Show upload status */}
+                    {uploadStatus && (
+                        <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-center text-blue-700">
+                            {uploadStatus}
+                        </div>
+                    )}
+
                     <div className="space-y-4">
                         <div>
                             <Label htmlFor="title">Title *</Label>
@@ -378,6 +442,7 @@ export function AnnouncementsPage({
                                         title: e.target.value,
                                     })
                                 }
+                                disabled={isSubmitting} // ✨ NEW
                             />
                         </div>
                         <div>
@@ -392,29 +457,56 @@ export function AnnouncementsPage({
                                     })
                                 }
                                 rows={4}
+                                disabled={isSubmitting} // ✨ NEW
                             />
                         </div>
-                        <div>
-                            <Label htmlFor="imageUrl">Image URL</Label>
-                            <Input
-                                id="imageUrl"
-                                value={formData.imageUrl}
-                                onChange={(e) =>
-                                    setFormData({
-                                        ...formData,
-                                        imageUrl: e.target.value,
-                                    })
-                                }
-                            />
+                        <div className="space-y-2">
+                            <Label
+                                htmlFor="announcement-image"
+                                className="text-foreground"
+                            >
+                                {showEditDialog
+                                    ? "Replace Image"
+                                    : "Upload Image"}{" "}
+                                (Optional)
+                            </Label>
+                            <div className="flex items-center gap-4">
+                                <label
+                                    htmlFor="announcement-image"
+                                    className="cursor-pointer px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors font-medium text-sm"
+                                >
+                                    Choose File
+                                </label>
+                                <Input
+                                    id="announcement-image"
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) =>
+                                        setImageFile(
+                                            e.target.files?.[0] || null
+                                        )
+                                    }
+                                    disabled={isSubmitting}
+                                    className="hidden"
+                                />
+                                <span className="text-sm text-muted-foreground">
+                                    {imageFile
+                                        ? imageFile.name
+                                        : existingImageUrl
+                                        ? "Current image is set"
+                                        : "No file chosen"}
+                                </span>
+                            </div>
                         </div>
                     </div>
                     <DialogFooter>
                         <Button
                             variant="outline"
-                            onClick={() => (
-                                setShowCreateDialog(false),
-                                setShowEditDialog(false)
-                            )}
+                            onClick={() => {
+                                setShowCreateDialog(false);
+                                setShowEditDialog(false);
+                            }}
+                            disabled={isSubmitting}
                         >
                             Cancel
                         </Button>
@@ -424,13 +516,18 @@ export function AnnouncementsPage({
                                     ? createAnnouncement
                                     : updateAnnouncement
                             }
+                            disabled={isSubmitting}
                         >
-                            {showCreateDialog ? "Create" : "Save Changes"}
+                            {isSubmitting
+                                ? "Saving..."
+                                : showCreateDialog
+                                ? "Create"
+                                : "Save Changes"}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-
+            {/* (Delete dialog is unchanged) */}
             <AlertDialog
                 open={showDeleteDialog}
                 onOpenChange={setShowDeleteDialog}
