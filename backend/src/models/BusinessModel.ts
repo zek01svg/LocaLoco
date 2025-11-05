@@ -303,7 +303,7 @@ class BusinessModel {
         try {
 
             // update hasBusiness first
-            await db.update(user).set({hasBusiness:1}).where(eq(user.id, business.ownerId))
+            const result = await db.update(user).set({hasBusiness:1}).where(eq(user.id, business.ownerId))
 
             // ✅ Insert only into businesses table as database schema defines
             await db.insert(businesses).values({
