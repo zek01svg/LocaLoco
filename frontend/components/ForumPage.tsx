@@ -11,6 +11,7 @@ import { useThemeStore } from '../store/themeStore';
 import { useForumPosts } from '../hooks/useForumPosts';
 import { useAuthStore } from '../store/authStore';
 import { useUser } from '../hooks/useUser';
+import { BusinessSearchDropdown } from './BusinessSearchDropdown';
 
 
 interface ForumPageProps {
@@ -123,11 +124,10 @@ export function ForumPage({ onBack}: ForumPageProps) {
               />
             </div>
             <div className="space-y-2">
-              <Input
-                placeholder="Tag/Business Name (optional)"
+              <BusinessSearchDropdown
                 value={newDiscussion.businessTag}
-                onChange={(e) => setNewDiscussion(prev => ({ ...prev, businessTag: e.target.value }))}
-                className={`${textColor} ${isDarkMode ? 'bg-[#2a2a2a] border-gray-700' : 'bg-input-background'}`}
+                onChange={(value) => setNewDiscussion(prev => ({ ...prev, businessTag: value }))}
+                placeholder="Tag/Business Name (optional)"
               />
             </div>
             <div className="space-y-2">

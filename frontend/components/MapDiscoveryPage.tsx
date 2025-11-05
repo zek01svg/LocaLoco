@@ -10,6 +10,7 @@ import { GoogleMap, Marker, InfoWindow, useLoadScript } from '@react-google-maps
 import { useBusinessStore } from '../store/businessStore';
 import { useAuthStore } from '../store/authStore';
 import { useThemeStore } from '../store/themeStore';
+import { BusinessSearchDropdown } from './BusinessSearchDropdown';
 
 const mapContainerStyle = {
   width: '100%',
@@ -324,17 +325,12 @@ export function MapDiscoveryPage() {
       >
         <div className="max-w-none mx-auto h-full flex flex-col gap-3 px-4 pt-4 pb-4">
           <div>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <Input
-                type="text"
-                placeholder="Search businesses…"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className={`pl-10 pr-4 h-10 border-none rounded-full text-sm ${inputText}`}
-                style={{ backgroundColor: panelBg }}
-              />
-            </div>
+            <BusinessSearchDropdown
+              value={searchTerm}
+              onChange={setSearchTerm}
+              placeholder="Search businesses…"
+              limit={3}
+            />
             <div className={`mt-2 text-xs ${textMuted}`}>
               {searchTerm.trim()
                 ? `Found ${filtered.length} result${filtered.length !== 1 ? 's' : ''}`
