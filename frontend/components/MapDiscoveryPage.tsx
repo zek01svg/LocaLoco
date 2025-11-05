@@ -44,7 +44,7 @@ export function MapDiscoveryPage() {
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 768);
 
   const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: 'AIzaSyCn-aVVBxUbCBYihIeKHePKcTq7O4KfMlY',
+    googleMapsApiKey: 'AIzaSyBEJP1GmEezTaIfMFZ-eT36PkiF3s9UgQg',
   });
 
   useEffect(() => {
@@ -231,7 +231,7 @@ export function MapDiscoveryPage() {
               />
               {showUserInfo && (
                 <InfoWindow position={userLocation} onCloseClick={() => setShowUserInfo(false)}>
-                  <div className="text-sm font-medium text-gray-800">You are here</div>
+                  {/* <div className="text-sm font-medium text-gray-800">You are here</div> */}
                 </InfoWindow>
               )}
             </>

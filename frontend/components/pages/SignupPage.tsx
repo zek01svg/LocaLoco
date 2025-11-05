@@ -152,7 +152,7 @@ const getLatLngFromAddress = async (address: string): Promise<{ lat: string; lng
     return { lat: '', lng: '' };
   }
 
-  const apiKey = 'AIzaSyCn-aVVBxUbCBYihIeKHePKcTq7O4KfMlY';
+  const apiKey = 'AIzaSyBEJP1GmEezTaIfMFZ-eT36PkiF3s9UgQg';
   const encodedAddress = encodeURIComponent(address);
 
   try {
