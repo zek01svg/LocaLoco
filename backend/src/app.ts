@@ -43,6 +43,7 @@ app.use(
         "https://maps.googleapis.com",    // Explicit for maps API
         "https://maps.gstatic.com"        // Explicit for map tiles
       ],
+      scriptSrcAttr: ["'unsafe-inline'"],
       scriptSrc: [
         "'self'",
         "'unsafe-inline'",
@@ -83,27 +84,28 @@ const __dirname = path.dirname(__filename);
 // __dirname equivalent in ES module
 const frontendPath = path.resolve(__dirname, '../../frontend/dist');
 
+// mount the routers
 app.use(businessRouter) // router for business functionality
 app.use(userRouter) // router for user functionality
 app.use(featureRouter) // router for small features
 app.use(imageUploadRouter) // router for the images
 app.all('/api/auth/{*any}', toNodeHandler(auth)); // handler for better-auth
 
-// static frontend
-app.use(express.static(frontendPath));
-
-// landing and react routes
+// sever landing page at root
 app.get('/', (req, res) => {
-  res.sendFile(path.join(frontendPath, 'landing.html'));
+    res.sendFile(path.join(frontendPath, 'landing.html'))
 });
 
 app.get('/map', (req, res) => {
-  res.sendFile(path.join(frontendPath, 'index.html'));
+    res.sendFile(path.join(frontendPath, 'index.html'))
 });
 
-// catch-all for react router
-app.get('{*any}', (req, res) => {
-  res.sendFile(path.join(frontendPath, 'index.html'));
+// serve static assets
+app.use(express.static(frontendPath));
+
+// catch all route for react router
+app.get('/{*any}', (req, res) => {
+    res.sendFile(path.join(frontendPath, 'index.html'))
 });
 
 export default app
