@@ -36,18 +36,18 @@ interface BusinessData {
   description: string;
   address: string;
   postalCode: string;
-  latitude: string;
-  longitude: string;
+  latitude: number;
+  longitude: number;
   phoneNumber: string;
   businessEmail: string;
   websiteLink: string;
   socialMediaLink: string;
   wallpaper: File | null;
   priceTier: string;
-  open247: boolean;
+  open247: number;
   openingHours: { [day: string]: { open: string; close: string } };
-  offersDelivery: boolean;
-  offersPickup: boolean;
+  offersDelivery: number;
+  offersPickup: number;
   paymentOptions: string[];
 }
 
@@ -68,21 +68,21 @@ const createEmptyBusiness = (): BusinessData => ({
   description: '',
   address: '',
   postalCode: '',
-  latitude: '',
-  longitude: '',
+  latitude: 0,
+  longitude: 0,
   phoneNumber: '',
   businessEmail: '',
   websiteLink: '',
   socialMediaLink: '',
   wallpaper: null,
   priceTier: '',
-  open247: false,
+  open247: 0,
   openingHours: DAYS_OF_WEEK.reduce((acc, day) => {
     acc[day] = { open: '09:00', close: '17:00' };
     return acc;
   }, {} as { [day: string]: { open: string; close: string } }),
-  offersDelivery: false,
-  offersPickup: false,
+  offersDelivery: 0,
+  offersPickup: 0,
   paymentOptions: [],
 });
 
@@ -457,7 +457,7 @@ export function SignupPage({ onSignup, onBack }: SignupPageProps = {}) {
     setCurrentStep(prev => Math.max(prev - 1, 1));
   };
 
-  const uploadWallpaper = async (file: File): Promise<string> => {
+  const uploadWallpaper = async (file: string | any): Promise<string> => {
     setUploadStatus('Uploading image...');
     
     try {
@@ -558,8 +558,8 @@ export function SignupPage({ onSignup, onBack }: SignupPageProps = {}) {
               description: business.description,
               address: business.address,
               postalCode: business.postalCode,
-              latitude: business.latitude,
-              longitude: business.longitude,
+              latitude: Number(business.latitude),
+              longitude: Number(business.longitude),
               phoneNumber: business.phoneNumber,
               email: business.businessEmail,
               websiteLink: business.websiteLink,
@@ -567,11 +567,11 @@ export function SignupPage({ onSignup, onBack }: SignupPageProps = {}) {
               wallpaper: wallpaperUrl,
               dateOfCreation: new Date().toISOString().slice(0, 10),
               priceTier: convertToBackendFormat(business.priceTier),
-              open247: business.open247,
+              open247: Number(business.open247),
               openingHours: business.openingHours, // ✅ Send as object, NOT JSON.stringify()
-              offersDelivery: business.offersDelivery,
-              offersPickup: business.offersPickup,
-              paymentOptions: business.paymentOptions, // ✅ Send as array, NOT JSON.stringify()
+              offersDelivery: Number(business.offersDelivery),
+              offersPickup: Number(business.offersPickup),
+              paymentOptions: business.paymentOptions, 
               password: formData.password,
             };
           })
@@ -942,8 +942,8 @@ export function SignupPage({ onSignup, onBack }: SignupPageProps = {}) {
                 required
               />
               <span className="text-sm text-muted-foreground">
-                {currentBusiness.wallpaper ? currentBusiness.wallpaper.name : 'No file chosen'}
-              </span>
+                    {currentBusiness.wallpaper ? (currentBusiness.wallpaper as File).name : 'No file chosen'}
+                </span>
             </div>
           </div>
         </div>
@@ -958,7 +958,7 @@ export function SignupPage({ onSignup, onBack }: SignupPageProps = {}) {
           <div className="flex items-center space-x-2">
             <Checkbox
               id="open247"
-              checked={currentBusiness.open247}
+              checked={!!currentBusiness.open247}
               onCheckedChange={(checked: boolean) => handleBusinessChange('open247', checked)}
               className="border-2 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
               style={{ 
@@ -1081,7 +1081,7 @@ export function SignupPage({ onSignup, onBack }: SignupPageProps = {}) {
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="delivery"
-                  checked={currentBusiness.offersDelivery}
+                  checked={!!currentBusiness.offersDelivery}
                   onCheckedChange={(checked: boolean) => handleBusinessChange('offersDelivery', checked)}
                   disabled={isLoading}
                   className="border-2 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
@@ -1097,7 +1097,7 @@ export function SignupPage({ onSignup, onBack }: SignupPageProps = {}) {
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="pickup"
-                  checked={currentBusiness.offersPickup}
+                  checked={!!currentBusiness.offersPickup}
                   onCheckedChange={(checked: boolean) => handleBusinessChange('offersPickup', checked)}
                   disabled={isLoading}
                   className="border-2 data-[state=checked]:bg-primary data-[state=checked]:border-primary"

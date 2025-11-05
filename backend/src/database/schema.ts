@@ -93,7 +93,6 @@ export const businesses = mysqlTable("businesses", {
 	websiteLink: varchar("website_link", { length: 255 }),
 	socialMediaLink: varchar("social_media_link", { length: 255 }),
 	wallpaper: varchar({ length: 255 }),
-	// you can use { mode: 'date' }, if you want to have Date as type for this column
 	dateOfCreation: date("date_of_creation", { mode: 'string' }),
 	priceTier: mysqlEnum("price_tier", ['low','medium','high']),
 	offersDelivery: tinyint("offers_delivery").default(0),
