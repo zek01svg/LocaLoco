@@ -1,40 +1,29 @@
-import { betterAuth } from "better-auth";
+import { betterAuth, boolean } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import db from "../database/db.js";
 import { user, session, account, verification } from "../database/schema.js";
-import sendEmail from "./mailer.js";
+import { sendEmail, getResetPasswordEmailHtml, getVerificationEmailHtml } from "./mailer.js";
 
 const auth = betterAuth({
     database: drizzleAdapter(db, {
-        provider: "mysql",
+        provider: "mysql", 
         schema: { user, session, account, verification }
     }),
-    baseURL: String(process.env.BETTER_AUTH_URL),
+    baseURL: 'http://localhost:3000',
     secret: String(process.env.BETTER_AUTH_SECRET),
     user: {
         additionalFields: {
             hasBusiness: {
                 type: "boolean",
-                input: false,
-                defaultValue: false
-            },
-            firstName: {
-                type: "string",
-                input: true
-            },
-            lastName: {
-                type: "string",
-                input: true
+                input: false
             },
             referralCode: {
                 type: 'string',
-                input: false,
-                required: false
+                input: false
             },
             referredByUserID: {
-                type: 'string',
-                input: false,
-                required: false
+                type:'string',
+                input:false
             },
             bio: {
                 type: 'string',
@@ -42,35 +31,39 @@ const auth = betterAuth({
             }
         }
     },
-    advanced: {
-        crossSubDomainCookies: {
-            enabled: true,
-        },
-    },
-    emailAndPassword: {
-        enabled: true,
+    emailAndPassword: { 
+        enabled: true, 
         autoSignIn: true,
         sendResetPassword: async ({ user, url }, _request) => {
+
+            const subject = 'Reset your LocaLoco password';            const htmlBody = getResetPasswordEmailHtml(url, user);
+
             await sendEmail(
                 user.email,
-                'Reset your password',
-                `Click the link to reset your password: ${url}`
+                subject,
+                htmlBody
             )
         }
-    },
+    }, 
     emailVerification: {
         sendVerificationEmail: async ({ user, url, token }, _request) => {
+            
+            const subject = 'Welcome to LocaLoco! Please verify your email';
+            const htmlBody = getVerificationEmailHtml(url);
+
             await sendEmail(
                 user.email,
-                'Verify your email address',
-                `Click the link to verify your email: ${url}`
+                subject,
+                htmlBody
             )
         },
         sendOnSignUp: true,
+        
     },
     trustedOrigins: [
         "http://localhost:3000", // for testing
-        "https://localoco.azurewebsites.net" // for staging and prod
+        "http://localhost:5173", // for dev
+        "https://localoco.azurewebsites.net" // for staging and prod 
     ],
     socialProviders: {
         google: {
@@ -100,5 +93,4 @@ const auth = betterAuth({
     }
 })
 
-
-export default auth;
+export default auth
