@@ -20,7 +20,6 @@ import { authClient } from '../../lib/authClient';
 import { useAuthStore } from '../../store/authStore';
 import { ReferralCodeDialog } from '../ReferralCodeDialog';
 
-
 interface SignupPageProps {
   onSignup?: (data: any, role: UserRole) => void;
   onBack?: () => void;
@@ -91,19 +90,14 @@ const getAuthToken = async (): Promise<string | null> => {
   try {
     const response = await fetch('https://www.onemap.gov.sg/api/auth/post/getToken', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         email: 'pamika.lim.2024@computing.smu.edu.sg',
         password: 'CKPF6pu@DBRJ7cK'
       })
     });
 
-    if (!response.ok) {
-      throw new Error('Failed to get OneMap token');
-    }
-
+    if (!response.ok) throw new Error('Failed to get OneMap token');
     const data = await response.json();
     return data.access_token;
   } catch (error) {
@@ -113,34 +107,19 @@ const getAuthToken = async (): Promise<string | null> => {
 };
 
 const getAddressFromPostalCode = async (postalCode: string): Promise<string> => {
-  if (postalCode.length !== 6 || isNaN(Number(postalCode))) {
-    return '';
-  }
-
+  if (postalCode.length !== 6 || isNaN(Number(postalCode))) return '';
   const authToken = await getAuthToken();
-  if (!authToken) {
-    throw new Error('Unable to authenticate with OneMap API');
-  }
+  if (!authToken) throw new Error('Unable to authenticate with OneMap API');
 
   try {
     const response = await fetch(
       `https://www.onemap.gov.sg/api/common/elastic/search?searchVal=${postalCode}&returnGeom=N&getAddrDetails=Y`,
-      {
-        headers: {
-          'Authorization': authToken
-        }
-      }
+      { headers: { Authorization: authToken } }
     );
 
-    if (!response.ok) {
-      throw new Error('OneMap API request failed');
-    }
-
+    if (!response.ok) throw new Error('OneMap API request failed');
     const data = await response.json();
-    if (data.results && data.results.length > 0) {
-      return data.results[0].ADDRESS;
-    }
-    return '';
+    return data.results?.[0]?.ADDRESS || '';
   } catch (error) {
     console.error('Error fetching address from postal code:', error);
     throw error;
@@ -148,10 +127,7 @@ const getAddressFromPostalCode = async (postalCode: string): Promise<string> => 
 };
 
 const getLatLngFromAddress = async (address: string): Promise<{ lat: string; lng: string }> => {
-  if (!address || address.trim() === '') {
-    return { lat: '', lng: '' };
-  }
-
+  if (!address.trim()) return { lat: '', lng: '' };
   const apiKey = 'AIzaSyBEJP1GmEezTaIfMFZ-eT36PkiF3s9UgQg';
   const encodedAddress = encodeURIComponent(address);
 
@@ -160,18 +136,11 @@ const getLatLngFromAddress = async (address: string): Promise<{ lat: string; lng
       `https://maps.googleapis.com/maps/api/geocode/json?address=${encodedAddress}&key=${apiKey}`
     );
 
-    if (!response.ok) {
-      throw new Error('Google Geocoding API request failed');
-    }
-
+    if (!response.ok) throw new Error('Google Geocoding API request failed');
     const data = await response.json();
-
     if (data.status === 'OK' && data.results.length > 0) {
       const location = data.results[0].geometry.location;
-      return {
-        lat: location.lat.toString(),
-        lng: location.lng.toString(),
-      };
+      return { lat: location.lat.toString(), lng: location.lng.toString() };
     } else {
       console.warn('No results found for address:', address);
       return { lat: '', lng: '' };
@@ -183,7 +152,7 @@ const getLatLngFromAddress = async (address: string): Promise<{ lat: string; lng
 };
 
 export function SignupPage({ onSignup, onBack }: SignupPageProps = {}) {
-  const isDarkMode = useThemeStore((state) => state.isDarkMode);
+  const isDarkMode = useThemeStore(state => state.isDarkMode);
   const navigate = useNavigate();
 
   const cardBgColor = isDarkMode ? '#2a2a2a' : '#ffffff';
@@ -198,6 +167,7 @@ export function SignupPage({ onSignup, onBack }: SignupPageProps = {}) {
   const [useSameHours, setUseSameHours] = useState(false);
   const [defaultHours, setDefaultHours] = useState({ open: '09:00', close: '17:00' });
   const [isFetchingAddress, setIsFetchingAddress] = useState(false);
+  const [postalCodeError, setPostalCodeError] = useState(''); // New state for postal code error
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -209,18 +179,13 @@ export function SignupPage({ onSignup, onBack }: SignupPageProps = {}) {
 
   const [businesses, setBusinesses] = useState<BusinessData[]>([createEmptyBusiness()]);
 
-  // Referral system state
   const [showReferralDialog, setShowReferralDialog] = useState(false);
   const [newUserId, setNewUserId] = useState<string | null>(null);
   const [prefillReferralCode, setPrefillReferralCode] = useState<string>('');
 
-  // Auto-fill referral code from URL query param ?ref=XXXX
   useEffect(() => {
     const ref = new URLSearchParams(window.location.search).get('ref');
-    if (ref) {
-      setPrefillReferralCode(ref.toUpperCase());
-      console.log('🔗 Referral link detected, will auto-fill code:', ref.toUpperCase());
-    }
+    if (ref) setPrefillReferralCode(ref.toUpperCase());
   }, []);
 
   const totalSteps = hasBusiness ? 6 : 1;
@@ -231,83 +196,50 @@ export function SignupPage({ onSignup, onBack }: SignupPageProps = {}) {
     setError('');
   };
 
-  // Handle referral code submission
-  const handleReferralSubmit = async (referralCode: string) => {
-    if (newUserId && referralCode) {
-      try {
-        const response = await fetch('http://localhost:3000/api/user/referral', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({
-            referralCode: referralCode,
-            referredId: newUserId
-          })
-        });
-
-        if (response.ok) {
-          toast.success('Referral code applied! You and your friend will receive $5 vouchers!');
-        } else {
-          toast.error('Invalid referral code');
-        }
-      } catch (error) {
-        console.error('Error applying referral code:', error);
-        toast.error('Could not apply referral code');
-      }
-    }
-
-    setShowReferralDialog(false);
-    setTimeout(() => navigate('/map'), 300);
-  };
-
-  // Handle dialog skip
-  const handleReferralSkip = () => {
-    setShowReferralDialog(false);
-    setTimeout(() => navigate('/map'), 300);
-  };
-
   const handleBusinessChange = (field: string, value: any) => {
     setBusinesses(prev =>
-      prev.map((business, idx) =>
-        idx === currentBusinessIndex ? { ...business, [field]: value } : business
-      )
+      prev.map((business, idx) => idx === currentBusinessIndex ? { ...business, [field]: value } : business)
     );
     setError('');
   };
 
   const handlePostalCodeChange = async (postalCode: string) => {
-    // Update postal code in business data
     handleBusinessChange('postalCode', postalCode);
-
-    // Only trigger API call when we have exactly 6 digits
+    setPostalCodeError(''); // Clear previous error when user types
+    
     if (postalCode.length === 6 && !isNaN(Number(postalCode))) {
       setIsFetchingAddress(true);
       try {
         const address = await getAddressFromPostalCode(postalCode);
         if (address) {
           handleBusinessChange('address', address);
-
-          // Get lat/lng from the address
           const { lat, lng } = await getLatLngFromAddress(address);
           handleBusinessChange('latitude', lat);
           handleBusinessChange('longitude', lng);
 
+          console.log(`Postal Code: ${postalCode} → Address: ${address}`);
+          console.log(`Lat: ${lat}, Lng: ${lng}`);
           toast.success('Address updated successfully');
         } else {
-          console.log('No address found for postal code:', postalCode);
+          // If no address is returned, show error
+          setPostalCodeError('Invalid Postal Code. Please Key in a valid Postal Code');
+          handleBusinessChange('address', '');
+          handleBusinessChange('latitude', '');
+          handleBusinessChange('longitude', '');
         }
       } catch (error) {
         console.error('Error processing postal code:', error);
-      } finally {
-        setIsFetchingAddress(false);
-      }
-    } else {
-      // Clear address if postal code is invalid
-      if (postalCode.length === 0) {
+        setPostalCodeError('Invalid Postal Code. Please Key in a valid Postal Code');
         handleBusinessChange('address', '');
         handleBusinessChange('latitude', '');
         handleBusinessChange('longitude', '');
+      } finally {
+        setIsFetchingAddress(false);
       }
+    } else if (postalCode.length === 0) {
+      handleBusinessChange('address', '');
+      handleBusinessChange('latitude', '');
+      handleBusinessChange('longitude', '');
     }
   };
 
@@ -422,6 +354,9 @@ export function SignupPage({ onSignup, onBack }: SignupPageProps = {}) {
         if (!currentBusiness.uen || !currentBusiness.businessName || !currentBusiness.businessCategory || !currentBusiness.description || !currentBusiness.address) {
           setError('Please fill in all required fields');
           return false;
+        }
+        if (postalCodeError) {
+          return false; // Don't proceed if there's a postal code error
         }
         return true;
       case 3:
@@ -625,7 +560,54 @@ export function SignupPage({ onSignup, onBack }: SignupPageProps = {}) {
       navigate('/');
     }
   };
+  // Add these functions inside the SignupPage component, before the renderStepIndicator function
 
+const handleReferralSubmit = async (referralCode: string) => {
+  if (!newUserId) {
+    console.error('No user ID available for referral');
+    toast.error('Unable to process referral. Please try again.');
+    setShowReferralDialog(false);
+    navigate('/');
+    return;
+  }
+
+  try {
+    setIsLoading(true);
+    
+    // Call your referral API endpoint
+    const response = await fetch('http://localhost:3000/api/referrals/apply', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        userId: newUserId,
+        referralCode: referralCode.toUpperCase().trim()
+      })
+    });
+
+    const result = await response.json();
+
+    if (response.ok && result.success) {
+      toast.success('Referral applied successfully!');
+    } else {
+      toast.error(result.message || 'Invalid referral code');
+    }
+  } catch (error) {
+    console.error('Error applying referral:', error);
+    toast.error('Failed to apply referral code');
+  } finally {
+    setIsLoading(false);
+    setShowReferralDialog(false);
+    navigate('/');
+  }
+};
+
+const handleReferralSkip = () => {
+  console.log('User skipped referral');
+  setShowReferralDialog(false);
+  navigate('/');
+};
   const renderStepIndicator = () => {
     if (!hasBusiness) return null;
 
@@ -851,6 +833,12 @@ export function SignupPage({ onSignup, onBack }: SignupPageProps = {}) {
               className="bg-input-background"
             />
             {isFetchingAddress && <p className="text-xs text-muted-foreground">Fetching address...</p>}
+            {postalCodeError && (
+              <p className="text-xs text-red-600 flex items-center gap-1">
+                <AlertCircle className="w-3 h-3" />
+                {postalCodeError}
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">
