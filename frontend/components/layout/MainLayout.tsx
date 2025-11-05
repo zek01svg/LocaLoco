@@ -1,3 +1,4 @@
+import * as React from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { AppSidebar } from '../AppSidebar';
 import { useAuth } from '../../hooks/useAuth';
@@ -24,7 +25,9 @@ export const MainLayout = () => {
     if (path === ROUTES.NOTIFICATIONS) return 'notifications';
     if (path === ROUTES.SETTINGS) return 'settings';
     if (path === ROUTES.VOUCHERS) return 'vouchers';
-    return 'list';
+    // ✅ ADDED: Recognize the announcements path to highlight the icon
+    if (path === ROUTES.ANNOUNCEMENTS) return 'announcements';
+    return 'list'; // Default view
   };
 
   const handleNavigate = (view: string) => {
@@ -38,16 +41,16 @@ export const MainLayout = () => {
       settings: ROUTES.SETTINGS,
       vouchers: ROUTES.VOUCHERS,
       filters: ROUTES.BUSINESSES,
+      // ✅ ADDED: Map the 'announcements' view to its route
+      announcements: ROUTES.ANNOUNCEMENTS,
     };
     if (routeMap[view]) {
       navigate(routeMap[view]);
     }
   };
 
-  // ✅ Helper function to safely get user info (with guest fallback)
   const getUserInfo = () => {
     if (!user) {
-      // Guest user - return dummy data
       return {
         name: 'Guest',
         email: 'guest@localoco.com',
@@ -57,7 +60,6 @@ export const MainLayout = () => {
     }
 
     if ('businessName' in user) {
-      // It's a BusinessOwner
       return {
         name: user.businessName,
         email: user.businessEmail,
@@ -65,7 +67,6 @@ export const MainLayout = () => {
         isGuest: false,
       };
     } else {
-      // It's a regular User
       return {
         name: user.name,
         email: user.email,
@@ -87,9 +88,10 @@ export const MainLayout = () => {
         userEmail={userInfo.email}
         avatarUrl={userInfo.avatarUrl}
         onThemeToggle={toggleTheme}
-        isAuthenticated={isAuthenticated} // ✅ Pass auth status
+        isAuthenticated={isAuthenticated}
       />
       <div className="main-content md:ml-20 h-screen overflow-y-auto pb-20 md:pb-0">
+        {/* The Outlet renders the component for the current route, like AnnouncementsPage */}
         <Outlet context={{ user, stats, updateUser, isAuthenticated }} />
       </div>
     </>

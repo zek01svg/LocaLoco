@@ -12,7 +12,7 @@ class AnnouncementModel {
                 title: announcement.title,
                 content: announcement.content,
                 imageUrl: announcement.imageUrl,
-                createdAt: announcement.createdAt,
+                createdAt: announcement.createdAt
             })
         } 
         catch (err:any){

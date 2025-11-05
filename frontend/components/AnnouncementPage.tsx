@@ -27,11 +27,13 @@ import { toast } from 'sonner';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 
 
+
 interface AnnouncementsPageProps {
   businessUen: string;
   onBack: () => void;
   isDarkMode?: boolean;
 }
+
 
 
 export function AnnouncementsPage({
@@ -53,6 +55,7 @@ export function AnnouncementsPage({
   });
 
 
+
   const bgColor = isDarkMode ? '#1a1a1a' : '#ffffff';
   const cardBgColor = isDarkMode ? '#2a2a2a' : '#f9fafb';
   const textColor = isDarkMode ? '#ffffff' : '#000000';
@@ -60,24 +63,26 @@ export function AnnouncementsPage({
   const borderColor = isDarkMode ? '#404040' : '#e5e7eb';
 
 
+
   // --- API Functions ---
   const fetchAnnouncements = async () => {
     setLoading(true);
     try {
       const cacheBuster = `_=${new Date().getTime()}`;
-      // *** UPDATED LINE: Changed 'businessUen' to 'uen' in the query string ***
-      const response = await fetch(`/api/announcements?uen=${businessUen}&${cacheBuster}`);
+      const response = await fetch(`/api/announcements?businessUen=${businessUen}&${cacheBuster}`); 
       if (!response.ok) throw new Error('Failed to fetch announcements');
       const data = await response.json();
       setAnnouncements(data || []);
     } catch (error) {
-      toast.error('Could not load announcements.');
+        console.error(error);
+        toast.error('Could not load announcements.');
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
   };
 
 
+  //  ✅ UPDATE THIS FUNCTION
   const createAnnouncement = async () => {
     if (!formData.title || !formData.content) {
       toast.error('Title and content are required.');
@@ -95,7 +100,12 @@ export function AnnouncementsPage({
         }),
       });
       if (!response.ok) throw new Error('Failed to create announcement');
-      fetchAnnouncements(); // Refresh list
+      
+      // Add a small delay before re-fetching
+      setTimeout(() => {
+        fetchAnnouncements();
+      }, 300);
+
       setShowCreateDialog(false);
       toast.success('Announcement created!');
     } catch (error) {
@@ -104,6 +114,7 @@ export function AnnouncementsPage({
   };
 
 
+  // ✅ UPDATE THIS FUNCTION
   const updateAnnouncement = async () => {
     if (!selectedAnnouncement) return;
     try {
@@ -118,7 +129,12 @@ export function AnnouncementsPage({
         }),
       });
       if (!response.ok) throw new Error('Failed to update announcement');
-      fetchAnnouncements(); // Refresh list
+      
+      // Add a small delay before re-fetching
+      setTimeout(() => {
+        fetchAnnouncements();
+      }, 300);
+
       setShowEditDialog(false);
       toast.success('Announcement updated!');
     } catch (error) {
@@ -127,6 +143,7 @@ export function AnnouncementsPage({
   };
 
 
+  // ✅ UPDATE THIS FUNCTION
   const deleteAnnouncement = async () => {
     if (!selectedAnnouncement) return;
     try {
@@ -136,7 +153,12 @@ export function AnnouncementsPage({
         body: JSON.stringify({ announcementId: selectedAnnouncement.announcementId }),
       });
       if (!response.ok) throw new Error('Failed to delete announcement');
-      fetchAnnouncements(); // Refresh list
+
+      // Add a small delay before re-fetching
+      setTimeout(() => {
+        fetchAnnouncements();
+      }, 300);
+
       setShowDeleteDialog(false);
       toast.success('Announcement deleted!');
     } catch (error) {
@@ -145,16 +167,19 @@ export function AnnouncementsPage({
   };
 
 
+
   useEffect(() => {
     fetchAnnouncements();
   }, [businessUen]);
 
 
-  // --- Dialog Handlers ---
+
+  // --- Dialog Handlers (No changes needed below this line) ---
   const handleOpenCreateDialog = () => {
     setFormData({ title: '', content: '', imageUrl: '' });
     setShowCreateDialog(true);
   };
+
 
 
   const handleOpenEditDialog = (announcement: Announcement) => {
@@ -167,10 +192,12 @@ export function AnnouncementsPage({
   };
 
 
+
   const handleOpenDeleteDialog = (announcement: Announcement) => {
     setSelectedAnnouncement(announcement);
     setShowDeleteDialog(true);
   };
+
 
 
   const formatDate = (dateString: string) => {
@@ -180,6 +207,7 @@ export function AnnouncementsPage({
       day: 'numeric',
     });
   };
+
 
 
   return (
@@ -199,6 +227,7 @@ export function AnnouncementsPage({
             Create Announcement
           </Button>
         </div>
+
 
 
         {/* Content */}
@@ -249,6 +278,7 @@ export function AnnouncementsPage({
       </div>
 
 
+
       {/* Dialogs */}
       <Dialog open={showCreateDialog || showEditDialog} onOpenChange={(open) => !open && (setShowCreateDialog(false), setShowEditDialog(false))}>
         <DialogContent className={isDarkMode ? 'bg-[#2a2a2a] text-white border-[#404040]' : 'bg-white'}>
@@ -277,6 +307,7 @@ export function AnnouncementsPage({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
 
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>

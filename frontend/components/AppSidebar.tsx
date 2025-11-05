@@ -1,3 +1,4 @@
+import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
@@ -7,7 +8,7 @@ import {
   Home,
   Box,
   Layers,
-  Bell,
+  Bell, // Bell is already imported
   Moon,
   Sun,
   Settings,
@@ -46,7 +47,8 @@ import { toast } from 'sonner';
 
 
 interface AppSidebarProps {
-  onNavigate: (view: 'map' | 'list' | 'forum' | 'profile' | 'filters' | 'bookmarks' | 'notifications' | 'settings' | 'vouchers') => void;
+  // Added 'announcements' to the view types
+  onNavigate: (view: 'map' | 'list' | 'forum' | 'profile' | 'filters' | 'bookmarks' | 'notifications' | 'settings' | 'vouchers' | 'announcements') => void;
   onLogout: () => void;
   currentView?: string;
   userName?: string;
@@ -118,20 +120,40 @@ export function AppSidebar({
   const hoverBgColor = isDarkMode ? 'hover:bg-[#404040]' : 'hover:bg-gray-100';
   const avatarBgColor = isDarkMode ? 'bg-gray-600' : 'bg-gray-300';
 
-
-  const allMenuItems = [
+  // Define the base set of user menu items
+  const userMenuItems = [
     { icon: Home, label: 'Home', view: 'map' as const },
     { icon: Box, label: 'Explore', view: 'list' as const },
     { icon: Bookmark, label: 'Bookmarks', view: 'bookmarks' as const, requiresAuth: true },
     { icon: Ticket, label: 'Vouchers', view: 'vouchers' as const, userOnly: true, requiresAuth: true },
     { icon: Layers, label: 'Forum', view: 'forum' as const, requiresAuth: true },
   ];
+  
+  // Define the business-specific menu item
+  const businessSpecificItem = { 
+    icon: Bell, // Reusing Bell icon for Announcements
+    label: 'Announcements', 
+    view: 'announcements' as const, 
+    requiresAuth: true,
+    isBusinessItem: true,
+  };
+
+  // Conditionally include the business item
+  const allMenuItems = businessMode.isBusinessMode
+    ? [
+        { icon: Home, label: 'Dashboard', view: 'map' as const }, // Renaming Home to Dashboard in business mode
+        businessSpecificItem,
+        ...userMenuItems.filter(item => item.view !== 'map'), // Exclude user Home/Map, keep others if needed
+      ]
+    : userMenuItems;
 
 
   const mainMenuItems = allMenuItems.filter(item => {
+    // Standard filtering logic
     if (item.userOnly && role !== 'user') {
       return false;
     }
+    // Note: Business items are already filtered by the conditional logic above
     return true;
   });
 
@@ -144,7 +166,7 @@ export function AppSidebar({
 
 
   const handleMenuClick = (
-    view: 'map' | 'list' | 'forum' | 'profile' | 'filters' | 'bookmarks' | 'notifications' | 'settings' | 'vouchers' | null,
+    view: 'map' | 'list' | 'forum' | 'profile' | 'filters' | 'bookmarks' | 'notifications' | 'settings' | 'vouchers' | 'announcements' | null,
     isThemeToggle?: boolean,
     requiresAuth?: boolean
   ) => {
@@ -252,7 +274,9 @@ export function AppSidebar({
 
   // Combine all menu items for mobile view
   const allBottomNavItems = [
-    ...mainMenuItems.filter(item => item.view !== 'vouchers'), // Remove vouchers from mobile
+    // Include the business-specific item only in business mode for mobile
+    ...(businessMode.isBusinessMode ? [businessSpecificItem] : []),
+    ...mainMenuItems.filter(item => item.view !== 'vouchers' && item.view !== 'announcements' && !item.isBusinessItem), // Filter out business item if mobile nav is combined with user items
     { icon: Bell, label: 'Notifications', view: 'notifications' as const, hasNotification: notificationCount > 0, requiresAuth: true },
     ...(isAuthenticated
       ? [{ icon: null, label: 'Profile', view: 'profile' as const, isAvatar: true }]
@@ -275,6 +299,7 @@ export function AppSidebar({
             }
           }}
         >
+          {/* ... Header content remains the same ... */}
           <div className={`p-4 border-b ${borderColor}`}>
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 flex-shrink-0 bg-[#FFA1A3] rounded-lg flex items-center justify-center">
@@ -291,11 +316,13 @@ export function AppSidebar({
             </div>
           </div>
 
+          {/* Main Menu Items */}
           <nav className="flex-1 px-3 py-2 space-y-1">
             {mainMenuItems.map((item) => {
               const Icon = item.icon;
               const isActive = currentView === item.view;
               const isDisabled = 'requiresAuth' in item && item.requiresAuth && !isAuthenticated;
+              const isBusinessItem = 'isBusinessItem' in item && item.isBusinessItem;
 
               return (
                 <button
@@ -307,17 +334,21 @@ export function AppSidebar({
                       : isDisabled
                       ? `opacity-25 cursor-not-allowed ${isDarkMode ? 'text-gray-600' : 'text-gray-400'}`
                       : `${secondaryTextColor} ${hoverBgColor} ${isDarkMode ? 'hover:text-white' : 'hover:text-black'}`
-                  }`}
+                  } ${isBusinessItem && businessMode.isBusinessMode ? 'font-semibold text-[#FFA1A3]' : ''} `}
                 >
                   <Icon className="w-5 h-5 flex-shrink-0" />
                   {isExpanded && (
                     <span className="text-sm whitespace-nowrap">{item.label}</span>
+                  )}
+                  {isBusinessItem && businessMode.isBusinessMode && (
+                     <div className="absolute top-1 right-1 w-2 h-2 bg-[#FFA1A3] rounded-full animate-pulse"></div>
                   )}
                 </button>
               );
             })}
           </nav>
 
+          {/* ... Bottom Menu Items and other sections remain the same ... */}
           <nav className={`px-3 py-4 space-y-1 border-t ${borderColor}`}>
             {bottomMenuItems.map((item) => {
               const Icon = item.icon;
@@ -584,6 +615,8 @@ export function AppSidebar({
                 const isAvatar = 'isAvatar' in item && item.isAvatar;
                 const isLoginButton = 'isLoginButton' in item && item.isLoginButton;
                 const isDisabled = 'requiresAuth' in item && item.requiresAuth && !isAuthenticated;
+                const isBusinessItem = 'isBusinessItem' in item && item.isBusinessItem;
+
 
                 return (
                   <button
@@ -618,7 +651,7 @@ export function AppSidebar({
                       Icon && <Icon className="w-5 h-5 flex-shrink-0" />
                     )}
                     <span className="text-xs mt-1 whitespace-nowrap">{item.label}</span>
-                    {hasNotification && (
+                    {(hasNotification || (isBusinessItem && businessMode.isBusinessMode)) && (
                       <div className="absolute top-1 right-1 w-2 h-2 bg-[#FFA1A3] rounded-full"></div>
                     )}
                   </button>
@@ -809,6 +842,10 @@ export function AppSidebar({
           50% { transform: rotate(10deg) scale(1.1); }
           100% { transform: rotate(0) scale(1); opacity: 1; }
         }
+
+        @keyframes fadeSlideUp {
+          from { transform: translateY(20px); opacity: 0; }
+          to { transform: translateY(0); opac
 
         @keyframes fadeSlideUp {
           from { transform: translateY(20px); opacity: 0; }

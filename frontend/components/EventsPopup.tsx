@@ -34,7 +34,7 @@ export function EventsPopup({ open, onClose }: EventsPopupProps) {
   const fetchAnnouncements = async () => {
     setLoading(true);
     try {
-      const response = await fetch('api/announcements');
+      const response = await fetch('api/newsletter');
       if (!response.ok) throw new Error('Failed to fetch');
       const data = await response.json();
       setAnnouncements(data || []);
