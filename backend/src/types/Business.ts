@@ -70,3 +70,27 @@ export interface BusinessToBeUpdated {
     paymentOptions: string[]
             
 }
+
+export interface BusinessForBusinessList {
+    ownerId: string,
+    uen: string; 
+    businessName: string;
+    businessCategory: string;
+    description: string;
+    avgRating: number;
+    address: string;
+    latitude: string | null;
+    longitude: string | null;
+    open247: boolean | number; 
+    openingHours: Record<DayOfWeek, HourEntry>; 
+    email: string;
+    phoneNumber: string;
+    websiteLink: string | null; 
+    socialMediaLink: string | null; 
+    wallpaper: string; 
+    dateOfCreation: string; 
+    priceTier: string;
+    offersDelivery: boolean | number;
+    offersPickup: boolean | number;
+    paymentOptions: string[];
+}

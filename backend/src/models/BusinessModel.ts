@@ -1,4 +1,4 @@
-import { Business, HourEntry, DayOfWeek, BusinessPaymentOption, PriceTier, FilterOptions, BusinessToBeUpdated } from "../types/Business.js";
+import { Business, HourEntry, DayOfWeek, BusinessPaymentOption, PriceTier, FilterOptions, BusinessToBeUpdated, BusinessForBusinessList } from "../types/Business.js";
 import db from '../database/db.js'
 import { businesses, businessReviews, forumPosts, forumPostsReplies, businessPaymentOptions, businessOpeningHours, user } from '../database/schema.js';
 import { and, or, ilike, eq, inArray, gte, sql, asc, desc } from 'drizzle-orm';
@@ -8,13 +8,21 @@ class BusinessModel {
 
     public static async getAllBusinesses() {
         const businessRows = await db.select().from(businesses)
-        const container: Business[] = [];
+        const container: BusinessForBusinessList[] = [];
 
         for (const business of businessRows) {
             const paymentRows = await db.select().from(businessPaymentOptions).where(eq(businessPaymentOptions.uen, business.uen))
             const paymentOptions = paymentRows.map(p => p.paymentOption)
-
             const openingHours: Record<DayOfWeek, HourEntry> = {} as Record<DayOfWeek, HourEntry>
+
+            const ratings = await db
+            .select({ rating: businessReviews.rating })
+            .from(businessReviews)
+            .where(eq(businessReviews.businessUen, business.uen));
+
+            const avgRating = ratings.length
+            ? Math.round(ratings.reduce((sum, r) => sum + Number(r.rating), 0) / ratings.length)
+            : 0;
             
             if (!business.open247) {
                 const hourRows = await db.select().from(businessOpeningHours).where(eq(businessOpeningHours.uen, business.uen))
@@ -23,12 +31,13 @@ class BusinessModel {
                 }
             }
 
-            const fullBusiness: Business = {
+            const fullBusiness: BusinessForBusinessList = {
                 ownerId:business.ownerId,
                 uen: business.uen,
                 businessName: business.businessName,
                 businessCategory: business.businessCategory!, 
                 description: business.description!,
+                avgRating: avgRating,
                 address: business.address!,
                 latitude: business.latitude,
                 longitude: business.longitude,
@@ -47,7 +56,7 @@ class BusinessModel {
             }
             container.push(fullBusiness)
         }
-
+        
         return container
     }
 
