@@ -44,7 +44,7 @@ export function MapDiscoveryPage() {
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 768);
 
   const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: 'AIzaSyCn-aVVBxUbCBYihIeKHePKcTq7O4KfMlY',
+    googleMapsApiKey: 'AIzaSyBEJP1GmEezTaIfMFZ-eT36PkiF3s9UgQg',
   });
 
   useEffect(() => {

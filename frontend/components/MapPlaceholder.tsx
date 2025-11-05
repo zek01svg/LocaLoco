@@ -21,7 +21,7 @@ export function MapPlaceholder({ business }: MapPlaceholderProps) {
         const response = await fetch(
           `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
             address
-          )}&key=AIzaSyCn-aVVBxUbCBYihIeKHePKcTq7O4KfMlY`
+          )}&key=AIzaSyBEJP1GmEezTaIfMFZ-eT36PkiF3s9UgQg`
         );
         const data = await response.json();
 
@@ -71,7 +71,7 @@ export function MapPlaceholder({ business }: MapPlaceholderProps) {
                   loading="lazy"
                   allowFullScreen
                   // Embed map with pin marker and business name label
-                  src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyCn-aVVBxUbCBYihIeKHePKcTq7O4KfMlY&q=${encodeURIComponent(
+                  src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyBEJP1GmEezTaIfMFZ-eT36PkiF3s9UgQg&q=${encodeURIComponent(
                     business.name
                   )}+@${coords.lat},${coords.lng}&zoom=15`}
                 />
