@@ -307,7 +307,7 @@ export function AppSidebar({
               </div>
               {isExpanded && (
                 <div className="overflow-hidden">
-                  <h1 className={`${textColor} text-xl whitespace-nowrap`}>LocalLoco</h1>
+                  <h1 className={`${textColor} text-xl whitespace-nowrap`}>LocaLoco</h1>
                   <p className={`${secondaryTextColor} text-xs whitespace-nowrap overflow-hidden text-ellipsis`}>
                     Discover and support local busine...
                   </p>

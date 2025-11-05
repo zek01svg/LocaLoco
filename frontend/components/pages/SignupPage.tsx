@@ -736,7 +736,7 @@ const handleReferralSkip = () => {
               </label>
             </div>
             <p className="text-xs text-muted-foreground mt-1 ml-6">
-              Register your business to appear in LocalLoco directory
+              Register your business to appear in LocaLoco directory
             </p>
           </div>
         </div>
@@ -1205,7 +1205,7 @@ const handleReferralSkip = () => {
               <Store className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-semibold">LocalLoco</h1>
+              <h1 className="text-xl font-semibold">LocaLoco</h1>
               <p className="text-sm opacity-90">
                 Discover and support local businesses in your community
               </p>
@@ -1219,7 +1219,7 @@ const handleReferralSkip = () => {
           <form onSubmit={handleSubmit} className="rounded-lg shadow-lg p-8" style={{ backgroundColor: cardBgColor, color: textColor }}>
             <div className="text-center mb-6">
               <h2 className="text-2xl font-bold text-primary">Create Account</h2>
-              <p className="text-sm mt-1 text-muted-foreground">Join LocalLoco today</p>
+              <p className="text-sm mt-1 text-muted-foreground">Join LocaLoco today</p>
             </div>
 
             {uploadStatus && (

@@ -12,6 +12,8 @@ import { useForumPosts } from '../hooks/useForumPosts';
 import { useAuthStore } from '../store/authStore';
 import { useUser } from '../hooks/useUser';
 import { BusinessSearchDropdown } from './BusinessSearchDropdown';
+import { User } from '../types/user';
+import { BusinessOwner } from '../types/auth.store.types';
 
 
 interface ForumPageProps {
@@ -49,7 +51,7 @@ export function ForumPage({ onBack}: ForumPageProps) {
       title: newDiscussion.title,
       businessTag: newDiscussion.businessTag || undefined,
       content: newDiscussion.content,
-      userName: user?.name || 'Anonymous',
+      userName: user!.name || 'Anonymous' || user!.businessName,
       createdAt: new Date().toISOString(),
       likes: 0,
       replies: [],
@@ -78,7 +80,7 @@ export function ForumPage({ onBack}: ForumPageProps) {
     const reply: ForumReply = {
       id: `${discussionId}-${Date.now()}`,
       discussionId,
-      userName: user?.name || 'Anonymous',
+      userName: user?.businessName || 'Anonymous',
       content: replyContent,
       createdAt: new Date().toISOString(),
       likes: 0,

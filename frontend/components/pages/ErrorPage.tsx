@@ -28,7 +28,7 @@ export function ErrorPage({ onGoHome}: ErrorPageProps) {
               <Store className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-medium" style={{ color: textColor }}>LocalLoco</h1>
+              <h1 className="text-xl font-medium" style={{ color: textColor }}>LocaLoco</h1>
               <p className="text-sm" style={{ color: secondaryTextColor }}>
                 Discover and support local businesses in your community
               </p>

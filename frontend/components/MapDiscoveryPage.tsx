@@ -73,11 +73,11 @@ export function MapDiscoveryPage() {
           let lng = (b as any).longitude;
 
           if (lat !== undefined && lng !== undefined && lat !== null && lng !== null) {
-            console.log(`[DB] ${b.businessName} lat/lng:`, lat, lng);
+            console.log(`[DB] ${b.name} lat/lng:`, lat, lng);
           } else {
             const address = (b as any).address || '';
             if (!address) {
-              console.log(`[NO ADDRESS] ${b.businessName}, skipping geocode.`);
+              console.log(`[NO ADDRESS] ${b.name}, skipping geocode.`);
               results.push(b as any);
               return;
             }
@@ -96,9 +96,9 @@ export function MapDiscoveryPage() {
             if (res) {
               lat = res.lat;
               lng = res.lng;
-              console.log(`[GEOCODED] ${b.businessName} lat/lng:`, lat, lng);
+              console.log(`[GEOCODED] ${b.name} lat/lng:`, lat, lng);
             } else {
-              console.log(`[GEOCODE FAILED] ${b.businessName}`);
+              console.log(`[GEOCODE FAILED] ${b.name}`);
             }
           }
 
@@ -179,7 +179,7 @@ export function MapDiscoveryPage() {
             mapContainerStyle={{ width: '100%', height: '100%' }}
             zoom={userLocation ? 16 : 14}
             center={userLocation ?? defaultCenter}
-            onLoad={(map) => (mapRef.current = map)}
+            onLoad={(map) => {mapRef.current = map}}
             options={{
               streetViewControl: false,
               mapTypeControl: false,

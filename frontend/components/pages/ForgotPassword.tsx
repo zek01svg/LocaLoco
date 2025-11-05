@@ -95,7 +95,7 @@ export function ForgotPasswordPage({ onBack, onEmailSent }: ForgotPasswordPagePr
               <Store className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl">LocalLoco</h1>
+              <h1 className="text-xl">LocaLoco</h1>
               <p className="text-sm opacity-90">
                 Discover and support local businesses in your community - or nearby you!
               </p>
