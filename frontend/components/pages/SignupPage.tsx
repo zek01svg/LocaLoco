@@ -16,7 +16,7 @@ import {
 } from '../ui/select';
 import { useThemeStore } from '../../store/themeStore';
 import { toast } from 'sonner';
-import { authClient } from '../../lib/authClient';
+import { authClient, callbackURL } from '../../lib/authClient';
 import { useAuthStore } from '../../store/authStore';
 import { ReferralCodeDialog } from '../ReferralCodeDialog';
 
@@ -185,6 +185,7 @@ const getLatLngFromAddress = async (address: string): Promise<{ lat: string; lng
 export function SignupPage({ onSignup, onBack }: SignupPageProps = {}) {
   const isDarkMode = useThemeStore((state) => state.isDarkMode);
   const navigate = useNavigate();
+  const login = useAuthStore((state) => state.login);
 
   const cardBgColor = isDarkMode ? '#2a2a2a' : '#ffffff';
   const textColor = isDarkMode ? '#ffffff' : '#000000';
@@ -549,7 +550,7 @@ export function SignupPage({ onSignup, onBack }: SignupPageProps = {}) {
             if (business.wallpaper) {
               wallpaperUrl = await uploadWallpaper(business.wallpaper);
             }
-
+            
             return {
               ownerId: userData.user.id, // Link business to user
               uen: business.uen,
@@ -576,7 +577,7 @@ export function SignupPage({ onSignup, onBack }: SignupPageProps = {}) {
             };
           })
         );
-  
+        
         // Send all business registrations CONCURRENTLY
         const results = await Promise.allSettled(
           businessRegistrations.map(payload =>
@@ -587,7 +588,7 @@ export function SignupPage({ onSignup, onBack }: SignupPageProps = {}) {
             }).then(res => res.json())
           )
         );
-  
+        
         // Check results
         const fulfilled = results.filter(r => r.status === 'fulfilled');
         const successCount = fulfilled.filter(r => r.value?.success).length;
@@ -1070,7 +1071,6 @@ export function SignupPage({ onSignup, onBack }: SignupPageProps = {}) {
                 <SelectItem value="$">$ - Budget Friendly</SelectItem>
                 <SelectItem value="$$">$$ - Moderate</SelectItem>
                 <SelectItem value="$$$">$$$ - Upscale</SelectItem>
-                <SelectItem value="$$$$">$$$$ - Fine Dining</SelectItem>
               </SelectContent>
             </Select>
           </div>

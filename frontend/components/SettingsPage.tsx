@@ -100,7 +100,7 @@ export function SettingsPage({ onBack}: SettingsPageProps) {
               <div className="p-1.5 bg-primary rounded-lg">
                 <User className="w-4 h-4 text-white" />
               </div>
-              <h2 className="text-lg">Account Settings</h2>
+              {/* <h2 className="text-lg">Account Settings</h2> */}
             </div>
             <div className="space-y-2">
               <div className="space-y-1">

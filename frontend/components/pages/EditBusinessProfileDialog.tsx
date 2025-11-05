@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BusinessOwner } from '../../data/mockBusinessOwnerData';
+import { BusinessOwner } from '../../types/auth.store.types';
 import {
   Dialog,
   DialogContent,
@@ -225,7 +225,6 @@ export function EditBusinessProfileDialog({
                       <SelectItem value="$">$ - Budget Friendly</SelectItem>
                       <SelectItem value="$$">$$ - Moderate</SelectItem>
                       <SelectItem value="$$$">$$$ - Upscale</SelectItem>
-                      <SelectItem value="$$$$">$$$$ - Fine Dining</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

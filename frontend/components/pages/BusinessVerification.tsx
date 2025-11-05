@@ -493,7 +493,6 @@ export function BusinessVerification({ onSubmit, onSkip }: BusinessVerificationP
                   <SelectItem value="$">$ - Budget Friendly</SelectItem>
                   <SelectItem value="$$">$$ - Moderate</SelectItem>
                   <SelectItem value="$$$">$$$ - Upscale</SelectItem>
-                  <SelectItem value="$$$$">$$$$ - Fine Dining</SelectItem>
                 </SelectContent>
               </Select>
             </div>
