@@ -6,7 +6,7 @@ import { useThemeStore } from '../store/themeStore';
 
 interface BusinessSearchDropdownProps {
   value: string;
-  onChange: (value: string) => void;
+  onChange: (value: string, uen?: string) => void;
   placeholder?: string;
   limit?: number;
 }
@@ -53,9 +53,9 @@ export function BusinessSearchDropdown({
     setIsOpen(true);
   };
 
-  const handleSelectBusiness = (businessName: string) => {
+  const handleSelectBusiness = (businessName: string, businessUen: string) => {
     setSearchTerm(businessName);
-    onChange(businessName);
+    onChange(businessName, businessUen);
     setIsOpen(false);
   };
 
@@ -96,7 +96,7 @@ export function BusinessSearchDropdown({
                 {filteredBusinesses.map((business) => (
                   <li
                     key={business.uen}
-                    onClick={() => handleSelectBusiness(business.name)}
+                    onClick={() => handleSelectBusiness(business.name, business.uen)}
                     className={`px-4 py-2 cursor-pointer transition-colors ${textColor}`}
                     style={{
                       backgroundColor: bgColor,

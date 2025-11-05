@@ -11,7 +11,7 @@ class ForumModel {
         try {
             await db.insert(forumPosts).values({
                 userEmail: post.userEmail,
-                uen: post.businessUen,
+                businessUen: post.businessUen,
                 title: post.title,
                 body: post.body,
                 createdAt: post.createdAt,

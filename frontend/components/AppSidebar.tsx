@@ -20,7 +20,8 @@ import {
   LogOut,
   LogIn,
   Briefcase,
-  ChevronDown
+  ChevronDown,
+  X
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Badge } from './ui/badge';
@@ -78,6 +79,7 @@ export function AppSidebar({
   const [isMobile, setIsMobile] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [showBusinessDropdown, setShowBusinessDropdown] = useState(false);
+  const [showMobileBusinessMenu, setShowMobileBusinessMenu] = useState(false);
   const [showTransition, setShowTransition] = useState(false);
   const [transitionText, setTransitionText] = useState('');
   const [transitionIcon, setTransitionIcon] = useState<'user' | 'business'>('user');
@@ -282,6 +284,16 @@ export function AppSidebar({
       ? [{ icon: null, label: 'Profile', view: 'profile' as const, isAvatar: true }]
       : [{ icon: LogIn, label: 'Login', view: null as const, isLoginButton: true }]
     ),
+    // ✅ Add business mode toggle for mobile (only show if user has businesses)
+    ...(isAuthenticated && hasBusiness
+      ? [{
+          icon: Briefcase,
+          label: businessMode.isBusinessMode ? 'User Mode' : 'Business Mode',
+          view: null as const,
+          isBusinessModeToggle: true
+        }]
+      : []
+    ),
     { icon: Settings, label: 'Settings', view: 'settings' as const, requiresAuth: true },
   ];
 
@@ -307,7 +319,7 @@ export function AppSidebar({
               </div>
               {isExpanded && (
                 <div className="overflow-hidden">
-                  <h1 className={`${textColor} text-xl whitespace-nowrap`}>LocaLoco</h1>
+                  <h1 className={`${textColor} text-xl whitespace-nowrap`}>LocalLoco</h1>
                   <p className={`${secondaryTextColor} text-xs whitespace-nowrap overflow-hidden text-ellipsis`}>
                     Discover and support local busine...
                   </p>
@@ -442,7 +454,15 @@ export function AppSidebar({
                             businessMode.currentBusinessUen === business.uen ? 'bg-[#FFA1A3]/10' : ''
                           }`}
                         >
-                          <Store className="w-4 h-4 mr-2" />
+                          {business.wallpaper ? (
+                            <img
+                              src={business.wallpaper}
+                              alt={business.businessName}
+                              className="w-6 h-6 mr-2 rounded-full object-cover"
+                            />
+                          ) : (
+                            <Store className="w-4 h-4 mr-2" />
+                          )}
                           <span className="truncate">{business.businessName}</span>
                         </DropdownMenuItem>
                       ))}
@@ -478,25 +498,46 @@ export function AppSidebar({
                   <Avatar className={`w-10 h-10 transition-all duration-300 ${
                     businessMode.isBusinessMode ? 'ring-2 ring-[#FFA1A3] ring-offset-2' : ''
                   }`} style={{ ringOffsetColor: bgColor }}>
-                    {avatarUrl ? (
-                      <AvatarImage
-                        key={businessMode.isBusinessMode ? businessMode.currentBusinessUen : 'user'}
-                        src={avatarUrl}
-                        alt={businessMode.isBusinessMode ? businessMode.currentBusinessName || userName : userName}
-                        className="animate-in fade-in duration-300"
-                      />
-                    ) : (
-                      <AvatarFallback
-                        key={businessMode.isBusinessMode ? businessMode.currentBusinessUen : 'user'}
-                        className={`${avatarBgColor} ${textColor} transition-all duration-300 animate-in fade-in ${
-                          businessMode.isBusinessMode ? 'bg-[#FFA1A3] text-white' : ''
-                        }`}
-                      >
-                        {businessMode.isBusinessMode && businessMode.currentBusinessName
-                          ? getInitials(businessMode.currentBusinessName)
-                          : getInitials(userName)}
-                      </AvatarFallback>
-                    )}
+                    {(() => {
+                      // ✅ If in business mode, find the current business and use its wallpaper
+                      if (businessMode.isBusinessMode && businessMode.currentBusinessUen) {
+                        const currentBusiness = businesses.find(b => b.uen === businessMode.currentBusinessUen);
+                        const businessImage = currentBusiness?.wallpaper;
+
+                        return businessImage ? (
+                          <AvatarImage
+                            key={businessMode.currentBusinessUen}
+                            src={businessImage}
+                            alt={businessMode.currentBusinessName || 'Business'}
+                            className="animate-in fade-in duration-300"
+                          />
+                        ) : (
+                          <AvatarFallback
+                            key={businessMode.currentBusinessUen}
+                            className="bg-[#FFA1A3] text-white transition-all duration-300 animate-in fade-in"
+                          >
+                            {getInitials(businessMode.currentBusinessName || 'B')}
+                          </AvatarFallback>
+                        );
+                      }
+
+                      // ✅ Otherwise use user avatar
+                      return avatarUrl ? (
+                        <AvatarImage
+                          key="user"
+                          src={avatarUrl}
+                          alt={userName}
+                          className="animate-in fade-in duration-300"
+                        />
+                      ) : (
+                        <AvatarFallback
+                          key="user"
+                          className={`${avatarBgColor} ${textColor} transition-all duration-300 animate-in fade-in`}
+                        >
+                          {getInitials(userName)}
+                        </AvatarFallback>
+                      );
+                    })()}
                   </Avatar>
                   <div className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 transition-colors duration-300 ${
                     businessMode.isBusinessMode ? 'bg-[#FFA1A3]' : 'bg-green-500'
@@ -616,6 +657,7 @@ export function AppSidebar({
                 const isLoginButton = 'isLoginButton' in item && item.isLoginButton;
                 const isDisabled = 'requiresAuth' in item && item.requiresAuth && !isAuthenticated;
                 const isBusinessItem = 'isBusinessItem' in item && item.isBusinessItem;
+                const isBusinessModeToggle = 'isBusinessModeToggle' in item && item.isBusinessModeToggle;
 
 
                 return (
@@ -624,6 +666,8 @@ export function AppSidebar({
                     onClick={() => {
                       if (isLoginButton) {
                         navigate('/login');
+                      } else if (isBusinessModeToggle) {
+                        setShowMobileBusinessMenu(true);
                       } else {
                         handleMenuClick(item.view, isThemeToggle, 'requiresAuth' in item ? item.requiresAuth : false);
                       }
@@ -852,6 +896,99 @@ export function AppSidebar({
           to { transform: translateY(0); opacity: 1; }
         }
       `}</style>
+
+      {/* Mobile Business Menu Modal */}
+      {showMobileBusinessMenu && (
+        <div
+          className="fixed inset-0 bg-black/50 z-50 flex items-end md:hidden"
+          onClick={() => setShowMobileBusinessMenu(false)}
+        >
+          <div
+            className="w-full rounded-t-2xl p-6 space-y-4 animate-slide-up"
+            style={{ backgroundColor: bgColor }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className={`text-lg font-semibold ${textColor}`}>
+                {businessMode.isBusinessMode ? 'Switch Business' : 'Select Business'}
+              </h3>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowMobileBusinessMenu(false)}
+              >
+                <X className="w-5 h-5" />
+              </Button>
+            </div>
+
+            <div className="space-y-2 max-h-[60vh] overflow-y-auto">
+              {/* Show "User Mode" button if currently in business mode */}
+              {businessMode.isBusinessMode && (
+                <button
+                  onClick={() => {
+                    handleBusinessModeToggle();
+                    setShowMobileBusinessMenu(false);
+                  }}
+                  className={`w-full p-4 rounded-lg flex items-center gap-3 transition-colors ${
+                    isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'
+                  }`}
+                >
+                  <User className="w-6 h-6 text-[#FFA1A3]" />
+                  <div className="flex-1 text-left">
+                    <p className={`font-medium ${textColor}`}>User Mode</p>
+                    <p className={`text-xs ${secondaryTextColor}`}>Switch back to personal account</p>
+                  </div>
+                </button>
+              )}
+
+              {/* List all businesses */}
+              {businesses.map((business) => {
+                const isCurrentBusiness = businessMode.isBusinessMode && businessMode.currentBusinessUen === business.uen;
+
+                return (
+                  <button
+                    key={business.uen}
+                    onClick={() => {
+                      if (businessMode.isBusinessMode) {
+                        handleBusinessSwitch(business.uen, business.businessName);
+                      } else {
+                        handleBusinessModeToggle();
+                        setTimeout(() => {
+                          enableBusinessMode(business.uen, business.businessName);
+                        }, 800);
+                      }
+                      setShowMobileBusinessMenu(false);
+                    }}
+                    className={`w-full p-4 rounded-lg flex items-center gap-3 transition-colors ${
+                      isCurrentBusiness
+                        ? 'bg-[#FFA1A3]/20 border-2 border-[#FFA1A3]'
+                        : isDarkMode
+                        ? 'bg-gray-700 hover:bg-gray-600'
+                        : 'bg-gray-100 hover:bg-gray-200'
+                    }`}
+                  >
+                    {business.wallpaper ? (
+                      <img
+                        src={business.wallpaper}
+                        alt={business.businessName}
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                    ) : (
+                      <Store className="w-10 h-10 text-[#FFA1A3]" />
+                    )}
+                    <div className="flex-1 text-left">
+                      <p className={`font-medium ${textColor}`}>{business.businessName}</p>
+                      {isCurrentBusiness && (
+                        <p className="text-xs text-[#FFA1A3]">Currently active</p>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

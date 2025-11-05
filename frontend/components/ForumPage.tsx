@@ -34,6 +34,7 @@ export function ForumPage({ onBack}: ForumPageProps) {
   const [newDiscussion, setNewDiscussion] = useState({
     title: '',
     businessTag: '',
+    businessUen: '',
     content: '',
   });
   const [replyInputs, setReplyInputs] = useState<{ [key: string]: string }>({});
@@ -50,8 +51,9 @@ export function ForumPage({ onBack}: ForumPageProps) {
       id: Date.now().toString(),
       title: newDiscussion.title,
       businessTag: newDiscussion.businessTag || undefined,
+      businessUen: newDiscussion.businessUen || undefined,
       content: newDiscussion.content,
-      userName: user!.name || 'Anonymous' || user!.businessName,
+      userName: user?.name || user?.businessName || 'Anonymous',
       createdAt: new Date().toISOString(),
       likes: 0,
       replies: [],
@@ -59,7 +61,7 @@ export function ForumPage({ onBack}: ForumPageProps) {
 
     try {
       await createDiscussion(discussion);
-      setNewDiscussion({ title: '', businessTag: '', content: '' });
+      setNewDiscussion({ title: '', businessTag: '', businessUen: '', content: '' });
     } catch (error) {
       console.error('Failed to create discussion:', error);
     }
@@ -128,7 +130,7 @@ export function ForumPage({ onBack}: ForumPageProps) {
             <div className="space-y-2">
               <BusinessSearchDropdown
                 value={newDiscussion.businessTag}
-                onChange={(value) => setNewDiscussion(prev => ({ ...prev, businessTag: value }))}
+                onChange={(value, uen) => setNewDiscussion(prev => ({ ...prev, businessTag: value, businessUen: uen || '' }))}
                 placeholder="Tag/Business Name (optional)"
               />
             </div>

@@ -67,23 +67,16 @@ export const useForumPosts = (userEmail?: string) => {
     addDiscussion(discussion);
 
     try {
-      // Try to fetch business UEN if businessTag is provided
-      let businessUen: string | null = null;
+      // Use the businessUen directly from the discussion object
+      const businessUen: string | null = discussion.businessUen || null;
 
-      if (discussion.businessTag && discussion.businessTag.trim()) {
-        console.log('Searching for business:', discussion.businessTag);
-        businessUen = await fetchBusinessUenByName(discussion.businessTag);
-
-        if (businessUen) {
-          console.log('Found business UEN:', businessUen);
-        } else {
-          console.log('No business found for:', discussion.businessTag);
-        }
+      if (businessUen) {
+        console.log('Posting with business UEN:', businessUen);
       }
 
       const postData = {
         userEmail: userEmail, // Use actual logged-in user email
-        businessUen: businessUen, // Link to business if found, otherwise null
+        businessUen: businessUen, // Link to business if provided, otherwise null
         title: discussion.title,
         body: discussion.content,
       };

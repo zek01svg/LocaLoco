@@ -30,6 +30,7 @@ export interface ForumDiscussion {
   id: string;
   title: string;
   businessTag?: string;
+  businessUen?: string;
   content: string;
   userName: string;
   userAvatar?: string;
