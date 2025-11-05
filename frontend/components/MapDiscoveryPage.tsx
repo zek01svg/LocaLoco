@@ -67,17 +67,30 @@ export function MapDiscoveryPage() {
   }, []);
 
   // Geocode businesses' addresses
-  useEffect(() => {
-    if (!isLoaded || !safeBusinesses.length) return;
-    const geocoder = new (window as any).google.maps.Geocoder();
+// Geocode businesses only if lat/lng missing
+useEffect(() => {
+  if (!isLoaded || !safeBusinesses.length) return;
+  const geocoder = new (window as any).google.maps.Geocoder();
 
-    const geocodeAll = async () => {
-      const results: (Business & { lat?: number; lng?: number })[] = [];
+  const geocodeAll = async () => {
+    const results: (Business & { lat?: number; lng?: number })[] = [];
 
-      await Promise.all(
-        safeBusinesses.map(async (b) => {
+    await Promise.all(
+      safeBusinesses.map(async (b) => {
+        // First try database coordinates
+        let lat = (b as any).latitude;
+        let lng = (b as any).longitude;
+
+        if (lat !== undefined && lng !== undefined && lat !== null && lng !== null) {
+          console.log(`[DB] ${b.businessName} lat/lng:`, lat, lng);
+        } else {
+          // If missing, fallback to geocoding
           const address = (b as any).address || '';
-          if (!address) return results.push(b as any);
+          if (!address) {
+            console.log(`[NO ADDRESS] ${b.businessName}, skipping geocode.`);
+            results.push(b as any);
+            return;
+          }
 
           const res: any = await new Promise((resolve) => {
             geocoder.geocode({ address }, (geoResults: any, status: any) => {
@@ -90,16 +103,26 @@ export function MapDiscoveryPage() {
             });
           });
 
-          if (res) results.push({ ...(b as any), lat: res.lat, lng: res.lng });
-          else results.push(b as any);
-        })
-      );
+          if (res) {
+            lat = res.lat;
+            lng = res.lng;
+            console.log(`[GEOCODED] ${b.businessName} lat/lng:`, lat, lng);
+          } else {
+            console.log(`[GEOCODE FAILED] ${b.businessName}`);
+          }
+        }
 
-      setBusinessesWithCoords(results);
-    };
+        results.push({ ...(b as any), lat, lng });
+      })
+    );
 
-    geocodeAll();
-  }, [isLoaded, safeBusinesses]);
+    setBusinessesWithCoords(results);
+  };
+
+  geocodeAll();
+}, [isLoaded, safeBusinesses]);
+
+
 
   const filtered = (searchTerm
     ? businessesWithCoords.filter((b) => {
@@ -400,3 +423,4 @@ function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 }
+
