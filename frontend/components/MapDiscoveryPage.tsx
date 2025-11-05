@@ -14,6 +14,7 @@ import { useThemeStore } from '../store/themeStore';
 const mapContainerStyle = {
   width: '100%',
   height: '100%',
+  borderRadius: '16px', // Added rounded corners to the map itself
 };
 
 const defaultCenter = { lat: 1.3521, lng: 103.8198 }; // Singapore fallback
@@ -31,7 +32,7 @@ export function MapDiscoveryPage() {
   const pageBg = isDarkMode ? '#3a3a3a' : '#f9fafb';
   const panelBg = isDarkMode ? '#2a2a2a' : '#ffffff';
   const railBg = isDarkMode ? '#3a3a3a' : '#f9fafb';
-  const borderTone = isDarkMode ? 'border-gray-700' : 'border-gray-200';
+  const borderTone = isDarkMode ? 'border-gray-600' : 'border-gray-300'; // Updated for thicker borders
   const textMain = isDarkMode ? 'text-white' : 'text-black';
   const textMuted = isDarkMode ? 'text-gray-400' : 'text-gray-600';
   const inputText = isDarkMode ? 'text-white placeholder:text-gray-400' : 'text-black placeholder:text-gray-500';
@@ -66,65 +67,63 @@ export function MapDiscoveryPage() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Geocode businesses' addresses
-// Geocode businesses only if lat/lng missing
-useEffect(() => {
-  if (!isLoaded || !safeBusinesses.length) return;
-  const geocoder = new (window as any).google.maps.Geocoder();
+  // Geocode businesses only if lat/lng missing
+  useEffect(() => {
+    if (!isLoaded || !safeBusinesses.length) return;
+    const geocoder = new (window as any).google.maps.Geocoder();
 
-  const geocodeAll = async () => {
-    const results: (Business & { lat?: number; lng?: number })[] = [];
+    const geocodeAll = async () => {
+      const results: (Business & { lat?: number; lng?: number })[] = [];
 
-    await Promise.all(
-      safeBusinesses.map(async (b) => {
-        // First try database coordinates
-        let lat = (b as any).latitude;
-        let lng = (b as any).longitude;
+      await Promise.all(
+        safeBusinesses.map(async (b) => {
+          // First try database coordinates
+          let lat = (b as any).latitude;
+          let lng = (b as any).longitude;
 
-        if (lat !== undefined && lng !== undefined && lat !== null && lng !== null) {
-          console.log(`[DB] ${b.businessName} lat/lng:`, lat, lng);
-        } else {
-          // If missing, fallback to geocoding
-          const address = (b as any).address || '';
-          if (!address) {
-            console.log(`[NO ADDRESS] ${b.businessName}, skipping geocode.`);
-            results.push(b as any);
-            return;
-          }
-
-          const res: any = await new Promise((resolve) => {
-            geocoder.geocode({ address }, (geoResults: any, status: any) => {
-              if (status === 'OK' && geoResults[0]) {
-                const loc = geoResults[0].geometry.location;
-                resolve({ lat: loc.lat(), lng: loc.lng() });
-              } else {
-                resolve(null);
-              }
-            });
-          });
-
-          if (res) {
-            lat = res.lat;
-            lng = res.lng;
-            console.log(`[GEOCODED] ${b.businessName} lat/lng:`, lat, lng);
+          if (lat !== undefined && lng !== undefined && lat !== null && lng !== null) {
+            console.log(`[DB] ${b.businessName} lat/lng:`, lat, lng);
           } else {
-            console.log(`[GEOCODE FAILED] ${b.businessName}`);
+            // If missing, fallback to geocoding
+            const address = (b as any).address || '';
+            if (!address) {
+              console.log(`[NO ADDRESS] ${b.businessName}, skipping geocode.`);
+              results.push(b as any);
+              return;
+            }
+
+            const res: any = await new Promise((resolve) => {
+              geocoder.geocode({ address }, (geoResults: any, status: any) => {
+                if (status === 'OK' && geoResults[0]) {
+                  const loc = geoResults[0].geometry.location;
+                  resolve({ lat: loc.lat(), lng: loc.lng() });
+                } else {
+                  resolve(null);
+                }
+              });
+            });
+
+            if (res) {
+              lat = res.lat;
+              lng = res.lng;
+              console.log(`[GEOCODED] ${b.businessName} lat/lng:`, lat, lng);
+            } else {
+              console.log(`[GEOCODE FAILED] ${b.businessName}`);
+            }
           }
-        }
 
-        results.push({ ...(b as any), lat, lng });
-      })
-    );
+          results.push({ ...(b as any), lat, lng });
+        })
+      );
 
-    setBusinessesWithCoords(results);
-  };
+      setBusinessesWithCoords(results);
+    };
 
-  geocodeAll();
-}, [isLoaded, safeBusinesses]);
+    geocodeAll();
+  }, [isLoaded, safeBusinesses]);
 
-
-
-  const filtered = (searchTerm
+  // Filter businesses based on search term for both cards and map pins
+  const filteredBusinesses = (searchTerm
     ? businessesWithCoords.filter((b) => {
         const q = searchTerm.toLowerCase();
         return (
@@ -137,9 +136,9 @@ useEffect(() => {
     : businessesWithCoords
   ).slice(0, 50);
 
-  // ✅ Compute nearest 5 businesses robustly
+  // ✅ Compute nearest 5 businesses robustly (only for non-search mode)
   const nearestUENs = new Set<string>();
-  if (userLocation && businessesWithCoords.length > 0) {
+  if (userLocation && businessesWithCoords.length > 0 && !searchTerm) {
     const withCoords = businessesWithCoords.filter((b) => b.lat !== undefined && b.lng !== undefined);
     const distances = withCoords.map((b) => ({
       uen: (b as any).uen ?? b.uen ?? b.name,
@@ -168,24 +167,56 @@ useEffect(() => {
     }
   };
 
+  // Clear selected pin when search changes
+  useEffect(() => {
+    setSelectedPin(null);
+  }, [searchTerm]);
+
   if (loadError) return <div className="text-red-500">Map cannot load</div>;
   if (!isLoaded) return <div>Loading map...</div>;
 
   return (
     <div className="h-screen w-full flex flex-col" style={{ backgroundColor: pageBg }}>
-      {/* MAP SECTION */}
-      <div className="relative flex-1 overflow-hidden">
+      {/* MAP SECTION WITH THICKER ALL-ROUND BORDER */}
+      <div 
+        className={`relative flex-1 overflow-hidden m-4 mb-2 rounded-2xl border-4 ${borderTone}`}
+        style={{ 
+          backgroundColor: '#ffffff' // Keep map background white always
+        }}
+      >
         <GoogleMap
           mapContainerStyle={mapContainerStyle}
           zoom={userLocation ? 16 : 14}
           center={userLocation ?? defaultCenter}
           onLoad={(map) => (mapRef.current = map)}
+          options={{
+            // Keep the map with default light styling
+            styles: undefined,
+            // Additional options to ensure rounded corners work properly
+            streetViewControl: false,
+            mapTypeControl: false,
+            fullscreenControl: true,
+            // Ensure controls respect rounded corners
+            fullscreenControlOptions: {
+              position: google.maps.ControlPosition.RIGHT_TOP,
+            },
+            zoomControlOptions: {
+              position: google.maps.ControlPosition.RIGHT_TOP,
+            }
+          }}
         >
-          {/* LEGEND CARD INSIDE MAP */}
+          {/* LEGEND CARD INSIDE MAP - Adjusted position to account for rounded corners */}
           <div
-            key={isDarkMode ? 'dark' : 'light'} // forces re-render on theme change
+            key={isDarkMode ? 'dark' : 'light'}
             className={`absolute z-10 p-3 rounded-lg shadow-lg`}
-            style={{ backgroundColor: panelBg, top: '55px', left: '10px' }}
+            style={{ 
+              backgroundColor: panelBg, 
+              top: '55px', 
+              left: '10px',
+              // Ensure legend doesn't overlap with rounded corners
+              marginLeft: '4px',
+              marginTop: '4px'
+            }}
           >
             <div className="flex flex-col gap-2 text-sm">
               <div className="flex items-center gap-2">
@@ -215,14 +246,17 @@ useEffect(() => {
             </div>
           </div>
 
-          {/* Center on User Button */}
+          {/* Center on User Button - Adjusted position */}
           {userLocation && (
             <div
               style={{
                 position: 'absolute',
-                top: '55px', // below the fullscreen icon
+                top: '55px',
                 right: '10px',
                 zIndex: 10,
+                // Adjust position to account for rounded corners
+                marginRight: '4px',
+                marginTop: '4px'
               }}
             >
               <button
@@ -254,19 +288,19 @@ useEffect(() => {
               />
               {showUserInfo && (
                 <InfoWindow position={userLocation} onCloseClick={() => setShowUserInfo(false)}>
-                  {/* <div className="text-sm font-medium text-gray-800">You are here</div> */}
+                  <div className="text-sm font-medium text-gray-800">You are here</div>
                 </InfoWindow>
               )}
             </>
           )}
 
-          {/* Business pins */}
-          {businessesWithCoords.map((b) => {
+          {/* Business pins - ONLY SHOW FILTERED BUSINESSES */}
+          {filteredBusinesses.map((b) => {
             if (b.lat === undefined || b.lng === undefined) return null;
 
             const uen = (b as any).uen ?? b.uen ?? b.name;
             const isSelected = selectedPin && ((selectedPin.uen ?? selectedPin.name) === uen);
-            const isNearest = nearestUENs.has(uen);
+            const isNearest = nearestUENs.has(uen) && !searchTerm; // Only show nearest in non-search mode
 
             const baseColor = isNearest
               ? 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'
@@ -284,9 +318,16 @@ useEffect(() => {
           })}
         </GoogleMap>
 
-        {/* Selected-pin mini card */}
+        {/* Selected-pin mini card - Adjusted position for rounded corners */}
         {selectedPin && (
-          <div className="absolute bottom-6 left-6 z-10 max-w-sm">
+          <div 
+            className="absolute bottom-6 left-6 z-10 max-w-sm"
+            style={{
+              // Adjust position to account for rounded corners
+              marginLeft: '4px',
+              marginBottom: '4px'
+            }}
+          >
             <Card className={`p-4 ${borderTone}`} style={{ backgroundColor: panelBg }}>
               <div className="flex items-start gap-3">
                 <div className="p-2 bg-primary/10 rounded-md">
@@ -340,10 +381,13 @@ useEffect(() => {
         )}
       </div>
 
-      {/* LOWER PANEL */}
-      <div
-        className={`shrink-0 border-t ${borderTone}`}
-        style={{ backgroundColor: railBg, height: '52vh' }}
+      {/* LOWER PANEL WITH THICKER ALL-ROUND BORDER */}
+      <div 
+        className={`shrink-0 mx-4 mt-2 mb-4 rounded-2xl border-4 ${borderTone}`}
+        style={{ 
+          backgroundColor: railBg, 
+          height: '52vh'
+        }}
       >
         <div className="max-w-none mx-auto h-full flex flex-col gap-3 px-4 pt-4 pb-4">
           <div>
@@ -360,7 +404,7 @@ useEffect(() => {
             </div>
             <div className={`mt-2 text-xs ${textMuted}`}>
               {searchTerm.trim()
-                ? `Found ${filtered.length} result${filtered.length !== 1 ? 's' : ''}`
+                ? `Found ${filteredBusinesses.length} result${filteredBusinesses.length !== 1 ? 's' : ''}`
                 : `${safeBusinesses.length} businesses nearby`}
             </div>
           </div>
@@ -368,7 +412,7 @@ useEffect(() => {
           {/* Cards */}
           <div className="flex-1 min-h-0 overflow-y-auto">
             <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-              {filtered.map((b, index) => (
+              {filteredBusinesses.map((b, index) => (
                 <Card key={b.uen || `business-${index}`} className={`p-4 hover:shadow ${borderTone}`} style={{ backgroundColor: panelBg }}>
                   <div className="flex items-start gap-3">
                     <div className="p-2 bg-primary/10 rounded-md">
@@ -400,7 +444,7 @@ useEffect(() => {
                   </div>
                 </Card>
               ))}
-              {filtered.length === 0 && (
+              {filteredBusinesses.length === 0 && (
                 <div className={`text-sm py-8 text-center ${textMuted}`}>No results.</div>
               )}
             </div>
@@ -423,4 +467,3 @@ function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 }
-
