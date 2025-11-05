@@ -49,7 +49,7 @@ export async function getReferralInfo(userId: number | string) {
 
   // Extract profile data (response has nested structure)
   const profile = profileRes.data.profile || profileRes.data;
-  const successfulReferrals = profileRes.data.successfulReferrals || 0;
+  const successfulReferrals = profileRes.data.stats?.successfulReferrals || 0; // ✅ Adjusted for new shape
 
   return {
     referralCode: profile.referralCode || '',
@@ -76,3 +76,22 @@ export async function getVouchers({
   return res.data;
 }
 
+// ✅ --- ADD THIS NEW FUNCTION --- ✅
+// This is the missing piece. It sends the redemption request to your backend.
+export async function redeemVoucherOnBackend(payload: {
+  userId: number | string;
+  voucherId: string;
+  pointsCost: number;
+}) {
+  // This POST request will hit the new endpoint we are creating on the backend.
+  // Using a verb like "redeem" in the path is common and acceptable for actions.
+  const res = await axios.post(`${API_BASE}/vouchers/redeem`, {
+    userId: payload.userId,
+    voucherId: payload.voucherId,
+    pointsCost: payload.pointsCost,
+  }, {
+    withCredentials: true,
+  });
+
+  return res.data;
+}
