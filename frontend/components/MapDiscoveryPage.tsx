@@ -231,7 +231,7 @@ export function MapDiscoveryPage() {
               />
               {showUserInfo && (
                 <InfoWindow position={userLocation} onCloseClick={() => setShowUserInfo(false)}>
-                  <div className="text-sm font-medium text-gray-800">You are here</div>
+                  {/* <div className="text-sm font-medium text-gray-800">You are here</div> */}
                 </InfoWindow>
               )}
             </>
