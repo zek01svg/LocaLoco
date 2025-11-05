@@ -1,4 +1,5 @@
 // routes.tsx
+import * as React from 'react';
 import { Routes, Route, Navigate } from "react-router-dom";
 import { ROUTES } from "./constants/routes";
 
@@ -22,6 +23,10 @@ import { NotificationsPage } from "./components/NotificationsPage";
 import { WriteReviewPage } from "./components/WriteReviewPage";
 import { ErrorPage } from "./components/pages/ErrorPage";
 import ErrorBoundary from "./components/pages/ErrorBoundary";
+import { ForgotPasswordPage } from './components/pages/ForgotPassword';
+import { AnnouncementsPage } from './components/AnnouncementPage';
+
+
 
 import { useNavigate } from "react-router-dom";
 
@@ -37,6 +42,24 @@ export const WelcomePage = () => {
     );
 };
 
+const ForgotPasswordWrapper = () => {
+  const navigate = useNavigate();
+
+  const handleEmailSent = (email: string) => {
+    // In a real app, you'd navigate to a reset page with a token
+    // For this demo, we'll just go back to login after showing a message
+    console.log(`Password reset for ${email} initiated.`);
+    navigate(ROUTES.LOGIN);
+  };
+  
+  return (
+    <ForgotPasswordPage 
+      onBack={() => navigate(ROUTES.LOGIN)}
+      onEmailSent={handleEmailSent}
+    />
+  );
+};
+
 import { BusinessListPage } from "./components/BusinessListPage";
 import { BusinessDetailPage } from "./components/BusinessDetailPage";
 import { BookmarksPage } from "./components/BookmarksPage";
@@ -47,6 +70,7 @@ export const AppRoutes = () => {
             {/* Public Routes - No Auth Required */}
             <Route path={ROUTES.LOGIN} element={<LoginPage />} />
             <Route path={ROUTES.SIGNUP} element={<SignupPage />} />
+            <Route path={ROUTES.FORGOT_PASSWORD} element={<ForgotPasswordWrapper />} />
 
             {/* Public Routes with Layout - Guests can browse */}
             <Route element={<MainLayout />}>
@@ -91,7 +115,9 @@ export const AppRoutes = () => {
                 <Route path={ROUTES.SETTINGS} element={<SettingsPage />} />
                 {/* <Route path={ROUTES.VOUCHERS} element={<VouchersPage />} /> */}
                 <Route path={ROUTES.REVIEW} element={<WriteReviewPage />} />
+                <Route path={ROUTES.ANNOUNCEMENTS} element={<AnnouncementsPage businessUen="" onBack={() => {}} />} />
             </Route>
+            
 
             {/* Error Routes */}
             <Route path="/404" element={<ErrorPage />} />

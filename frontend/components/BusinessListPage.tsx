@@ -48,7 +48,6 @@ export const BusinessListPage = () => {
       <EventsPopup
         open={showEventsPopup}
         onClose={() => setShowEventsPopup(false)}
-        events={mockEvents}
       />
 
       {showFilters && (

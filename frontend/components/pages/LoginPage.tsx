@@ -8,6 +8,7 @@ import { Label } from '../ui/label';
 import { useAuthStore } from '../../store/authStore';
 import { useThemeStore } from '../../store/themeStore';
 import { authClient, callbackURL } from '../../lib/authClient';
+import { ROUTES } from '../../constants/routes';
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -244,7 +245,8 @@ export function LoginPage() {
               <button
                 type="button"
                 className="text-sm underline text-foreground hover:text-primary"
-                onClick={() => alert('Password reset functionality would be implemented here')}
+                onClick={() => navigate(ROUTES.FORGOT_PASSWORD)}
+
               >
                 Forgot password?
               </button>
