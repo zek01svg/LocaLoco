@@ -3,7 +3,7 @@ import { getReferralInfo } from '../../types/ref';
 
 type Props = {
   userId: number | string; // from your auth state
-  appBaseUrl?: string; // e.g., "http://localhost:5173"
+  appBaseUrl?: string; 
 };
 
 export default function ReferralPanel({ userId, appBaseUrl = window.location.origin }: Props) {
