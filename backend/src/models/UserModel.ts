@@ -255,6 +255,10 @@ class UserModel {
             throw error;
         }
     }
+
+    public static async updateVoucherStatus (voucherId:number) {
+        await db.update(vouchers).set({status:'used'}).where(eq(vouchers.voucherId, voucherId))
+    }
 }
 
 export default UserModel

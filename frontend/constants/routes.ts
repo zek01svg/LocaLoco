@@ -19,6 +19,9 @@ export const ROUTES = {
   REVIEW: '/review/:id',
   ANNOUNCEMENTS: '/announcements', 
   FORGOT_PASSWORD: '/forgot-password',
+  PASSWORD_RESET: '/password-reset', // ✅ ADDED
+
+
    
   
   // Error

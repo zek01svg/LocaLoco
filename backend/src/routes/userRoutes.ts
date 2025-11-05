@@ -21,4 +21,7 @@ userRouter.post('/api/user/referral', UserController.handleReferral.bind(UserCon
 // Get user vouchers
 userRouter.get('/api/users/:userId/vouchers', UserController.getUserVouchers.bind(UserController));
 
+// update the status of the user's voucher/s
+userRouter.post('/api/user/update-voucher', UserController.updateVoucherStatus.bind(UserController))
+
 export default userRouter

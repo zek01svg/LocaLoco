@@ -202,6 +202,20 @@ class UserController {
             res.status(500).json({ error: 'Failed to fetch vouchers' });
         }
     }
+
+    static async updateVoucherStatus (req: Request, res: Response, next: NextFunction): Promise<void> {
+        const voucherId = Number(req.body.voucherId)
+        if (!voucherId) {
+            throw new Error('voucher id not specified')
+        }
+
+        try {
+            await UserModel.updateVoucherStatus(voucherId)
+        }
+        catch (err:any) {
+            throw new Error('cannot update voucher status')
+        }
+    }
 }
 
 export default UserController;

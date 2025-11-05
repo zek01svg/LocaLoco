@@ -1,17 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Store, Lock, Check, X, Eye, EyeOff } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { toast } from 'sonner';
-import { useThemeStore } from '../../store/themeStore'; // 1. Import theme store
+import { useThemeStore } from '../../store/themeStore';
+import { authClient } from '../../lib/authClient'; // Ensure this path is correct
 
+// Define the component's props
 interface ResetPasswordPageProps {
-  email: string;
-  token?: string;
-  onSuccess: () => void;
+  email: string; // The user's email, can be passed for display purposes
+  onSuccess: () => void; // A callback function to run on successful password reset
 }
 
+// Define the structure for password validation checks
 interface PasswordValidation {
   minLength: boolean;
   hasUppercase: boolean;
@@ -21,19 +23,33 @@ interface PasswordValidation {
   passwordsMatch: boolean;
 }
 
-// 2. Remove isDarkMode from props
-export function ResetPasswordPage({ email, token, onSuccess }: ResetPasswordPageProps) {
+export function ResetPasswordPage({ email, onSuccess }: ResetPasswordPageProps) {
+  // --- STATE MANAGEMENT ---
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [touched, setTouched] = useState(false);
+  const [token, setToken] = useState<string | null>(null);
 
-  // 3. Get theme state from the store
   const isDarkMode = useThemeStore((state) => state.isDarkMode);
 
-  // 4. Define all theme color variables
+  // --- GET TOKEN FROM URL ---
+  // This hook runs once when the component is first rendered.
+  // It reads the 'token' from the URL's query parameters.
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlToken = urlParams.get("token");
+    if (urlToken) {
+      setToken(urlToken);
+    } else {
+      toast.error("Invalid or missing password reset token.");
+      // Optional: You could navigate the user away if no token is found.
+    }
+  }, []); // The empty array [] ensures this effect runs only once.
+
+  // --- THEME & VALIDATION ---
   const headerBgColor = isDarkMode ? '#3a3a3a' : '#ffffff';
   const headerTextColor = isDarkMode ? '#ffffff' : '#000000';
   const bgColor = isDarkMode ? '#3a3a3a' : '';
@@ -50,28 +66,44 @@ export function ResetPasswordPage({ email, token, onSuccess }: ResetPasswordPage
     hasSymbol: /[!@#$%^&*(),.?":{}|<>]/.test(password),
     passwordsMatch: password === confirmPassword && password.length > 0,
   };
-
   const isValid = Object.values(validation).every(v => v === true);
 
+  // --- FORM SUBMISSION ---
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setTouched(true);
 
-    if (!isValid) {
-      toast.error('Please fix all validation errors before submitting');
+    if (!isValid || !token) {
+      toast.error(token ? 'Please fix all validation errors.' : 'Reset token is missing.');
       return;
     }
 
     setIsSubmitting(true);
 
-    setTimeout(() => {
+    try {
+      const { data, error } = await authClient.resetPassword({
+        token: token,
+        newPassword: password,
+      });
+
+      if (error) {
+        toast.error(error.message || "Failed to reset password. The link may have expired.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (data) {
+        toast.success('Password has been reset successfully!');
+        onSuccess(); // Triggers navigation provided by the parent component
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("An unexpected error occurred.");
       setIsSubmitting(false);
-      toast.success('Password reset successfully!');
-      onSuccess();
-    }, 1500);
+    }
   };
 
-  // 5. Update ValidationItem to be theme-aware
+  // Helper component for displaying validation criteria
   const ValidationItem = ({ isValid, text }: { isValid: boolean; text: string }) => (
     <div className="flex items-center gap-2 text-sm">
       {isValid ? (
@@ -85,6 +117,7 @@ export function ResetPasswordPage({ email, token, onSuccess }: ResetPasswordPage
     </div>
   );
 
+  // --- RENDER ---
   return (
     <div
       className={`min-h-screen relative ${!isDarkMode ? 'bg-gradient-to-br from-pink-50 via-pink-100 to-orange-50' : ''}`}

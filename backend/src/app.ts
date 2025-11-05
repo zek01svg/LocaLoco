@@ -95,7 +95,7 @@ app.get('/', (req, res) => {
 });
 
 app.get('{*any}', (req, res) => {
-    res.sendFile(path.join(frontendPath, 'index.html'))
+  res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
 export default app
