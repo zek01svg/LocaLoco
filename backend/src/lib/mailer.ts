@@ -28,10 +28,8 @@ export async function sendEmail(to: string, subject: string, htmlContent: string
     };
 
     try {
-        console.log(`Sending email to ${to} with subject: ${subject}`);
         const poller = await emailClient.beginSend(message);
         const result = await poller.pollUntilDone();
-        console.log(`Email sent successfully. Message ID: ${result.id}`);
     } 
     catch (error:any) {
         console.error(`Error sending email: ${error}`);
@@ -70,12 +68,12 @@ export function getVerificationEmailHtml(url: string): string {
                 <table width="600" border="0" cellspacing="0" cellpadding="0" style="background-color: ${brandColors.white}; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
                     <tr>
                         <td align="center" style="padding: 40px 0; border-bottom: 1px solid #f0f0f0;">
-                            <h1 style="margin: 0; color: ${brandColors.primary}; font-size: 32px; font-weight: bold;">LocalLoco</h1>
+                            <h1 style="margin: 0; color: ${brandColors.primary}; font-size: 32px; font-weight: bold;">LocaLoco</h1>
                         </td>
                     </tr>
                     <tr>
                         <td style="padding: 40px 30px; color: ${brandColors.dark}; font-size: 16px; line-height: 1.6;">
-                            <h2 style="margin-top: 0; color: ${brandColors.dark}; font-size: 24px;">Welcome to LocalLoco!</h2>
+                            <h2 style="margin-top: 0; color: ${brandColors.dark}; font-size: 24px;">Welcome to LocaLoco!</h2>
                             <p style="margin-bottom: 25px;">Thanks for signing up! We're excited to have you join our community. Please click the button below to verify your email address and get started.</p>
                             <table border="0" cellspacing="0" cellpadding="0" align="center">
                                 <tr>
@@ -86,14 +84,12 @@ export function getVerificationEmailHtml(url: string): string {
                                     </td>
                                 </tr>
                             </table>
-                            <p style="margin-top: 25px; font-size: 14px; color: #777;">If the button doesn't work, copy and paste this link into your browser:<br>
-                            <a href="${url}" target="_blank" style="color: ${brandColors.primary}; text-decoration: underline;">${url}</a></p>
                         </td>
                     </tr>
                     <tr>
                         <td align="center" style="padding: 30px; background-color: #FAFAFA; border-top: 1px solid #f0f0f0; color: #999; font-size: 12px;">
-                            <p style="margin: 0 0 10px 0;">You received this email because you signed up for an account on LocalLoco.</p>
-                            <p style="margin: 0;">&copy; ${new Date().getFullYear()} LocalLoco. All rights reserved.</p>
+                            <p style="margin: 0 0 10px 0;">You received this email because you signed up for an account on LocaLoco.</p>
+                            <p style="margin: 0;">&copy; ${new Date().getFullYear()} LocaLoco. All rights reserved.</p>
                         </td>
                     </tr>
                 </table>
@@ -129,7 +125,7 @@ export function getResetPasswordEmailHtml(url: string, user: { email: string }):
                 <table width="600" border="0" cellspacing="0" cellpadding="0" style="background-color: ${brandColors.white}; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
                     <tr>
                         <td align="center" style="padding: 40px 0; border-bottom: 1px solid #f0f0f0;">
-                            <h1 style="margin: 0; color: ${brandColors.primary}; font-size: 32px; font-weight: bold;">LocalLoco</h1>
+                            <h1 style="margin: 0; color: ${brandColors.primary}; font-size: 32px; font-weight: bold;">LocaLoco</h1>
                         </td>
                     </tr>
                     <tr>
@@ -138,7 +134,7 @@ export function getResetPasswordEmailHtml(url: string, user: { email: string }):
                             <p style="margin-bottom: 25px;">
                                 Hi there,
                                 <br><br>
-                                We received a request to reset the password for your LocalLoco account (${user.email}). If this was you, click the button below to set a new password.
+                                We received a request to reset the password for your LocaLoco account (${user.email}). If this was you, click the button below to set a new password.
                             </p>
                             <table border="0" cellspacing="0" cellpadding="0" align="center">
                                 <tr>
@@ -158,7 +154,71 @@ export function getResetPasswordEmailHtml(url: string, user: { email: string }):
                     </tr>
                     <tr>
                         <td align="center" style="padding: 30px; background-color: #FAFAFA; border-top: 1px solid #f0f0f0; color: #999; font-size: 12px;">
-                            <p style="margin: 0;">&copy; ${new Date().getFullYear()} LocalLoco. All rights reserved.</p>
+                            <p style="margin: 0;">&copy; ${new Date().getFullYear()} LocaLoco. All rights reserved.</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>`;
+}
+
+export function generateWelcomeEmail ():string {
+    return ``
+}
+
+export function generateNotificationEmail ():string {
+    return ``
+}
+
+/**
+ * Generates the HTML for the "New Business Listing Created" confirmation email.
+ * @param business - The business object
+ * @returns HTML string
+ */
+export function generateNewBusinessListingEmail(business: { uen: string, businessName: string, businessCategory: string, address: string }): string {
+    return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Listing is Live!</title>
+    <style>
+        body { margin: 0; padding: 0; font-family: Arial, sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+        .details { background-color: #f9f9f9; border-radius: 5px; padding: 20px; margin-top: 20px; }
+        .details p { margin: 10px 0; }
+    </style>
+</head>
+<body style="margin: 0; padding: 0; background-color: ${brandColors.light};">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: ${brandColors.light}; padding: 20px 0;">
+        <tr>
+            <td align="center">
+                <table width="600" border="0" cellspacing="0" cellpadding="0" style="background-color: ${brandColors.white}; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+                    <tr>
+                        <td align="center" style="padding: 40px 0; border-bottom: 1px solid #f0f0f0;">
+                            <h1 style="margin: 0; color: ${brandColors.primary}; font-size: 32px; font-weight: bold;">LocaLoco</h1>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 40px 30px; color: ${brandColors.dark}; font-size: 16px; line-height: 1.6;">
+                            <h2 style="margin-top: 0; color: ${brandColors.dark}; font-size: 24px;">Congratulations! Your Listing is Live!</h2>
+                            <p style="margin-bottom: 25px;">
+                                Your business listing for <strong>${business.businessName}</strong> is now live on LocaLoco and visible to all users.
+                            </p>
+                            
+                            <div class="details" style="background-color: #f9f9f9; border-radius: 5px; padding: 20px; margin-top: 20px;">
+                                <p style="margin: 10px 0;"><strong>UEN:</strong> ${business.uen}</p>
+                                <p style="margin: 10px 0;"><strong>Category:</strong> ${business.businessCategory}</p>
+                                <p style="margin: 10px 0;"><strong>Address:</strong> ${business.address}</p>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="center" style="padding: 30px; background-color: #FAFAFA; border-top: 1px solid #f0f0f0; color: #999; font-size: 12px;">
+                            <p style="margin: 0;">&copy; ${new Date().getFullYear()} LocaLoco. All rights reserved.</p>
                         </td>
                     </tr>
                 </table>

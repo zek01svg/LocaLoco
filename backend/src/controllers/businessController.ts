@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import BusinessModel from '../models/BusinessModel.js';
 import UserModel from '../models/UserModel.js';
+import { sendEmail, generateNewBusinessListingEmail } from '../lib/mailer.js';
+
 
 class businessController {
 
@@ -98,11 +100,27 @@ class businessController {
             paymentOptions: req.body.paymentOptions
         }
 
+        const emailInfo = {
+            uen: business.uen,
+            businessName: business.businessName,
+            businessCategory: business.businessCategory,
+            address: business.address
+        }
+
         try {
-            await BusinessModel.registerBusiness(business)
+            const registrationResult = await BusinessModel.registerBusiness(business)
+
+            // only send email if the insert is successful
+            const ownerEmail = (await UserModel.getUserById(business.ownerId)).profile!.email
+            const subject = 'Your Listing is Live!'
+            const htmlBody = generateNewBusinessListingEmail(emailInfo)
+            const emailSent = await sendEmail(ownerEmail, subject, htmlBody)
+
             res.status(200).json({ 
                 success: true, 
-                message: 'business registered' 
+                message: 'business registered',
+                registrationResult: registrationResult,
+                emailSent: emailSent
             });
         }
         catch (err:any) {
