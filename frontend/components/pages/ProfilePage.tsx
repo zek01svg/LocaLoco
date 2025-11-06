@@ -71,6 +71,10 @@ export function ProfilePage({
     onUpdateUser(updatedUser);
   };
 
+  // Debug: Log stats when component renders
+  console.log('📊 ProfilePage stats:', stats);
+  console.log('📊 ProfilePage vouchersCount:', stats.vouchersCount);
+
   // ✅ Show loading state
   if (loading) {
     return (

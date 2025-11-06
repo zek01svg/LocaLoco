@@ -58,19 +58,26 @@ app.use(
         "https://fonts.googleapis.com"
       ],
       imgSrc: [
-        "'self'", 
-        "data:", 
+        "'self'",
+        "data:",
         "https://cdn.jsdelivr.net",
         "https://localoco.blob.core.windows.net",
         "https://maps.gstatic.com",
         "https://*.googleapis.com",
         "*.google.com",
         "https://*.ggpht.com",
-        "https://images.unsplash.com"
+        "https://images.unsplash.com",
+        "https://example.com",           // For dummy data images
+        "http://maps.google.com"         // For Google Maps markers
+    ],
+      frameSrc: [
+        "'self'",
+        "https://*.google.com",           // Allow Google Maps iframes
+        "https://www.google.com"          // Allow Google Maps iframes
     ],
       fontSrc: [
-        "'self'", 
-        "data:", 
+        "'self'",
+        "data:",
         "https://fonts.gstatic.com"
     ],
     },

@@ -7,8 +7,8 @@ const API_BASE_URL = 'http://localhost:3000/api';
 
 // Transform backend review to frontend Review type
 const transformBackendReview = (backendReview: BackendReview, businessId: string): Review => {
-  // Extract username from email (before @)
-  const userName = backendReview.userEmail.split('@')[0];
+  // Use userName from backend, fallback to email if not available
+  const userName = backendReview.userName || backendReview.userEmail.split('@')[0];
 
   return {
     id: backendReview.id.toString(),

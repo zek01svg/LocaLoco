@@ -9,6 +9,7 @@ export interface SubmitReviewData {
 export interface BackendReview {
   id: number;
   userEmail: string;
+  userName?: string | null;
   userImage?: string | null;
   businessUen: string;
   rating: number;

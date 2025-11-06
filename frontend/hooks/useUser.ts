@@ -81,13 +81,17 @@ export const useUser = (userId: string | null) => {
 
         // ✅ Set vouchers from response
         setVouchers(data.vouchers || []);
+        console.log('🎫 Vouchers array:', data.vouchers);
+        console.log('🎫 Vouchers count:', data.vouchers?.length || 0);
 
         // ✅ Set stats from response (or defaults for new users)
-        setStats({
+        const calculatedStats = {
           vouchersCount: data.vouchers?.length || 0,
           reviewsCount: data.reviews?.length || 0,
           loyaltyPoints: data.points || 0,
-        });
+        };
+        console.log('📊 Calculated stats:', calculatedStats);
+        setStats(calculatedStats);
 
       } catch (err) {
         // Ignore abort errors (happens during logout/unmount)
@@ -183,11 +187,16 @@ export const useUser = (userId: string | null) => {
         };
         setUser(userData);
         setVouchers(data.vouchers || []);
-        setStats({
+        console.log('🎫 [Refetch] Vouchers array:', data.vouchers);
+        console.log('🎫 [Refetch] Vouchers count:', data.vouchers?.length || 0);
+
+        const calculatedStats = {
           vouchersCount: data.vouchers?.length || 0,
           reviewsCount: data.reviews?.length || 0,
           loyaltyPoints: data.points || 0,
-        });
+        };
+        console.log('📊 [Refetch] Calculated stats:', calculatedStats);
+        setStats(calculatedStats);
       } catch (err) {
         if (err instanceof Error && err.name !== 'AbortError') {
           setError(err.message);

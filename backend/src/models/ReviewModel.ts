@@ -28,22 +28,24 @@ class ReviewModel {
         try {
             const reviews = await db.select().from(businessReviews).where(eq(businessReviews.businessUen, uen))
 
-            // Fetch user images for each review
-            const reviewsWithImages = await Promise.all(
+            // Fetch user data (name and image) for each review
+            const reviewsWithUserData = await Promise.all(
                 reviews.map(async (review) => {
                     let userImage: string | null = null;
-                    const userResult = await db.select({ image: user.image })
+                    let userName: string | null = null;
+                    const userResult = await db.select({ image: user.image, name: user.name })
                         .from(user)
                         .where(eq(user.email, review.userEmail))
                         .limit(1);
                     if (userResult.length > 0 && userResult[0]) {
                         userImage = userResult[0].image;
+                        userName = userResult[0].name;
                     }
-                    return { ...review, userImage };
+                    return { ...review, userImage, userName };
                 })
             );
 
-            return reviewsWithImages;
+            return reviewsWithUserData;
         }
         catch (err) {
             console.error(err)
