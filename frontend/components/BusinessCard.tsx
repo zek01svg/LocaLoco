@@ -175,9 +175,9 @@ const fallbackImage = '';
               {business.name}
             </h3>
             <div className="flex items-center gap-1 text-sm">
-              {business.rating !== undefined && (
+              {business.avgRating !== undefined && (
                 <>
-                  <div className="flex">{renderStars(business.rating)}</div>
+                  <div className="flex">{renderStars(business.avgRating)}</div>
                   <span className={mutedTextColor}>({business.reviewCount})</span>
                 </>
               )}

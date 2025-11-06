@@ -27,7 +27,6 @@ export function FiltersPanel({
 }: FiltersPanelProps) {
   const categories = [
     { value: 'fnb', label: 'F&B' },
-    { value: 'dietary-options', label: 'Dietary Options' },
     { value: 'retail', label: 'Retail' },
     { value: 'services', label: 'Services' },
     { value: 'entertainment', label: 'Entertainment' },

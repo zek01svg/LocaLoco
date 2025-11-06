@@ -639,16 +639,16 @@ const handleReferralSubmit = async (referralCode: string) => {
   } finally {
     setIsLoading(false);
     setShowReferralDialog(false);
-    // Force page reload to refresh session with hasBusiness
-    window.location.href = '/';
+    // Force page reload to refresh session with hasBusiness and redirect to map
+    window.location.href = '/map';
   }
 };
 
 const handleReferralSkip = () => {
   console.log('User skipped referral');
   setShowReferralDialog(false);
-  // Force page reload to refresh session with hasBusiness
-  window.location.href = '/';
+  // Force page reload to refresh session with hasBusiness and redirect to map
+  window.location.href = '/map';
 };
   const renderStepIndicator = () => {
     if (!hasBusiness) return null;
@@ -1097,9 +1097,9 @@ const handleReferralSkip = () => {
                 <SelectValue placeholder="Select price tier" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="$">$ - Budget Friendly</SelectItem>
-                <SelectItem value="$$">$$ - Moderate</SelectItem>
-                <SelectItem value="$$$">$$$ - Upscale</SelectItem>
+                <SelectItem value="$">$ - Low</SelectItem>
+                <SelectItem value="$$">$$ - Medium</SelectItem>
+                <SelectItem value="$$$">$$$ - High</SelectItem>
               </SelectContent>
             </Select>
           </div>

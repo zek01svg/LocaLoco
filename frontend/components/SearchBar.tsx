@@ -45,7 +45,6 @@ export function SearchBar({
   const borderColor = isDarkMode ? 'border-gray-700' : 'border-gray-200';
   const categories = [
     { value: 'fnb', label: 'F&B' },
-    { value: 'dietary-options', label: 'Dietary Options' },
     { value: 'retail', label: 'Retail' },
     { value: 'services', label: 'Services' },
     { value: 'entertainment', label: 'Entertainment' },

@@ -167,11 +167,11 @@ export function BusinessDetail({
                   </Badge>
                   <span className="text-sm">{business.priceRange}</span>
                 </div>
-                {business.rating !== undefined && (
+                {business.avgRating !== undefined && (
                   <div className="flex items-center gap-2">
-                    <div className="flex">{renderStars(business.rating)}</div>
+                    <div className="flex">{renderStars(business.avgRating)}</div>
                     <span className="text-sm">
-                      {business.rating} ({business.reviewCount} reviews)
+                      {business.avgRating} ({business.reviewCount} reviews)
                     </span>
                   </div>
                 )}

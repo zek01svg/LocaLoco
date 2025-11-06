@@ -488,9 +488,9 @@ export function BusinessVerification({ onSubmit, onSkip }: BusinessVerificationP
                   <SelectValue placeholder="Select price tier" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="$">$ - Budget Friendly</SelectItem>
-                  <SelectItem value="$$">$$ - Moderate</SelectItem>
-                  <SelectItem value="$$$">$$$ - Upscale</SelectItem>
+                  <SelectItem value="$">$ - Low</SelectItem>
+                  <SelectItem value="$$">$$ - Medium</SelectItem>
+                  <SelectItem value="$$$">$$$ - High</SelectItem>
                 </SelectContent>
               </Select>
             </div>

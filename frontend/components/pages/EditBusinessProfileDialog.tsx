@@ -1,5 +1,8 @@
-import React, { useState, useRef } from 'react';
-import { BusinessOwner } from '../../data/mockBusinessOwnerData';
+import React, { useState, useEffect, useRef } from 'react';
+import { BusinessOwner } from '../../types/auth.store.types';
+import { toast } from 'sonner';
+import { useAuthStore } from '../../store/authStore';
+import { useUserBusinesses } from '../../hooks/useUserBusinesses';
 import {
   Dialog,
   DialogContent,
@@ -21,9 +24,70 @@ import {
   SelectValue,
 } from '../ui/select';
 import { Separator } from '../ui/separator';
-import { Upload, X } from 'lucide-react';
-import { useAuthStore } from '../../store/authStore';
-import { useUserBusinesses } from '../../hooks/useUserBusinesses';
+import { Alert, AlertDescription } from '../ui/alert';
+import { AlertCircle, ChevronLeft, ChevronRight, Upload, X } from 'lucide-react';
+
+
+
+// --- OneMap API Functions ---
+const getAuthToken = async (): Promise<string | null> => {
+  try {
+    const response = await fetch('https://www.onemap.gov.sg/api/auth/post/getToken', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: 'pamika.lim.2024@computing.smu.edu.sg',
+        password: 'CKPF6pu@DBRJ7cK'
+      })
+    });
+
+
+
+    if (!response.ok) throw new Error('Failed to get OneMap token');
+    const data = await response.json();
+    return data.access_token;
+  } catch (error) {
+    console.error('Failed to get OneMap token:', error);
+    toast.error('Failed to authenticate with OneMap service.');
+    return null;
+  }
+};
+
+
+
+const getAddressFromPostalCode = async (postalCode: string): Promise<string> => {
+  if (postalCode.length !== 6 || isNaN(Number(postalCode))) {
+      toast.error('Invalid Postal Code', { description: 'Please enter a valid 6-digit postal code.' });
+      return '';
+  }
+  const authToken = await getAuthToken();
+  if (!authToken) return '';
+
+
+
+  try {
+    const response = await fetch(
+      `https://www.onemap.gov.sg/api/common/elastic/search?searchVal=${postalCode}&returnGeom=N&getAddrDetails=Y`,
+      { headers: { Authorization: `Bearer ${authToken}` } }
+    );
+
+
+
+    if (!response.ok) throw new Error('OneMap API request failed');
+    const data = await response.json();
+    if (data.results && data.results.length > 0) {
+        return data.results[0].ADDRESS;
+    } else {
+        toast.error('Invalid Postal Code', { description: 'No address found for this postal code.' });
+        return '';
+    }
+  } catch (error) {
+    console.error('Error fetching address from postal code:', error);
+    toast.error('Failed to fetch address from OneMap.');
+    return '';
+  }
+};
+
 
 
 interface EditBusinessProfileDialogProps {
@@ -32,10 +96,10 @@ interface EditBusinessProfileDialogProps {
   onOpenChange: (open: boolean) => void;
   onSave: (updatedBusiness: BusinessOwner) => void;
 }
-
-
 const DAYS_OF_WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-const PAYMENT_OPTIONS = ['Cash', 'Credit/Debit Card', 'PayNow', 'Digital Wallets (Apple/Google/Samsung/GrabPay)'];
+const PAYMENT_OPTIONS = ['cash','card','paynow','digital_wallets'];
+const TOTAL_STEPS = 4;
+
 
 
 export function EditBusinessProfileDialog({
@@ -45,6 +109,13 @@ export function EditBusinessProfileDialog({
   onSave,
 }: EditBusinessProfileDialogProps) {
   const [formData, setFormData] = useState<BusinessOwner>(businessOwner);
+  const [currentStep, setCurrentStep] = useState(1);
+  const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [useSameHours, setUseSameHours] = useState(false);
+  const [defaultHours, setDefaultHours] = useState({ open: '09:00', close: '17:00' });
+  const [postalCode, setPostalCode] = useState('');
+  const [isFetchingAddress, setIsFetchingAddress] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(businessOwner.wallpaper || null);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -52,79 +123,143 @@ export function EditBusinessProfileDialog({
   const businessMode = useAuthStore((state) => state.businessMode);
   const { refetch: refetchBusinesses } = useUserBusinesses();
 
-  // Debug: Log the businessOwner data
-  console.log('📦 BusinessOwner data:', businessOwner);
-  console.log('🏢 Current Business UEN:', businessMode.currentBusinessUen);
 
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    try {
-      // Call the backend to save business changes
-      const response = await fetch('http://localhost:3000/api/update-business', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          uen: businessMode.currentBusinessUen, // ✅ Use the UEN from business mode
-          businessName: formData.businessName,
-          businessCategory: formData.category,
-          description: formData.description,
-          address: formData.address,
-          email: formData.businessEmail,
-          phoneNumber: formData.phone,
-          websiteLink: formData.website || '',
-          socialMediaLink: formData.socialMedia || '',
-          wallpaper: formData.wallpaper || '',
-          priceTier: formData.priceTier,
-          offersDelivery: formData.offersDelivery,
-          offersPickup: formData.offersPickup,
-          paymentOptions: formData.paymentOptions,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update business');
+  // Address fetching logic from postal code
+  useEffect(() => {
+    const fetchAddress = async () => {
+      if (postalCode.length === 6) {
+        setIsFetchingAddress(true);
+        const fetchedAddress = await getAddressFromPostalCode(postalCode);
+        if (fetchedAddress) {
+            setFormData(prev => ({ ...prev, address: fetchedAddress }));
+        }
+        setIsFetchingAddress(false);
       }
+    };
 
-      // Update avatar in store so sidebar updates
-      if (formData.wallpaper) {
-        setAvatarUrl(formData.wallpaper);
+
+
+    const debounceFetch = setTimeout(() => {
+      fetchAddress();
+    }, 500); // Debounce API call
+
+
+
+    return () => clearTimeout(debounceFetch);
+  }, [postalCode, setFormData]);
+
+
+
+  // Sync formData when the initial businessOwner prop changes
+  useEffect(() => {
+    setFormData(businessOwner);
+  }, [businessOwner]);
+
+
+
+
+
+  const handleChange = (field: keyof BusinessOwner, value: any) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    setError(null); // Clear error on change
+  };
+
+
+
+
+
+  const handleDayToggle = (day: string) => {
+    const operatingDays = formData.operatingDays || [];
+    setFormData(prev => ({
+      ...prev,
+      operatingDays: operatingDays.includes(day)
+        ? operatingDays.filter(d => d !== day)
+        : [...operatingDays, day]
+    }));
+  };
+
+
+
+
+
+  const handlePaymentToggle = (payment: string) => {
+    const paymentOptions = formData.paymentOptions || [];
+    setFormData(prev => ({
+      ...prev,
+      paymentOptions: paymentOptions.includes(payment)
+        ? paymentOptions.filter(p => p !== payment)
+        : [...paymentOptions, payment]
+    }));
+  };
+
+
+
+
+
+  const handleOpeningHoursChange = (day: string, type: 'open' | 'close', value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      openingHours: {
+        ...prev.openingHours,
+        [day]: { ...prev.openingHours?.[day], [type]: value },
       }
+    }));
+  };
 
-      // Refetch businesses to update the dropdown
-      await refetchBusinesses();
 
-      onSave(formData);
-      onOpenChange(false);
-    } catch (error) {
-      console.error('Error updating business:', error);
-      alert('Failed to update business profile');
+
+
+
+  const handleDefaultHoursChange = (type: 'open' | 'close', value: string) => {
+    const newDefaultHours = { ...defaultHours, [type]: value };
+    setDefaultHours(newDefaultHours);
+    if (useSameHours) {
+        const newHours = DAYS_OF_WEEK.reduce((acc, day) => {
+            acc[day] = newDefaultHours;
+            return acc;
+        }, {} as { [key: string]: { open: string; close: string } });
+        setFormData(prev => ({ ...prev, openingHours: newHours }));
     }
   };
+  
+  const handleSameHoursToggle = (checked: boolean) => {
+    setUseSameHours(checked);
+    if (checked) {
+        const newHours = DAYS_OF_WEEK.reduce((acc, day) => {
+            acc[day] = defaultHours;
+            return acc;
+        }, {} as { [key: string]: { open: string; close: string } });
+        setFormData(prev => ({ ...prev, openingHours: newHours }));
+    }
+};
+
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
 
     if (!file.type.startsWith('image/')) {
       alert('Please upload an image file');
       return;
     }
 
+
     if (file.size > 5 * 1024 * 1024) {
       alert('Image size should be less than 5MB');
       return;
     }
 
+
     setUploading(true);
+
 
     try {
       const urlResponse = await fetch(`http://localhost:3000/api/url-generator?filename=${encodeURIComponent(file.name)}`);
       if (!urlResponse.ok) throw new Error('Failed to get upload URL');
       const { uploadUrl } = await urlResponse.json();
+
 
       const uploadResponse = await fetch(uploadUrl, {
         method: 'PUT',
@@ -135,7 +270,9 @@ export function EditBusinessProfileDialog({
         body: file,
       });
 
+
       if (!uploadResponse.ok) throw new Error('Failed to upload image');
+
 
       const blobUrl = uploadUrl.split('?')[0];
       setPreviewUrl(blobUrl);
@@ -148,6 +285,7 @@ export function EditBusinessProfileDialog({
     }
   };
 
+
   const handleRemoveWallpaper = () => {
     setPreviewUrl(null);
     setFormData((prev: BusinessOwner) => ({ ...prev, wallpaper: undefined }));
@@ -156,56 +294,153 @@ export function EditBusinessProfileDialog({
     }
   };
 
+
   const triggerFileInput = () => {
     fileInputRef.current?.click();
   };
 
 
-  const handleChange = (field: keyof BusinessOwner, value: any) => {
-    setFormData((prev: BusinessOwner) => ({ ...prev, [field]: value }));
+
+  const validateStep = (step: number): boolean => {
+    setError(null);
+    switch (step) {
+      case 1:
+        if (!formData.businessName || !formData.category || !formData.description) {
+          setError('Please fill in all basic information fields.');
+          return false;
+        }
+        break;
+      case 2:
+        if (!formData.businessEmail || !formData.phone || !formData.address) {
+          setError('Please provide a valid address, email, and phone number.');
+          return false;
+        }
+        break;
+        case 3:
+          if (!formData.priceTier || (!formData.open247 && (formData.operatingDays || []).length === 0)) {
+              setError('Please select a price tier and at least one operating day, or select "Open 24/7".');
+              return false;
+          }
+        break;
+      default:
+        return true;
+    }
+    return true;
   };
 
 
-  const handleDayToggle = (day: string) => {
-    setFormData((prev: BusinessOwner) => ({
-      ...prev,
-      operatingDays: prev.operatingDays.includes(day)
-        ? prev.operatingDays.filter(d => d !== day)
-        : [...prev.operatingDays, day]
-    }));
+
+
+
+  const handleNext = () => {
+    if (validateStep(currentStep)) {
+      setCurrentStep(prev => Math.min(prev + 1, TOTAL_STEPS));
+    }
   };
 
 
-  const handlePaymentToggle = (payment: string) => {
-    setFormData((prev: BusinessOwner) => ({
-      ...prev,
-      paymentOptions: prev.paymentOptions.includes(payment)
-        ? prev.paymentOptions.filter(p => p !== payment)
-        : [...prev.paymentOptions, payment]
-    }));
+
+
+
+  const handleBack = () => {
+    setCurrentStep(prev => Math.max(prev - 1, 1));
   };
 
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[700px] max-h-[85vh] overflow-hidden">
-        <DialogHeader>
-          <DialogTitle>Edit Business Profile</DialogTitle>
-          <DialogDescription>
-            Update your business information. Click save when you're done.
-          </DialogDescription>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} id="edit-business-form" className="overflow-hidden flex flex-col">
-          <div className="overflow-y-auto pr-4" style={{ maxHeight: 'calc(85vh - 180px)' }}>
-            <div className="space-y-6 py-2">
-              {/* Business Information */}
-              <div className="space-y-3">
-                <h3>Business Information</h3>
-                <Separator />
 
-                {/* Wallpaper Upload */}
-                <div className="space-y-2">
-                  <Label>Business Image (Wallpaper)</Label>
+
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateStep(TOTAL_STEPS)) return;
+
+    setSaving(true);
+    setError(null);
+
+    try {
+        const response = await fetch('http://localhost:3000/api/update-business', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                uen: businessMode.currentBusinessUen,
+                businessName: formData.businessName,
+                businessCategory: formData.category,
+                description: formData.description,
+                address: formData.address,
+                email: formData.businessEmail,
+                phoneNumber: formData.phone,
+                websiteLink: formData.website || '',
+                socialMediaLink: formData.socialMedia || '',
+                wallpaper: formData.wallpaper || '',
+                priceTier: formData.priceTier,
+                offersDelivery: formData.offersDelivery,
+                offersPickup: formData.offersPickup,
+                paymentOptions: formData.paymentOptions,
+            }),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to update business profile');
+        }
+
+        // Update avatar in store so sidebar updates
+        if (formData.wallpaper) {
+            setAvatarUrl(formData.wallpaper);
+        }
+
+        // Refetch businesses to update the dropdown
+        await refetchBusinesses();
+
+        const result = await response.json();
+        onSave(formData);
+        onOpenChange(false);
+        toast.success("Business profile updated successfully!");
+      } catch (err) {
+        if (err instanceof Error) {
+            setError(err.message);
+        } else {
+            setError('An unknown error occurred.');
+        }
+    } finally {
+        setSaving(false);
+    }
+  };
+
+
+
+
+  const renderStepIndicator = () => (
+    <div className="flex items-center justify-between mb-6">
+        {['Basic Info', 'Contact', 'Operations', 'Review'].map((step, index) => (
+            <React.Fragment key={step}>
+                <div className="flex flex-col items-center">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold transition-colors ${
+                        index + 1 === currentStep ? 'bg-primary text-white' : 
+                        index + 1 < currentStep ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-600'
+                    }`}>
+                        {index + 1}
+                    </div>
+                    <span className="text-xs mt-1 text-muted-foreground">{step}</span>
+                </div>
+                {index < 3 && <div className={`flex-1 h-1 mx-2 transition-colors ${index + 1 < currentStep ? 'bg-green-500' : 'bg-gray-200'}`}></div>}
+            </React.Fragment>
+        ))}
+    </div>
+  );
+
+
+
+
+
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 1: // Basic Information
+        return (
+          <div className="space-y-4">
+            <h3 className="font-semibold text-lg">Business Information</h3>
+            <Separator />
+            <div className="space-y-2">
+                  <Label>Business Wallpaper</Label>
                   <div className="flex items-center gap-4">
                     <div className="w-20 h-20 rounded-lg flex items-center justify-center overflow-hidden bg-gray-200">
                       {previewUrl ? (
@@ -218,6 +453,7 @@ export function EditBusinessProfileDialog({
                         <Upload className="w-8 h-8 text-gray-400" />
                       )}
                     </div>
+
 
                     <div className="flex gap-2">
                       <Button
@@ -241,6 +477,7 @@ export function EditBusinessProfileDialog({
                       )}
                     </div>
 
+
                     <input
                       ref={fileInputRef}
                       type="file"
@@ -253,202 +490,185 @@ export function EditBusinessProfileDialog({
                     Recommended: Landscape image, max 5MB
                   </p>
                 </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="businessName">Business Name</Label>
-                  <Input
-                    id="businessName"
-                    value={formData.businessName}
-                    onChange={(e) => handleChange('businessName', e.target.value)}
-                    required
-                    className="bg-input-background"
-                  />
-                </div>
-
-
-                <div className="space-y-2">
-                  <Label htmlFor="address">Business Address</Label>
-                  <Input
-                    id="address"
-                    value={formData.address}
-                    onChange={(e) => handleChange('address', e.target.value)}
-                    required
-                    className="bg-input-background"
-                  />
-                </div>
-
-
-                <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) => handleChange('description', e.target.value)}
-                    rows={3}
-                    className="bg-input-background"
-                  />
-                </div>
-
-
-                <div className="space-y-2">
-                  <Label>Operating Days</Label>
-                  <div className="grid grid-cols-2 gap-4">
-                    {DAYS_OF_WEEK.map(day => (
-                      <div key={day} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`edit-${day}`}
-                          checked={formData.operatingDays.includes(day)}
-                          onCheckedChange={() => handleDayToggle(day)}
-                        />
-                        <label htmlFor={`edit-${day}`} className="text-sm cursor-pointer">
-                          {day}
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-
-              {/* Contact Information */}
-              <div className="space-y-3">
-                <h3>Contact Information</h3>
-                <Separator />
-
-
-                <div className="space-y-2">
-                  <Label htmlFor="businessEmail">Business Email</Label>
-                  <Input
-                    id="businessEmail"
-                    type="email"
-                    value={formData.businessEmail}
-                    onChange={(e) => handleChange('businessEmail', e.target.value)}
-                    required
-                    className="bg-input-background"
-                  />
-                </div>
-
-
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) => handleChange('phone', e.target.value)}
-                    required
-                    className="bg-input-background"
-                  />
-                </div>
-
-
-                <div className="space-y-2">
-                  <Label htmlFor="website">Website</Label>
-                  <Input
-                    id="website"
-                    type="url"
-                    value={formData.website}
-                    onChange={(e) => handleChange('website', e.target.value)}
-                    className="bg-input-background"
-                  />
-                </div>
-
-
-                <div className="space-y-2">
-                  <Label htmlFor="socialMedia">Social Media</Label>
-                  <Input
-                    id="socialMedia"
-                    type="url"
-                    value={formData.socialMedia}
-                    onChange={(e) => handleChange('socialMedia', e.target.value)}
-                    className="bg-input-background"
-                  />
-                </div>
-              </div>
-
-
-              {/* Business Settings */}
-              <div className="space-y-3">
-                <h3>Business Settings</h3>
-                <Separator />
-
-
-                <div className="space-y-2">
-                  <Label htmlFor="priceTier">Price Tier</Label>
-                  <Select
-                    value={formData.priceTier}
-                    onValueChange={(value: string) => handleChange('priceTier', value)}
-                  >
-                    <SelectTrigger className="bg-input-background">
-                      <SelectValue placeholder="Select price tier" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="$">$ - Budget Friendly</SelectItem>
-                      <SelectItem value="$$">$$ - Moderate</SelectItem>
-                      <SelectItem value="$$$">$$$ - Upscale</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-
-                <div className="space-y-3">
-                  <Label>Service Options</Label>
-                  <div className="space-y-3">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="edit-delivery"
-                        checked={formData.offersDelivery}
-                        onCheckedChange={(checked: boolean) => handleChange('offersDelivery', checked)}
-                      />
-                      <label htmlFor="edit-delivery" className="cursor-pointer">
-                        Offers Delivery
-                      </label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="edit-pickup"
-                        checked={formData.offersPickup}
-                        onCheckedChange={(checked: boolean) => handleChange('offersPickup', checked)}
-                      />
-                      <label htmlFor="edit-pickup" className="cursor-pointer">
-                        Offers Pickup
-                      </label>
-                    </div>
-                  </div>
-                </div>
-
-
-                <div className="space-y-3">
-                  <Label>Payment Options</Label>
-                  <div className="bg-input-background rounded-md p-4">
-                    <div className="space-y-3">
-                      {PAYMENT_OPTIONS.map(payment => (
-                        <div key={payment} className="flex items-center space-x-2">
-                          <Checkbox
-                            id={`edit-payment-${payment}`}
-                            checked={formData.paymentOptions.includes(payment)}
-                            onCheckedChange={() => handlePaymentToggle(payment)}
-                          />
-                          <label htmlFor={`edit-payment-${payment}`} className="text-sm cursor-pointer flex-1">
-                            {payment}
-                          </label>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="businessName">Business Name</Label>
+              <Input id="businessName" value={formData.businessName} onChange={(e) => handleChange('businessName', e.target.value)} required />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="businessCategory">Business Category</Label>
+              <Select value={formData.category} onValueChange={(value) => handleChange('category', value)}>
+                <SelectTrigger><SelectValue placeholder="Select a category" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="fnb">F&B</SelectItem>
+                  <SelectItem value="retail">Retail</SelectItem>
+                  <SelectItem value="services">Services</SelectItem>
+                  <SelectItem value="entertainment">Entertainment</SelectItem>
+                  <SelectItem value="health_wellness">Health/Wellness</SelectItem>
+                  <SelectItem value="professional_services">Professional Services</SelectItem>
+                  <SelectItem value="home_living">Home and Living</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea id="description" value={formData.description} onChange={(e) => handleChange('description', e.target.value)} rows={4} />
             </div>
           </div>
-          <DialogFooter className="mt-4 pt-4 border-t">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="text-foreground">
-              Cancel
-            </Button>
-            <Button type="submit" form="edit-business-form">
-              Save Changes
-            </Button>
+        );
+      case 2: // Contact Information
+        return (
+          <div className="space-y-4">
+            <h3 className="font-semibold text-lg">Contact & Location</h3>
+            <Separator />
+            <div className="space-y-2">
+              <Label htmlFor="postalCode">Postal Code</Label>
+              <Input id="postalCode" value={postalCode} onChange={(e) => setPostalCode(e.target.value)} maxLength={6} placeholder="Enter 6-digit postal code" />
+               {isFetchingAddress && <p className="text-sm text-muted-foreground">Fetching address...</p>}
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="address">Business Address</Label>
+                <Input id="address" value={formData.address} onChange={(e) => handleChange('address', e.target.value)} required />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="businessEmail">Business Email</Label>
+              <Input id="businessEmail" type="email" value={formData.businessEmail} onChange={(e) => handleChange('businessEmail', e.target.value)} required />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone Number</Label>
+              <Input id="phone" type="tel" value={formData.phone} onChange={(e) => handleChange('phone', e.target.value)} required />
+            </div>
+             <div className="space-y-2">
+                  <Label htmlFor="website">Website</Label>
+                  <Input id="website" type="url" value={formData.website} onChange={(e) => handleChange('website', e.target.value)} />
+            </div>
+            <div className="space-y-2">
+                  <Label htmlFor="socialMedia">Social Media</Label>
+                  <Input id="socialMedia" type="url" value={formData.socialMedia} onChange={(e) => handleChange('socialMedia', e.target.value)} />
+            </div>
+          </div>
+        );
+    case 3: // Business Settings
+        return (
+            <div className="space-y-6">
+                <h3 className="font-semibold text-lg">Hours & Operations</h3>
+                <Separator />
+                <div className="space-y-3">
+                    <Label>Operating Days & Hours</Label>
+                    <div className="flex items-center space-x-2">
+                        <Checkbox id="open247" checked={formData.open247} onCheckedChange={(checked: boolean) => handleChange('open247', checked)} />
+                        <label htmlFor="open247">Open 24/7</label>
+                    </div>
+                    {!formData.open247 && (
+                      <>
+                        <div className="flex items-center space-x-2">
+                            <Checkbox id="sameHours" checked={useSameHours} onCheckedChange={handleSameHoursToggle} />
+                            <label htmlFor="sameHours">Same hours for all selected days</label>
+                        </div>
+                        {useSameHours ? (
+                            <div className="flex items-center gap-2 p-2 border rounded-md">
+                                <Input type="time" value={defaultHours.open} onChange={(e) => handleDefaultHoursChange('open', e.target.value)} />
+                                <span>to</span>
+                                <Input type="time" value={defaultHours.close} onChange={(e) => handleDefaultHoursChange('close', e.target.value)} />
+                            </div>
+                        ) : (
+                          <div className="space-y-2">
+                            {DAYS_OF_WEEK.map(day => (
+                              <div key={day} className="flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-2">
+                                  <Checkbox id={`edit-${day}`} checked={(formData.operatingDays || []).includes(day)} onCheckedChange={() => handleDayToggle(day)} />
+                                  <label htmlFor={`edit-${day}`}>{day}</label>
+                                </div>
+                                {(formData.operatingDays || []).includes(day) && (
+                                  <div className="flex items-center gap-2">
+                                    <Input type="time" value={formData.openingHours?.[day]?.open || ''} onChange={(e) => handleOpeningHoursChange(day, 'open', e.target.value)} />
+                                    <span>to</span>
+                                    <Input type="time" value={formData.openingHours?.[day]?.close || ''} onChange={(e) => handleOpeningHoursChange(day, 'close', e.target.value)} />
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </>
+                    )}
+                </div>
+                 <div className="space-y-3">
+                    <Label>Payment Options</Label>
+                    <div className="border border-input rounded-md p-4 grid grid-cols-2 gap-4">
+                        {PAYMENT_OPTIONS.map(payment => (
+                            <div key={payment} className="flex items-center space-x-2">
+                            <Checkbox id={`edit-payment-${payment}`} checked={(formData.paymentOptions || []).includes(payment)} onCheckedChange={() => handlePaymentToggle(payment)} />
+                            <label htmlFor={`edit-payment-${payment}`} className="text-sm">{payment}</label>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+    case 4: // Review
+        return (
+            <div className="space-y-4">
+                <h3 className="font-semibold text-lg">Review Changes</h3>
+                <Separator />
+                <div className="space-y-2 text-sm max-h-80 overflow-y-auto">
+                    <p><strong>Name:</strong> {formData.businessName}</p>
+                    <p><strong>Category:</strong> {formData.category}</p>
+                    <p><strong>Address:</strong> {formData.address}</p>
+                    <p><strong>Email:</strong> {formData.businessEmail}</p>
+                    <p><strong>Phone:</strong> {formData.phone}</p>
+                    <p><strong>Operating Days:</strong> {formData.open247 ? 'Open 24/7' : (formData.operatingDays || []).join(', ')}</p>
+                    <p><strong>Payment Options:</strong> {(formData.paymentOptions || []).join(', ')}</p>
+                </div>
+            </div>
+        );
+      default:
+        return null;
+    }
+  };
+  
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md max-h-[90vh] flex flex-col">
+        <DialogHeader>
+          <DialogTitle>Edit Business Profile</DialogTitle>
+          <DialogDescription>
+            Update your business information step-by-step.
+          </DialogDescription>
+        </DialogHeader>
+        {renderStepIndicator()}
+        <div className="flex-grow overflow-y-auto pr-4">
+            <form onSubmit={handleSubmit} id="edit-business-form" className="space-y-6">
+                {error && (
+                    <Alert variant="destructive">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertDescription>{error}</AlertDescription>
+                    </Alert>
+                )}
+                {renderStepContent()}
+            </form>
+        </div>
+          <DialogFooter className="mt-4 pt-4 border-t shrink-0">
+              <div className="flex justify-between w-full">
+                  {currentStep > 1 && (
+                      <Button type="button" variant="outline" onClick={handleBack}>
+                          <ChevronLeft className="h-4 w-4 mr-2" />
+                          Previous
+                      </Button>
+                  )}
+                  <div className="flex-grow"></div>
+                  {currentStep < TOTAL_STEPS && (
+                      <Button type="button" onClick={handleNext}>
+                          Next
+                          <ChevronRight className="h-4 w-4 ml-2" />
+                      </Button>
+                  )}
+                  {currentStep === TOTAL_STEPS && (
+                      <Button type="submit" form="edit-business-form">
+                          Save Changes
+                      </Button>
+                  )}
+              </div>
           </DialogFooter>
-        </form>
       </DialogContent>
     </Dialog>
   );

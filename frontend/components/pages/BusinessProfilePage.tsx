@@ -155,12 +155,10 @@ export function BusinessProfilePage({
                     <span className="text-sm">Price Tier</span>
                   </div>
                   <Badge variant="secondary" className={isDarkMode ? 'bg-[#3a3a3a] text-white' : ''}>
-                    {businessOwner.priceTier} - {
-                      businessOwner.priceTier === '$' ? 'Budget Friendly' :
-                      businessOwner.priceTier === '$$' ? 'Moderate' :
-                      businessOwner.priceTier === '$$$' ? 'Upscale' :
-                      'Fine Dining'
-                    }
+                    {businessOwner.priceTier === 'low' || businessOwner.priceTier === '$' ? '$ - Low' :
+                     businessOwner.priceTier === 'medium' || businessOwner.priceTier === '$$' ? '$$ - Medium' :
+                     businessOwner.priceTier === 'high' || businessOwner.priceTier === '$$$' ? '$$$ - High' :
+                     businessOwner.priceTier}
                   </Badge>
                 </div>
 

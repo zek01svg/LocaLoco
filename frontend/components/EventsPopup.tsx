@@ -96,7 +96,11 @@ export function EventsPopup({ open, onClose }: EventsPopupProps) {
             >
               {announcement.imageUrl && (
                 <ImageWithFallback
-                  src={announcement.imageUrl}
+                  src={announcement.imageUrl.includes('localhost')
+                    ? announcement.imageUrl.replace(/http:\/\/localhost:\d+\//, 'https://localoco.blob.core.windows.net/images/')
+                    : announcement.imageUrl.startsWith('http')
+                    ? announcement.imageUrl
+                    : `https://localoco.blob.core.windows.net/images/${announcement.imageUrl}`}
                   alt={announcement.title}
                   className="w-20 h-20 rounded-lg object-cover flex-shrink-0"
                 />
@@ -144,3 +148,4 @@ export function EventsPopup({ open, onClose }: EventsPopupProps) {
     </div>
   );
 }
+  

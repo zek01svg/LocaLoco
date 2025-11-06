@@ -7,6 +7,8 @@ export interface BackendBusiness {
   businessCategory: string;
   description: string;
   address: string;
+  avgRating:number;
+  reviewCount:number;
   phoneNumber: string;
   email?: string;
   websiteLink?: string;
@@ -28,7 +30,6 @@ export interface BackendBusiness {
 const categoryMap: Record<string, BusinessCategory> = {
   'all': 'all',
   'fnb': 'fnb',
-  'dietary-options': 'dietary-options',
   'retail': 'retail',
   'services': 'services',
   'entertainment': 'entertainment',
@@ -65,8 +66,8 @@ export function transformBackendToBusiness(backend: BackendBusiness): Business {
     offersDelivery: backend.offersDelivery || false,
     offersPickup: backend.offersPickup || false,
     paymentOptions: backend.paymentOptions || [],
-    rating: 0, // default or map if data available
-    reviewCount: 0,
+    avgRating:backend.avgRating,
+    reviewCount: backend.reviewCount,
     coordinates: undefined, // supply if available
   };
 }
@@ -75,7 +76,6 @@ export const getCategoryDisplayName = (category: string): string => {
   const categoryMap: { [key: string]: string } = {
     'all': 'All Categories',
     'fnb': 'Food & Beverage',
-    'dietary-options': 'Dietary Options',
     'retail': 'Retail',
     'services': 'Services',
     'entertainment': 'Entertainment',

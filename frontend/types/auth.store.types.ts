@@ -3,7 +3,7 @@ export type UserRole = 'user' | 'business';
 export type UserProfile = User | BusinessOwner;
 
 export interface BusinessOwner {
-  id: string;
+  uen: string;
   businessName: string;
   role: 'business_owner'; 
   address: string;
@@ -16,9 +16,16 @@ export interface BusinessOwner {
   priceTier: '' | '$' | '$$' | '$$$' | '$$$$'; 
   offersDelivery: boolean;
   offersPickup: boolean;
+  open247: boolean;
   paymentOptions: string[];
   category: string;
   description: string;
+  openingHours: { // ✅ Added
+    [day: string]: {
+      open: string;
+      close: string;
+    };
+  }
 }
 
 export interface AuthState {

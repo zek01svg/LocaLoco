@@ -25,6 +25,7 @@ export interface Business {
   image: string; // from wallpaper
 
   dateOfCreation?: string; // from dateOfCreation
+  avgRating?: number;
 
   rating?: number; // optional if backend provides
   reviewCount?: number; // optional if backend provides
@@ -71,6 +72,8 @@ export interface BackendBusiness {
   offersDelivery?: boolean;
   offersPickup?: boolean;
   paymentOptions?: string[];
+  avgRating:number;
+  reviewCount:number;
 }
 
 // Missing interface added here
