@@ -14,7 +14,7 @@ const transformBackendReview = (backendReview: BackendReview, businessId: string
     id: backendReview.id.toString(),
     businessId: businessId,
     userName: userName,
-    userAvatar: undefined,
+    userAvatar: backendReview.userImage || undefined,
     rating: backendReview.rating,
     comment: backendReview.body,
     date: backendReview.createdAt,

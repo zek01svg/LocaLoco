@@ -6,7 +6,7 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
 import { Card } from './ui/card';
-import { Avatar, AvatarFallback } from './ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { useThemeStore } from '../store/themeStore';
 import { useForumPosts } from '../hooks/useForumPosts';
 import { useAuthStore } from '../store/authStore';
@@ -179,6 +179,9 @@ export function ForumPage({ onBack}: ForumPageProps) {
                 {/* Discussion Header */}
                 <div className="flex gap-4">
                   <Avatar className="w-12 h-12 bg-primary/20 flex-shrink-0">
+                    {discussion.userAvatar && (
+                      <AvatarImage src={discussion.userAvatar} alt={discussion.userName} />
+                    )}
                     <AvatarFallback className="bg-primary/20 text-primary">
                       {discussion.userName.charAt(0).toUpperCase()}
                     </AvatarFallback>
@@ -216,6 +219,9 @@ export function ForumPage({ onBack}: ForumPageProps) {
                     {discussion.replies.map((reply) => (
                       <div key={reply.id} className="flex gap-3">
                         <Avatar className="w-10 h-10 bg-primary/20 flex-shrink-0">
+                          {reply.userAvatar && (
+                            <AvatarImage src={reply.userAvatar} alt={reply.userName} />
+                          )}
                           <AvatarFallback className="bg-primary/20 text-primary text-sm">
                             {reply.userName.charAt(0).toUpperCase()}
                           </AvatarFallback>

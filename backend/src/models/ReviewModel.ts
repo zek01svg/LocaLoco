@@ -1,6 +1,6 @@
 import { Review, UpdateReviewData } from '../types/Review.js';
 import db from '../database/db.js'
-import { businessReviews } from '../database/schema.js';
+import { businessReviews, user } from '../database/schema.js';
 import { eq } from 'drizzle-orm';
 
 class ReviewModel {
@@ -27,8 +27,24 @@ class ReviewModel {
     public static async getBusinessReviews(uen:string) {
         try {
             const reviews = await db.select().from(businessReviews).where(eq(businessReviews.businessUen, uen))
-            return reviews
-        } 
+
+            // Fetch user images for each review
+            const reviewsWithImages = await Promise.all(
+                reviews.map(async (review) => {
+                    let userImage: string | null = null;
+                    const userResult = await db.select({ image: user.image })
+                        .from(user)
+                        .where(eq(user.email, review.userEmail))
+                        .limit(1);
+                    if (userResult.length > 0 && userResult[0]) {
+                        userImage = userResult[0].image;
+                    }
+                    return { ...review, userImage };
+                })
+            );
+
+            return reviewsWithImages;
+        }
         catch (err) {
             console.error(err)
         }

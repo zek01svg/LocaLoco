@@ -1,6 +1,6 @@
 import { ForumPost, ForumPostReply } from '../types/ForumPost.js';
 import db from '../database/db.js'
-import { forumPosts, forumPostsReplies, businesses } from '../database/schema.js';
+import { forumPosts, forumPostsReplies, businesses, user } from '../database/schema.js';
 import { eq, desc } from 'drizzle-orm';
 
 class ForumModel {
@@ -55,15 +55,38 @@ class ForumModel {
             // fetch replies for this post, ordered by oldest first (so oldest replies show at top)
             const replies = await db.select().from(forumPostsReplies).where(eq(forumPostsReplies.postId, post.id)).orderBy(forumPostsReplies.createdAt);
 
-            // map replies to ForumPost interface
-            const mappedReplies: ForumPostReply[] = replies.map(r => ({
-                id: r.id,
-                postId: r.postId,
-                userEmail: r.userEmail,
-                body: r.body,
-                likeCount: r.likeCount,
-                createdAt: r.createdAt,
-            }));
+            // Fetch post author's image
+            let postUserImage: string | null = null;
+            const postUserResult = await db.select({ image: user.image })
+                .from(user)
+                .where(eq(user.email, post.userEmail))
+                .limit(1);
+            if (postUserResult.length > 0 && postUserResult[0]) {
+                postUserImage = postUserResult[0].image;
+            }
+
+            // map replies with user images
+            const mappedReplies: ForumPostReply[] = [];
+            for (const r of replies) {
+                let replyUserImage: string | null = null;
+                const replyUserResult = await db.select({ image: user.image })
+                    .from(user)
+                    .where(eq(user.email, r.userEmail))
+                    .limit(1);
+                if (replyUserResult.length > 0 && replyUserResult[0]) {
+                    replyUserImage = replyUserResult[0].image;
+                }
+
+                mappedReplies.push({
+                    id: r.id,
+                    postId: r.postId,
+                    userEmail: r.userEmail,
+                    userImage: replyUserImage,
+                    body: r.body,
+                    likeCount: r.likeCount,
+                    createdAt: r.createdAt,
+                });
+            }
 
             // Fetch business name if UEN exists
             let businessName: string | null = null;
@@ -81,6 +104,7 @@ class ForumModel {
             container.push({
                 id: post.id,
                 userEmail: post.userEmail,
+                userImage: postUserImage,
                 businessUen: post.businessUen,
                 businessName: businessName,
                 title: post.title || null,
@@ -112,15 +136,38 @@ class ForumModel {
                 .where(eq(forumPostsReplies.postId, post.id))
                 .orderBy(forumPostsReplies.createdAt);
 
-            // map replies to ForumPost interface
-            const mappedReplies: ForumPostReply[] = replies.map(r => ({
-                id: r.id,
-                postId: r.postId,
-                userEmail: r.userEmail,
-                body: r.body,
-                likeCount: r.likeCount,
-                createdAt: r.createdAt,
-            }));
+            // Fetch post author's image
+            let postUserImage: string | null = null;
+            const postUserResult = await db.select({ image: user.image })
+                .from(user)
+                .where(eq(user.email, post.userEmail))
+                .limit(1);
+            if (postUserResult.length > 0 && postUserResult[0]) {
+                postUserImage = postUserResult[0].image;
+            }
+
+            // map replies with user images
+            const mappedReplies: ForumPostReply[] = [];
+            for (const r of replies) {
+                let replyUserImage: string | null = null;
+                const replyUserResult = await db.select({ image: user.image })
+                    .from(user)
+                    .where(eq(user.email, r.userEmail))
+                    .limit(1);
+                if (replyUserResult.length > 0 && replyUserResult[0]) {
+                    replyUserImage = replyUserResult[0].image;
+                }
+
+                mappedReplies.push({
+                    id: r.id,
+                    postId: r.postId,
+                    userEmail: r.userEmail,
+                    userImage: replyUserImage,
+                    body: r.body,
+                    likeCount: r.likeCount,
+                    createdAt: r.createdAt,
+                });
+            }
 
             // Fetch business name if UEN exists
             let businessName: string | null = null;
@@ -138,6 +185,7 @@ class ForumModel {
             container.push({
                 id: post.id,
                 userEmail: post.userEmail,
+                userImage: postUserImage,
                 businessUen: post.businessUen,
                 businessName: businessName,
                 title: post.title || null,
