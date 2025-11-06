@@ -147,7 +147,7 @@ export const useUser = (userId: string | null) => {
 
         // ✅ Update local state
         setUser({ ...updatedUser });
-        
+
       } catch (err) {
         console.error('❌ Error updating user:', err);
         setError(err instanceof Error ? err.message : 'Update failed');

@@ -26,6 +26,8 @@ export interface AuthState {
   isAuthenticated: boolean;
   role: UserRole | null;
   userId: string | null;
+  userProfile: any | null;
+  avatarUrl: string | null;
 }
 
 // ✅ User interface
@@ -136,6 +138,8 @@ export interface AuthActions {
   enableBusinessMode: (businessUen: string, businessName: string) => void;
   disableBusinessMode: () => void;
   switchBusiness: (businessUen: string, businessName: string) => void;
+  setUserProfile: (profile: any) => void;
+  setAvatarUrl: (url: string) => void;
 }
 
 export type AuthStore = AuthState & AuthActions;

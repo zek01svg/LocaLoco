@@ -21,15 +21,14 @@ interface BusinessVerificationProps {
 const DAYS_OF_WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const PAYMENT_OPTIONS = ['Cash', 'Credit Card', 'Debit Card', 'PayNow', 'GrabPay', 'PayLah'];
 
-const convertPriceTier = (tier: string): "" | "$" | "$$" | "$$$" | "$$$$" => {
-  const mapping: Record<string, "" | "$" | "$$" | "$$$" | "$$$$"> = {
+const convertPriceTier = (tier: string): "" | "$" | "$$" | "$$$" => {
+  const mapping: Record<string, "" | "$" | "$$" | "$$$" > = {
     'low': '$',
     'medium': '$$',
     'high': '$$$',
     '$': '$',
     '$$': '$$',
     '$$$': '$$$',
-    '$$$$': '$$$$',
     '': ''
   };
   return mapping[tier.toLowerCase()] || '';
@@ -40,7 +39,6 @@ const convertToBackendFormat = (tier: string): string => {
     '$': 'low',
     '$$': 'medium',
     '$$$': 'high',
-    '$$$$': 'high'
   };
   return mapping[tier] || tier;
 };

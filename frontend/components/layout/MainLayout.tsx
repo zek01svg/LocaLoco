@@ -4,6 +4,7 @@ import { AppSidebar } from '../AppSidebar';
 import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../hooks/useTheme';
 import { useUser } from '../../hooks/useUser';
+import { useAuthStore } from '../../store/authStore';
 import { ROUTES } from '../../constants/routes';
 
 export const MainLayout = () => {
@@ -11,6 +12,7 @@ export const MainLayout = () => {
   const { isDarkMode, toggleTheme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
+  const avatarUrl = useAuthStore((state) => state.avatarUrl);
 
   const { user, stats, updateUser } = useUser(userId || null);
   const isAuthenticated = !!userId; // Check if user is logged in
@@ -63,14 +65,14 @@ export const MainLayout = () => {
       return {
         name: user.businessName,
         email: user.businessEmail,
-        avatarUrl: user.wallpaper,
+        avatarUrl: avatarUrl || user.wallpaper,
         isGuest: false,
       };
     } else {
       return {
         name: user.name,
         email: user.email,
-        avatarUrl: user.avatarUrl,
+        avatarUrl: avatarUrl || user.avatarUrl,
         isGuest: false,
       };
     }

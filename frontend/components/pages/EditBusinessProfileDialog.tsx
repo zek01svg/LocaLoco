@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { BusinessOwner } from '../../types/auth.store.types';
+import React, { useState, useRef } from 'react';
+import { BusinessOwner } from '../../data/mockBusinessOwnerData';
 import {
   Dialog,
   DialogContent,
@@ -21,6 +21,9 @@ import {
   SelectValue,
 } from '../ui/select';
 import { Separator } from '../ui/separator';
+import { Upload, X } from 'lucide-react';
+import { useAuthStore } from '../../store/authStore';
+import { useUserBusinesses } from '../../hooks/useUserBusinesses';
 
 
 interface EditBusinessProfileDialogProps {
@@ -42,22 +45,129 @@ export function EditBusinessProfileDialog({
   onSave,
 }: EditBusinessProfileDialogProps) {
   const [formData, setFormData] = useState<BusinessOwner>(businessOwner);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(businessOwner.wallpaper || null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const setAvatarUrl = useAuthStore((state) => state.setAvatarUrl);
+  const businessMode = useAuthStore((state) => state.businessMode);
+  const { refetch: refetchBusinesses } = useUserBusinesses();
+
+  // Debug: Log the businessOwner data
+  console.log('📦 BusinessOwner data:', businessOwner);
+  console.log('🏢 Current Business UEN:', businessMode.currentBusinessUen);
 
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(formData);
-    onOpenChange(false);
+
+    try {
+      // Call the backend to save business changes
+      const response = await fetch('http://localhost:3000/api/update-business', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          uen: businessMode.currentBusinessUen, // ✅ Use the UEN from business mode
+          businessName: formData.businessName,
+          businessCategory: formData.category,
+          description: formData.description,
+          address: formData.address,
+          email: formData.businessEmail,
+          phoneNumber: formData.phone,
+          websiteLink: formData.website || '',
+          socialMediaLink: formData.socialMedia || '',
+          wallpaper: formData.wallpaper || '',
+          priceTier: formData.priceTier,
+          offersDelivery: formData.offersDelivery,
+          offersPickup: formData.offersPickup,
+          paymentOptions: formData.paymentOptions,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update business');
+      }
+
+      // Update avatar in store so sidebar updates
+      if (formData.wallpaper) {
+        setAvatarUrl(formData.wallpaper);
+      }
+
+      // Refetch businesses to update the dropdown
+      await refetchBusinesses();
+
+      onSave(formData);
+      onOpenChange(false);
+    } catch (error) {
+      console.error('Error updating business:', error);
+      alert('Failed to update business profile');
+    }
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert('Please upload an image file');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image size should be less than 5MB');
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      const urlResponse = await fetch(`http://localhost:3000/api/url-generator?filename=${encodeURIComponent(file.name)}`);
+      if (!urlResponse.ok) throw new Error('Failed to get upload URL');
+      const { uploadUrl } = await urlResponse.json();
+
+      const uploadResponse = await fetch(uploadUrl, {
+        method: 'PUT',
+        headers: {
+          'x-ms-blob-type': 'BlockBlob',
+          'Content-Type': file.type,
+        },
+        body: file,
+      });
+
+      if (!uploadResponse.ok) throw new Error('Failed to upload image');
+
+      const blobUrl = uploadUrl.split('?')[0];
+      setPreviewUrl(blobUrl);
+      setFormData((prev: BusinessOwner) => ({ ...prev, wallpaper: blobUrl }));
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('Failed to upload image');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleRemoveWallpaper = () => {
+    setPreviewUrl(null);
+    setFormData((prev: BusinessOwner) => ({ ...prev, wallpaper: undefined }));
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
   };
 
 
   const handleChange = (field: keyof BusinessOwner, value: any) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setFormData((prev: BusinessOwner) => ({ ...prev, [field]: value }));
   };
 
 
   const handleDayToggle = (day: string) => {
-    setFormData(prev => ({
+    setFormData((prev: BusinessOwner) => ({
       ...prev,
       operatingDays: prev.operatingDays.includes(day)
         ? prev.operatingDays.filter(d => d !== day)
@@ -67,7 +177,7 @@ export function EditBusinessProfileDialog({
 
 
   const handlePaymentToggle = (payment: string) => {
-    setFormData(prev => ({
+    setFormData((prev: BusinessOwner) => ({
       ...prev,
       paymentOptions: prev.paymentOptions.includes(payment)
         ? prev.paymentOptions.filter(p => p !== payment)
@@ -92,6 +202,57 @@ export function EditBusinessProfileDialog({
               <div className="space-y-3">
                 <h3>Business Information</h3>
                 <Separator />
+
+                {/* Wallpaper Upload */}
+                <div className="space-y-2">
+                  <Label>Business Image (Wallpaper)</Label>
+                  <div className="flex items-center gap-4">
+                    <div className="w-20 h-20 rounded-lg flex items-center justify-center overflow-hidden bg-gray-200">
+                      {previewUrl ? (
+                        <img
+                          src={previewUrl}
+                          alt="Business preview"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <Upload className="w-8 h-8 text-gray-400" />
+                      )}
+                    </div>
+
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={triggerFileInput}
+                        disabled={uploading}
+                      >
+                        {uploading ? 'Uploading...' : previewUrl ? 'Change' : 'Upload'}
+                      </Button>
+                      {previewUrl && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={handleRemoveWallpaper}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Recommended: Landscape image, max 5MB
+                  </p>
+                </div>
                 
                 <div className="space-y-2">
                   <Label htmlFor="businessName">Business Name</Label>
