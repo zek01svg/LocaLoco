@@ -7,7 +7,7 @@ import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { useAuthStore } from "../../store/authStore";
 import { useThemeStore } from "../../store/themeStore";
-import { authClient, callbackURL } from "../../lib/authClient";
+import { authClient } from "../../lib/authClient";
 import { ROUTES } from "../../constants/routes";
 
 export function LoginPage() {
