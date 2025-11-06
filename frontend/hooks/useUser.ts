@@ -5,7 +5,7 @@ import { BusinessOwner } from '../types/auth.store.types';
 import { url } from '../constants/url';
 
 const API_BASE_URL = url; 
-
+console.log(API_BASE_URL);
 export const useUser = (userId: string | null) => {
   const [user, setUser] = useState<User | BusinessOwner | null>(null);
   const [stats, setStats] = useState<UserStats>({
