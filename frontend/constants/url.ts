@@ -1,1 +1,1 @@
-export const url = window.__env?.VITE_APP_URL
+export const url = window.__env?.VITE_URL
