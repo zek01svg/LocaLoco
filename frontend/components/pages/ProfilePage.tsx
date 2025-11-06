@@ -240,7 +240,7 @@ export function ProfilePage({
             <Card className="p-6" style={{ backgroundColor: cardBg, color: textColor, transition: 'background-color 0.3s ease, color 0.3s ease' }}>
               <ReferralPanel
                 userId={user.id}
-                appBaseUrl={window.location.origin}
+                appBaseUrl="https://localoco.azurewebsites.net"
               />
             </Card>
           </div>
