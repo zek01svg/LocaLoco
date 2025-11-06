@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { url } from '../constants/url';
 
 import axios from 'axios';
 
@@ -7,7 +8,7 @@ export default function BusinessesLoader() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get('http://localhost:3000/api/businesses')
+    axios.get(`${url}/api/businesses`)
       .then(response => {
         setBusinesses(response.data); 
       })

@@ -4,8 +4,9 @@ import { transformBackendToForumDiscussion } from '../utils/forumUtils';
 import { ForumDiscussion, ForumReply,BackendForumPost  } from '../types/forum';
 import { fetchBusinessUenByName } from '../utils/businessNameUtils';
 import { toast } from 'sonner';
+import { url } from '../constants/url';
 
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = `${url}/api`;
 
 export const useForumPosts = (userEmail?: string) => {
   const discussions = useForumStore((state) => state.discussions);

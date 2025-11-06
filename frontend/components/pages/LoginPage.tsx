@@ -7,8 +7,9 @@ import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { useAuthStore } from "../../store/authStore";
 import { useThemeStore } from "../../store/themeStore";
-import { authClient, callbackURL } from "../../lib/authClient";
+import { authClient } from "../../lib/authClient";
 import { ROUTES } from "../../constants/routes";
+import { url } from "../../constants/url";
 
 export function LoginPage() {
     const navigate = useNavigate();
@@ -74,7 +75,7 @@ export function LoginPage() {
             const { data, error } = await authClient.signIn.email({
                 email,
                 password,
-                callbackURL: callbackURL,
+                callbackURL: url,
             });
 
             console.log("📨 SignIn response:", { data, error });
@@ -103,7 +104,7 @@ export function LoginPage() {
 
             const { data, error } = await authClient.signIn.social({
                 provider: "google",
-                callbackURL: callbackURL,
+                callbackURL: url,
             });
 
             if (error) {

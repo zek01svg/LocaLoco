@@ -24,6 +24,7 @@ import {
 import { Separator } from '../ui/separator';
 import { Alert, AlertDescription } from '../ui/alert';
 import { AlertCircle, ChevronLeft, ChevronRight, Upload, X, Truck, ShoppingBag } from 'lucide-react';
+import { url } from '../../constants/url';
 
 // --- OneMap API Functions (no changes) ---
 const getAuthToken = async (): Promise<string | null> => {
@@ -260,7 +261,7 @@ export function EditBusinessProfileDialog({
     }
     setUploading(true);
     try {
-      const urlResponse = await fetch(`http://localhost:3000/api/url-generator?filename=${encodeURIComponent(file.name)}`);
+      const urlResponse = await fetch(`${url}/api/url-generator?filename=${encodeURIComponent(file.name)}`);
       if (!urlResponse.ok) throw new Error('Failed to get upload URL');
       const { uploadUrl } = await urlResponse.json();
       const uploadResponse = await fetch(uploadUrl, {
@@ -344,16 +345,7 @@ export function EditBusinessProfileDialog({
     setSaving(true);
     setError(null);
     try {
-        console.log('📤 Sending business update with formData:', formData);
-        console.log('📤 UEN in formData:', formData.uen);
-
-        // Convert price tier to backend format
-        const dataToSend = {
-          ...formData,
-          priceTier: convertToBackendFormat(formData.priceTier)
-        };
-
-        const response = await fetch('http://localhost:3000/api/update-business', {
+        const response = await fetch('${url}/api/update-business', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(dataToSend),

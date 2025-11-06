@@ -2,8 +2,9 @@ import { useState, useCallback, useEffect } from 'react';
 import { Review } from '../types/business';
 import { SubmitReviewData } from '../types/review';
 import { BackendReview } from '../types/review';
+import { url } from '../constants/url';
 
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = `${url}/api`;
 
 // Transform backend review to frontend Review type
 const transformBackendReview = (backendReview: BackendReview, businessId: string): Review => {

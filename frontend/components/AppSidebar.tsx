@@ -46,7 +46,7 @@ import {
 import { Button } from './ui/button';
 import { useThemeStore } from '../store/themeStore';
 import { toast } from 'sonner';
-
+import { url } from '../constants/url';
 
 interface AppSidebarProps {
   // Added 'announcements' to the view types
@@ -201,7 +201,7 @@ export function AppSidebar({
     if (businessMode.isBusinessMode) {
       // Switch back to user mode - fetch fresh user avatar from DB
       try {
-        const response = await fetch(`http://localhost:3000/api/users/profile/${userId}`);
+        const response = await fetch(`${url}/api/users/profile/${userId}`);
         if (response.ok) {
           const data = await response.json();
           const profileData = data.profile || data;

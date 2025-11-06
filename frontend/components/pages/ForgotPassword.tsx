@@ -6,6 +6,7 @@ import { Label } from '../ui/label';
 import { toast } from 'sonner';
 import { useThemeStore } from '../../store/themeStore';
 import { authClient } from '../../lib/authClient';
+import { url } from '../../constants/url';
 
 interface ForgotPasswordPageProps {
   onBack: () => void;
@@ -14,7 +15,7 @@ interface ForgotPasswordPageProps {
 
 // 2. Define the URL your backend will send in the reset email.
 // This URL must point to your React app's reset password page.
-const redirectTo = 'http://localhost:3000/reset-password'; 
+const redirectTo = `${url}/reset-password`; 
 
 export function ForgotPasswordPage({ onBack, onEmailSent }: ForgotPasswordPageProps) {
   const [email, setEmail] = useState('');

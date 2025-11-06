@@ -6,7 +6,7 @@ name: Build and deploy Node.js app to Azure Web App - localoco-wad-ii
 on:
   push:
     branches:
-      - cleaned_FINAL
+      - main
   workflow_dispatch:
 
 jobs:
@@ -73,4 +73,5 @@ jobs:
           package: .
 
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_674E6B775C1D48389A44BE235C6F8B8B }}
+
 

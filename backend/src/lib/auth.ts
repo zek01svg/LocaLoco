@@ -9,7 +9,7 @@ const auth = betterAuth({
         provider: "mysql", 
         schema: { user, session, account, verification }
     }),
-    baseURL: 'http://localhost:3000',
+    baseURL: String(process.env.BETTER_AUTH_URL),
     secret: String(process.env.BETTER_AUTH_SECRET),
     user: {
         additionalFields: {
@@ -36,7 +36,8 @@ const auth = betterAuth({
         autoSignIn: true,
         sendResetPassword: async ({ user, url }, _request) => {
 
-            const subject = 'Reset your LocaLoco password';            const htmlBody = getResetPasswordEmailHtml(url, user);
+            const subject = 'Reset your LocaLoco password';            
+            const htmlBody = getResetPasswordEmailHtml(url, user);
 
             await sendEmail(
                 user.email,

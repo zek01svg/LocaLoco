@@ -13,8 +13,9 @@ import { useUserPointsStore } from '../store/userStore';
 import { toast } from 'sonner';
 import { BusinessVerificationData } from '../types/auth.store.types';
 import { useBookmarks } from '../hooks/useBookmarks'; 
+import { url } from '../constants/url';
 
-const API_BASE_URL = 'http://localhost:3000';
+const API_BASE_URL = url;
 
 const uploadWallpaper = async (file: File): Promise<string> => {
     const toastId = toast.loading('Uploading image...');
