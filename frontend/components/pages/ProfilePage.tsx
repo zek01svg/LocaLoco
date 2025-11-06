@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, MapPin, Calendar, Edit2, Ticket, Star, Award, Bookmark } from 'lucide-react';
+import { Mail, MapPin, Calendar, Edit2, Ticket, Star, Award, Bookmark, Building2 } from 'lucide-react';
 import { User, UserStats } from '../../types/user';
 import { Business } from '../../types/business';
 import { Button } from '../ui/button';
@@ -10,6 +10,8 @@ import { Separator } from '../ui/separator';
 import { BusinessCard } from '../BusinessCard';
 import { EditProfileDialog } from './EditProfileDialog';
 import { useThemeStore } from '../../store/themeStore';
+import { AddBusinessDialog } from '../AddBusinessDialog';
+import { BusinessVerificationData } from '../../types/auth.store.types';
 import ReferralPanel from './ReferralPanel';
 
 interface ProfilePageProps {
@@ -18,6 +20,7 @@ interface ProfilePageProps {
   bookmarkedBusinesses: Business[];
   onBack: () => void;
   onUpdateUser: (updatedUser: User) => void;
+  onAddBusiness: (data: BusinessVerificationData) => void; // Only one argument!
   onViewBusinessDetails: (business: Business) => void;
   onBookmarkToggle: (businessId: string) => void;
   onNavigateToVouchers?: () => void;
@@ -31,6 +34,7 @@ export function ProfilePage({
   bookmarkedBusinesses,
   onBack,
   onUpdateUser,
+  onAddBusiness, // Destructure the new prop
   onViewBusinessDetails,
   onBookmarkToggle,
   onNavigateToVouchers,
@@ -112,15 +116,39 @@ export function ProfilePage({
     );
   }
 
-  // ✅ Render profile only when user data exists
+
   return (
-    <div className="min-h-screen md:pl-6" style={{ backgroundColor: bgColor, transition: 'background-color 0.3s ease' }}>
-      {/* Profile Content */}
+    <div className="min-h-screen md:pl-6" style={{ backgroundColor: isDarkMode ? '#3a3a3a' : '#f9fafb' }}>
       <div className="max-w-5xl mx-auto px-4 py-8">
-        {/* Profile Header Card */}
-        <Card className="p-8 mb-6" style={{ backgroundColor: cardBg, color: textColor, transition: 'background-color 0.3s ease, color 0.3s ease' }}>
+        {/* ✅ FIX: Added 'relative' positioning to the main Card */}
+        <Card className="p-8 mb-6 relative" style={{ backgroundColor: isDarkMode ? '#2a2a2a' : '#ffffff', color: isDarkMode ? '#ffffff' : '#000000' }}>
+          
+          {/* ✅ FIX: Placed buttons in an absolutely positioned container */}
+          <div className="absolute top-4 right-4 flex flex-col gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setIsEditDialogOpen(true)}
+              className={` ${isDarkMode ? 'border-white/40 text-white hover:bg-white/10 hover:border-white/60' : 'border-gray-300 text-foreground hover:bg-gray-100'}`}
+            >
+              <Edit2 className="w-4 h-4 mr-2" />
+              Edit Profile
+            </Button>
+            
+            <AddBusinessDialog
+              onSubmit={onAddBusiness}
+              trigger={
+                <Button
+                  variant="outline"
+                  className={isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : ''}
+                >
+                  <Building2 className="w-4 h-4 mr-2" />
+                  Add Business
+                </Button>
+              }
+            />
+          </div>
+
           <div className="flex flex-col md:flex-row gap-6 items-start">
-            {/* Avatar with image or initials */}
             <Avatar className="w-24 h-24">
               {user.avatarUrl ? (
                 <AvatarImage src={user.avatarUrl} alt={user.name} />
@@ -132,36 +160,14 @@ export function ProfilePage({
             </Avatar>
 
             <div className="flex-1">
-              <div className="flex flex-col md:flex-row items-start md:justify-between gap-4 mb-4">
-                <div>
-                  <h1 className="text-3xl mb-2">{user.name || 'User'}</h1>
-                  <div className="flex flex-col gap-2 text-muted-foreground">
-                    <div className="flex items-center gap-2">
-                      <Mail className="w-4 h-4" />
-                      <span>{user.email || 'No email'}</span>
-                    </div>
-                    {user.location && (
-                      <div className="flex items-center gap-2">
-                        <MapPin className="w-4 h-4" />
-                        <span>{user.location}</span>
-                      </div>
-                    )}
-                    {user.memberSince && (
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4" />
-                        <span>Member since {formatDate(user.memberSince)}</span>
-                      </div>
-                    )}
-                  </div>
+              {/* User info without buttons */}
+              <div>
+                <h1 className="text-3xl mb-2">{user.name || 'User'}</h1>
+                <div className="flex flex-col gap-2 text-muted-foreground">
+                  <div className="flex items-center gap-2"><Mail className="w-4 h-4" /><span>{user.email || 'No email'}</span></div>
+                  {user.location && <div className="flex items-center gap-2"><MapPin className="w-4 h-4" /><span>{user.location}</span></div>}
+                  {user.memberSince && <div className="flex items-center gap-2"><Calendar className="w-4 h-4" /><span>Member since {formatDate(user.memberSince)}</span></div>}
                 </div>
-                <Button
-                  variant="outline"
-                  onClick={() => setIsEditDialogOpen(true)}
-                  className={`order-last md:order-none ${isDarkMode ? 'border-white/40 text-white hover:bg-white/10 hover:border-white/60' : 'border-gray-300 text-foreground hover:bg-gray-100'}`}
-                >
-                  <Edit2 className="w-4 h-4 mr-2" />
-                  Edit Profile
-                </Button>
               </div>
 
               {user.bio && (
@@ -173,6 +179,7 @@ export function ProfilePage({
             </div>
           </div>
         </Card>
+        
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
