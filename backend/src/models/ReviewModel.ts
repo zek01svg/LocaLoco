@@ -11,7 +11,7 @@ class ReviewModel {
         try {
             await db.insert(businessReviews).values({
                 userEmail: review.userEmail,
-                uen: review.businessUEN,
+                businessUen: review.businessUEN,
                 rating: review.rating,
                 body: review.body ?? '',
                 likeCount: review.likeCount,

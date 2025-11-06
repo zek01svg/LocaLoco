@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Star, MapPin, Phone, Globe, Clock, ArrowLeft, Bookmark, MessageSquare, Share2 } from 'lucide-react';
 import { Business, Review } from '../types/business';
 import { Button } from './ui/button';
@@ -15,6 +15,7 @@ import { ForumDiscussion } from '../types/forum';
 interface BusinessDetailProps {
   business: Business;
   reviews: Review[];
+  threads: ForumDiscussion[];
   isBookmarked: boolean;
   onBookmarkToggle: (businessId: string) => void;
   onBack: () => void;
@@ -24,6 +25,7 @@ interface BusinessDetailProps {
 export function BusinessDetail({
   business,
   reviews,
+  threads,
   isBookmarked,
   onBookmarkToggle,
   onBack,
@@ -32,53 +34,12 @@ export function BusinessDetail({
   const isDarkMode = useThemeStore(state => state.isDarkMode);
 
   const [selectedTab, setSelectedTab] = useState('overview');
-  const [threads, setThreads] = useState<ForumDiscussion[]>([]);
-  const [threadsLoading, setThreadsLoading] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [shareMessage, setShareMessage] = useState('');
 
   const textColor = isDarkMode ? '#ffffff' : '#000000';
   const cardBgColor = isDarkMode ? '#262626' : '#ffffff';
   const borderColor = isDarkMode ? 'border-gray-700' : 'border-gray-200';
-
-  useEffect(() => {
-    if (selectedTab === 'threads' && threads.length === 0) {
-      fetchThreads();
-    }
-  }, [selectedTab]);
-
-  const fetchThreads = async () => {
-    setThreadsLoading(true);
-    try {
-      const response = await fetch(`http://localhost:3000/api/forum-posts/business?uen=${business.uen}`);
-      if (!response.ok) throw new Error('Failed to fetch threads');
-
-      const data = await response.json();
-      const transformedThreads: ForumDiscussion[] = data.map((post: any) => ({
-        id: post.id.toString(),
-        title: post.title || 'Discussion',
-        businessTag: business.name,
-        content: post.body,
-        userName: post.userEmail.split('@')[0],
-        createdAt: post.createdAt,
-        likes: post.likeCount || 0,
-        replies: post.replies.map((reply: any) => ({
-          id: reply.id.toString(),
-          discussionId: post.id.toString(),
-          userName: reply.userEmail.split('@')[0],
-          content: reply.body,
-          createdAt: reply.createdAt,
-          likes: reply.likeCount || 0,
-        })),
-      }));
-
-      setThreads(transformedThreads);
-    } catch (error) {
-      console.error('Error fetching threads:', error);
-    } finally {
-      setThreadsLoading(false);
-    }
-  };
 
   // ✅ Share functionality
   const handleShare = async (platform: 'copy' | 'whatsapp' | 'email') => {
@@ -342,13 +303,7 @@ export function BusinessDetail({
 
         <TabsContent value="threads">
           <div className="space-y-4">
-            {threadsLoading ? (
-              <Card className="border-border bg-card">
-                <CardContent className="p-8 text-center">
-                  <p className="text-foreground">Loading threads...</p>
-                </CardContent>
-              </Card>
-            ) : threads.length > 0 ? (
+            {threads.length > 0 ? (
               threads.map((thread) => (
                 <Card key={thread.id} className="border-border bg-card">
                   <CardContent className="p-6 space-y-4">
