@@ -6,7 +6,7 @@ type Props = {
   appBaseUrl?: string; 
 };
 
-export default function ReferralPanel({ userId, appBaseUrl = window.location.origin }: Props) {
+export default function ReferralPanel({ userId, appBaseUrl = 'https://localoco.azurewebsites.net' }: Props) {
   const [loading, setLoading] = React.useState(true);
   const [code, setCode] = React.useState('');
   const [count, setCount] = React.useState(0);
