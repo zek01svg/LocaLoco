@@ -26,11 +26,17 @@ export const useAuth = () => {
       const userId = session.user.id;
       const accessToken = session.session.token;
       const currentRole = storeRole || 'user'; // Keep existing role or default to 'user'
+      const userImage = session.user.image;
 
       // Only update if not already synced
       if (storeUserId !== userId || storeAccessToken !== accessToken) {
         console.log('🔄 Syncing session to store:', userId);
         storeLogin(userId, currentRole, accessToken);
+      }
+
+      // Always sync avatar (for Google users especially)
+      if (userImage) {
+        useAuthStore.getState().setAvatarUrl(userImage);
       }
     } else if (!isPending && !session?.user && storeIsAuthenticated) {
       // Session expired or user logged out on backend

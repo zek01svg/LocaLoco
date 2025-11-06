@@ -69,6 +69,7 @@ export const MainLayout = () => {
         isGuest: false,
       };
     } else {
+      console.log('👤 User avatars - authStore:', avatarUrl, 'userDB:', user.avatarUrl);
       return {
         name: user.name,
         email: user.email,
