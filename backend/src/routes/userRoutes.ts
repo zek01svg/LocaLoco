@@ -1,5 +1,5 @@
 import { Router } from "express";
-import UserController from "../controllers/userController.js";
+import UserController from "../controllers/UserController.js";
 
 const userRouter = Router();
 
@@ -23,5 +23,8 @@ userRouter.get('/api/users/:userId/vouchers', UserController.getUserVouchers.bin
 
 // update the status of the user's voucher/s
 userRouter.post('/api/user/update-voucher', UserController.updateVoucherStatus.bind(UserController))
+
+// Check email uniqueness
+userRouter.get('/api/check-email', UserController.checkEmailAvailability.bind(UserController));
 
 export default userRouter

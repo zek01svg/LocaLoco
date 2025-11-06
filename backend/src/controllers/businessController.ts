@@ -116,8 +116,8 @@ class businessController {
             const htmlBody = generateNewBusinessListingEmail(emailInfo)
             const emailSent = await sendEmail(ownerEmail, subject, htmlBody)
 
-            res.status(200).json({ 
-                success: true, 
+            res.status(200).json({
+                success: true,
                 message: 'business registered',
                 registrationResult: registrationResult,
                 emailSent: emailSent
@@ -125,7 +125,18 @@ class businessController {
         }
         catch (err:any) {
             console.error(`There was a problem registering the selected business: ${err}`)
-            next(err)
+
+            // Parse MySQL error for better frontend messages
+            let errorMessage = 'Failed to register business';
+            if (err.code === 'ER_DUP_ENTRY' || err.errno === 1062) {
+                if (err.sqlMessage?.includes('PRIMARY')) {
+                    errorMessage = 'This UEN is already registered';
+                } else {
+                    errorMessage = 'Duplicate entry detected';
+                }
+            }
+
+            res.status(400).json({ error: errorMessage });
         }
     }
 
@@ -174,6 +185,22 @@ class businessController {
         catch (err:any) {
             console.error(`There was a problem deleting the selected business: ${err}`)
             next(err)
+        }
+    }
+
+    static async checkUenAvailability(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const uen = String(req.query.uen || '');
+            if (!uen) {
+                res.status(400).json({ error: 'UEN is required' });
+                return;
+            }
+
+            const exists = await BusinessModel.checkUenExists(uen);
+            res.json({ available: !exists });
+        } catch (error) {
+            console.error('Error checking UEN:', error);
+            next(error);
         }
     }
 }

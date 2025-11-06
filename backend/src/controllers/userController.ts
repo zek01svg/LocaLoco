@@ -216,6 +216,22 @@ class UserController {
             throw new Error('cannot update voucher status')
         }
     }
+
+    static async checkEmailAvailability(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const email = String(req.query.email || '');
+            if (!email) {
+                res.status(400).json({ error: 'Email is required' });
+                return;
+            }
+
+            const exists = await UserModel.checkEmailExists(email);
+            res.json({ available: !exists });
+        } catch (error) {
+            console.error('Error checking email:', error);
+            next(error);
+        }
+    }
 }
 
 export default UserController;

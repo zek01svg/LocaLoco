@@ -492,6 +492,16 @@ class BusinessModel {
             throw err;
         }
     }
+
+    public static async checkUenExists(uen: string): Promise<boolean> {
+        try {
+            const result = await db.select().from(businesses).where(eq(businesses.uen, uen)).limit(1);
+            return result.length > 0;
+        } catch (error) {
+            console.error('Error checking UEN:', error);
+            throw error;
+        }
+    }
 }
 
 export default BusinessModel

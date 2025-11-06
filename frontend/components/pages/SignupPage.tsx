@@ -331,7 +331,7 @@ export function SignupPage({ onSignup, onBack }: SignupPageProps = {}) {
     }
   };
 
-  const validateStep = (step: number): boolean => {
+  const validateStep = async (step: number): Promise<boolean> => {
     if (step === 1) {
       if (!formData.firstName || !formData.lastName || !formData.email || !formData.password) {
         setError('Please fill in all required fields');
@@ -345,6 +345,19 @@ export function SignupPage({ onSignup, onBack }: SignupPageProps = {}) {
         setError('Password must be at least 6 characters long');
         return false;
       }
+
+      // Check email uniqueness
+      try {
+        const response = await fetch(`http://localhost:3000/api/check-email?email=${encodeURIComponent(formData.email)}`);
+        const data = await response.json();
+        if (!data.available) {
+          setError('This email is already registered');
+          return false;
+        }
+      } catch (err) {
+        console.error('Email check failed:', err);
+      }
+
       return true;
     }
 
@@ -359,6 +372,19 @@ export function SignupPage({ onSignup, onBack }: SignupPageProps = {}) {
         if (postalCodeError) {
           return false; // Don't proceed if there's a postal code error
         }
+
+        // Check UEN uniqueness
+        try {
+          const response = await fetch(`http://localhost:3000/api/check-uen?uen=${encodeURIComponent(currentBusiness.uen)}`);
+          const data = await response.json();
+          if (!data.available) {
+            setError('This UEN is already registered');
+            return false;
+          }
+        } catch (err) {
+          console.error('UEN check failed:', err);
+        }
+
         return true;
       case 3:
         if (!currentBusiness.businessEmail || !currentBusiness.phoneNumber) {
@@ -373,18 +399,31 @@ export function SignupPage({ onSignup, onBack }: SignupPageProps = {}) {
           setError('Please upload a business photo');
           return false;
         }
+
+        // Check business email uniqueness
+        try {
+          const response = await fetch(`http://localhost:3000/api/check-email?email=${encodeURIComponent(currentBusiness.businessEmail)}`);
+          const data = await response.json();
+          if (!data.available) {
+            setError('This business email is already registered');
+            return false;
+          }
+        } catch (err) {
+          console.error('Business email check failed:', err);
+        }
+
         return true;
       default:
         return true;
     }
   };
 
-  const handleNext = (e?: React.MouseEvent) => {
+  const handleNext = async (e?: React.MouseEvent) => {
     if (e) {
       e.preventDefault();
       e.stopPropagation();
     }
-    if (validateStep(currentStep)) {
+    if (await validateStep(currentStep)) {
       setCurrentStep(prev => Math.min(prev + 1, totalSteps));
     }
   };
@@ -435,12 +474,12 @@ export function SignupPage({ onSignup, onBack }: SignupPageProps = {}) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     e.stopPropagation();
-  
+
     if (currentStep !== totalSteps) {
       return;
     }
-  
-    if (!validateStep(currentStep)) {
+
+    if (!(await validateStep(currentStep))) {
       return;
     }
   
@@ -600,14 +639,16 @@ const handleReferralSubmit = async (referralCode: string) => {
   } finally {
     setIsLoading(false);
     setShowReferralDialog(false);
-    navigate('/');
+    // Force page reload to refresh session with hasBusiness
+    window.location.href = '/';
   }
 };
 
 const handleReferralSkip = () => {
   console.log('User skipped referral');
   setShowReferralDialog(false);
-  navigate('/');
+  // Force page reload to refresh session with hasBusiness
+  window.location.href = '/';
 };
   const renderStepIndicator = () => {
     if (!hasBusiness) return null;

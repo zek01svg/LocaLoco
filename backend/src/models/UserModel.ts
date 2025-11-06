@@ -259,6 +259,16 @@ class UserModel {
     public static async updateVoucherStatus (voucherId:number) {
         await db.update(vouchers).set({status:'used'}).where(eq(vouchers.voucherId, voucherId))
     }
+
+    public static async checkEmailExists(email: string): Promise<boolean> {
+        try {
+            const users = await db.select().from(user).where(eq(user.email, email)).limit(1);
+            return users.length > 0;
+        } catch (error) {
+            console.error('Error checking email:', error);
+            throw error;
+        }
+    }
 }
 
 export default UserModel

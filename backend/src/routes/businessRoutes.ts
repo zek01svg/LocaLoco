@@ -27,4 +27,7 @@ businessRouter.post('/api/update-business', businessController.updateBusiness.bi
 // this route handles business deletions
 businessRouter.post('/api/delete-business', businessController.deleteBusiness.bind(businessController))
 
+// Check UEN uniqueness
+businessRouter.get('/api/check-uen', businessController.checkUenAvailability.bind(businessController));
+
 export default businessRouter
