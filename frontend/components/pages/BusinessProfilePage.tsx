@@ -115,9 +115,8 @@ export function BusinessProfilePage({
         setBusinessOwner(updatedBusiness);
         if (onUpdateBusiness) {
             onUpdateBusiness(updatedBusiness);
-        } else {
-            updateUser(updatedBusiness);
         }
+        // Don't call updateUser for business owners - the business was already updated via /api/update-business
         toast.success("Business profile updated successfully!");
     };
 

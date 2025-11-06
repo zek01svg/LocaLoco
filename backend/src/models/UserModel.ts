@@ -14,11 +14,9 @@ class UserModel {
      */
     public static async getUserById(userId: string) {
         try {
-            console.log('🔍 getUserById called with userId:', userId);
             const profile = await db.select().from(user).where(eq(user.id, userId))
 
             // Fetch vouchers with referral code (join with referrals table)
-            console.log('🎫 Fetching vouchers with referral codes for userId:', userId);
             const availableVouchers = await db
                 .select({
                     id: vouchers.voucherId,
@@ -34,7 +32,6 @@ class UserModel {
                 .leftJoin(referrals, eq(referrals.refId, vouchers.refId))
                 .where(eq(vouchers.userId, userId));
 
-            console.log('🎫 Fetched vouchers with codes:', availableVouchers);
 
             // Fetch user points and reviews if profile exists
             let points = 0;
@@ -45,9 +42,7 @@ class UserModel {
                 points = availablePoints[0]?.points || 0;
 
                 // Fetch reviews using userEmail
-                console.log('🔍 Fetching reviews for email:', profile[0].email);
                 reviews = await db.select().from(businessReviews).where(eq(businessReviews.userEmail, profile[0].email))
-                console.log('📊 Reviews found:', reviews.length, reviews);
 
                 // Count successful referrals (where this user is the referrer and status is 'claimed')
                 const successfulReferralsResult = await db
@@ -87,10 +82,7 @@ class UserModel {
      */
     public static async updateProfile(userId: string, updates: UpdateProfileData) {
         try {
-            console.log('🟢 UserModel.updateProfile called');
-            console.log('🟢 userId:', userId);
-            console.log('🟢 updates:', JSON.stringify(updates, null, 2));
-
+   
             // Update only the fields that are provided
             const updateData: any = {};
             if (updates.name !== undefined) updateData.name = updates.name;
@@ -100,18 +92,15 @@ class UserModel {
             if (updates.hasBusiness !== undefined) updateData.hasBusiness = updates.hasBusiness;
             updateData.updatedAt = updates.updatedAt
 
-            console.log('🟢 updateData to be written to DB:', JSON.stringify(updateData, null, 2));
 
             // Perform the update
             const updateResult = await db.update(user)
                 .set(updateData)
                 .where(eq(user.id, userId));
 
-            console.log('🟢 Database update result:', JSON.stringify(updateResult, null, 2));
 
             // Fetch and return the updated user
             const updatedUser = await db.select().from(user).where(eq(user.id, userId)).limit(1);
-            console.log('🟢 Fetched updated user from DB:', JSON.stringify(updatedUser, null, 2));
 
             return updatedUser[0];
         } catch (error) {
@@ -147,7 +136,6 @@ class UserModel {
                 .where(eq(user.referralCode, referralCode));
             
             if (referrerResult.length === 0) {
-                console.log("Referral check failed: Code not found.");
                 return false; // Code doesn't exist
             }
 
@@ -155,7 +143,6 @@ class UserModel {
 
             // Prevent self-referral
             if (referrerUser.id === referredId) {
-                console.log("Referral check failed: User cannot refer themselves.");
                 return false;
             }
 
@@ -165,7 +152,6 @@ class UserModel {
                 }).from(user).where(eq(user.id, referredId));
 
             if (referredUserCheck[0]?.referredByUserID) {
-                console.log("Referral check failed: User already has a referrer.");
                 return false;
             }
 
@@ -232,7 +218,6 @@ class UserModel {
      */
     public static async getAuthProvider(userId: string): Promise<string | null> {
         try {
-            console.log('🔍 Checking account table for userId:', userId);
 
             // Check if user has any OAuth account linked (Google, Facebook, etc.)
             const accounts = await db
@@ -241,7 +226,6 @@ class UserModel {
                 .where(eq(account.userId, userId))
                 .limit(1);
 
-            console.log('📊 Account query result:', accounts);
 
             if (accounts.length > 0 && accounts[0]) {
                 // User has an OAuth account, return the provider

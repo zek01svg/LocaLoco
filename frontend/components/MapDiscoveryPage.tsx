@@ -51,11 +51,9 @@ export function MapDiscoveryPage() {
   // Get user location
   useEffect(() => {
     if ('geolocation' in navigator) {
-      console.log('📍 Getting user location...');
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           const location = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-          console.log('📍 User location obtained:', location);
           setUserLocation(location);
         },
         (err) => console.warn('📍 Geolocation failed:', err)
@@ -78,19 +76,15 @@ export function MapDiscoveryPage() {
   // --- Fetch businesses from backend ---
   useEffect(() => {
     if (!isLoaded) {
-      console.log('🗺️ Google Maps not loaded yet, waiting...');
       return;
     }
 
-    console.log('🗺️ Google Maps loaded, fetching businesses...');
 
     const fetchBusinesses = async () => {
       try {
-        console.log('📦 Fetching businesses from /api/businesses...');
         const response = await fetch('/api/businesses');
         const data: Business[] = await response.json();
 
-        console.log('📦 Fetched businesses from DB:', data);
 
         const geocoder = new (window as any).google.maps.Geocoder();
 
@@ -102,18 +96,15 @@ export function MapDiscoveryPage() {
             const lng = b.longitude ? Number(b.longitude) : undefined;
 
             if (lat != null && lng != null) {
-              console.log(`📌 Using DB coordinates for ${b.businessName}:`, { lat, lng });
               results.push({ ...b, lat, lng });
               return;
             }
 
             if (!b.address) {
-              console.log(`❌ No address for ${b.businessName}, skipping geocode`);
               results.push(b);
               return;
             }
 
-            console.log(`🗺️ Geocoding address for ${b.businessName}: ${b.address}`);
             const res: any = await new Promise((resolve) => {
               geocoder.geocode({ address: b.address }, (geoResults: any, status: any) => {
                 if (status === 'OK' && geoResults[0]) {
@@ -127,19 +118,15 @@ export function MapDiscoveryPage() {
             });
 
             if (res) {
-              console.log(`✅ Geocoded ${b.businessName}:`, res);
               results.push({ ...b, lat: res.lat, lng: res.lng });
             } else {
-              console.log(`❌ No coordinates for ${b.businessName}`);
               results.push(b);
             }
           })
         );
 
-        console.log('📊 Final businesses with coordinates:', results);
         setBusinessesWithCoords(results);
       } catch (err) {
-        console.error('❌ Failed to fetch businesses:', err);
       }
     };
 
@@ -169,7 +156,6 @@ export function MapDiscoveryPage() {
   const nearestUENs = new Set<string>();
   if (userLocation && businessesWithCoords.length > 0 && !searchTerm) {
     const withCoords = businessesWithCoords.filter((b) => b.lat !== undefined && b.lng !== undefined);
-    console.log(`📍 Calculating nearest businesses from ${withCoords.length} with coordinates`);
     
     const distances = withCoords.map((b) => ({
       uen: b.uen,
@@ -178,11 +164,9 @@ export function MapDiscoveryPage() {
     distances.sort((a, b) => a.distance - b.distance);
     distances.slice(0, 5).forEach((b) => nearestUENs.add(b.uen));
     
-    console.log('📍 Nearest businesses:', Array.from(nearestUENs));
   }
 
   const handleBusinessClick = (business: Business) => {
-    console.log('👆 Business clicked:', business.businessName);
     setSelectedBusiness(business);
     navigate(`/business/${business.uen}`);
   };
@@ -195,7 +179,6 @@ export function MapDiscoveryPage() {
   };
 
   const handleShowOnMap = (b: Business & { lat?: number; lng?: number }) => {
-    console.log('🗺️ Showing business on map:', b.businessName, b.lat, b.lng);
     setSelectedPin(b);
     if (b.lat && b.lng && mapRef.current) {
       mapRef.current.panTo({ lat: b.lat, lng: b.lng });
@@ -206,28 +189,17 @@ export function MapDiscoveryPage() {
   // Clear selected pin when search changes
   useEffect(() => {
     if (searchTerm) {
-      console.log('🔍 Search term changed, clearing selected pin');
       setSelectedPin(null);
     }
   }, [searchTerm]);
 
   if (loadError) {
-    console.error('❌ Map load error:', loadError);
     return <div className="text-red-500">Map cannot load</div>;
   }
   
   if (!isLoaded) {
-    console.log('⏳ Loading map...');
     return <div>Loading map...</div>;
   }
-
-  console.log('🎯 Rendering MapDiscoveryPage with:', {
-    businessesWithCoords: businessesWithCoords.length,
-    filteredBusinesses: filteredBusinesses.length,
-    searchTerm,
-    userLocation,
-    selectedPin: selectedPin?.businessName
-  });
 
   return (
     <div className="h-screen w-full flex flex-col" style={{ backgroundColor: pageBg }}>
@@ -239,7 +211,6 @@ export function MapDiscoveryPage() {
             zoom={userLocation ? 16 : 14}
             center={userLocation ?? defaultCenter}
             onLoad={(map) => {
-              console.log('🗺️ Google Map loaded');
               mapRef.current = map;
             }}
             options={{
@@ -305,7 +276,6 @@ export function MapDiscoveryPage() {
               >
                 <button
                   onClick={() => {
-                    console.log('📍 Centering on user location');
                     if (mapRef.current && userLocation) {
                       mapRef.current.panTo(userLocation);
                       mapRef.current.setZoom(16);
@@ -330,7 +300,6 @@ export function MapDiscoveryPage() {
                   position={userLocation}
                   icon={{ url: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png' }}
                   onClick={() => {
-                    console.log('📍 User marker clicked');
                     setShowUserInfo(true);
                   }}
                 />
@@ -345,7 +314,6 @@ export function MapDiscoveryPage() {
             {/* Business pins - ONLY SHOW FILTERED BUSINESSES */}
             {filteredBusinesses.map((b) => {
               if (b.lat === undefined || b.lng === undefined) {
-                console.log(`❌ No coordinates for ${b.businessName}, skipping marker`);
                 return null;
               }
 
@@ -357,14 +325,12 @@ export function MapDiscoveryPage() {
                 : 'http://maps.google.com/mapfiles/ms/icons/red-dot.png';
               const iconUrl = isSelected ? 'http://maps.google.com/mapfiles/ms/icons/pink-dot.png' : baseColor;
 
-              console.log(`📌 Rendering marker for ${b.businessName}:`, { isSelected, isNearest, iconUrl });
 
               return (
                 <Marker
                   key={b.uen}
                   position={{ lat: b.lat, lng: b.lng }}
                   onClick={() => {
-                    console.log(`📌 Marker clicked: ${b.businessName}`);
                     setSelectedPin(b);
                   }}
                   icon={{ url: iconUrl }}
@@ -391,7 +357,6 @@ export function MapDiscoveryPage() {
                           isDarkMode ? 'text-white hover:bg-neutral-800' : 'text-gray-900 hover:bg-gray-100'
                         }`}
                         onClick={() => {
-                          console.log('❌ Closing selected pin card');
                           setSelectedPin(null);
                         }}
                       >

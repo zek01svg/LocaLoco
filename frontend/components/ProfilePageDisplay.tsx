@@ -219,7 +219,7 @@ export function ProfilePageDisplay() {
       <BusinessProfilePage
         businessOwner={businessOwner}
         onBack={handleBack}
-        onUpdateBusiness={updateUser}
+        // Don't pass updateUser - business is already updated via /api/update-business
       />
     );
   }

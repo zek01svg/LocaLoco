@@ -3,10 +3,13 @@ export type UserRole = 'user' | 'business';
 export type UserProfile = User | BusinessOwner;
 
 export interface BusinessOwner {
+  ownerId?: string;  // Required by backend
   uen: string;
   businessName: string;
-  role: 'business_owner'; 
+  role: 'business_owner';
   address: string;
+  latitude?: string | null;  // Required by backend
+  longitude?: string | null;  // Required by backend
   operatingDays: string[];
   businessEmail: string;
   phone: string;

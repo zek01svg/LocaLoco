@@ -65,7 +65,6 @@ class businessController {
 
     static async getOwnedBusinesses(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            console.log(req.body.ownerId)
             const ownedBusinesses = await BusinessModel.getOwnedBusinesses(String(req.body.ownerId))
             res.status(200).json(ownedBusinesses);
         }
@@ -142,34 +141,88 @@ class businessController {
 
     static async updateBusiness(req: Request, res: Response, next: NextFunction): Promise<void> {
 
-        const business = {
-            ownerID: req.body.ownerID,
-            uen: req.body.uen,
-            businessName: req.body.businessName,
-            businessCategory: req.body.businessCategory,
-            description: req.body.description,
-            address: req.body.address,
-            latitude: req.body.latitude,
-            longitude: req.body.longitude,
-            open247: req.body.open247 ? 1 : 0,
-            openingHours: req.body.openingHours, 
-            email: req.body.email,
-            phoneNumber: req.body.phoneNumber,
-            websiteLink: req.body.websiteLink ?? '',
-            socialMediaLink: req.body.socialMediaLink ?? '',
-            wallpaper: req.body.wallpaper,
-            priceTier: req.body.priceTier,
-            offersDelivery: req.body.offersDelivery ? 1 : 0,
-            offersPickup: req.body.offersPickup ? 1 : 0,
-            paymentOptions: req.body.paymentOptions
+        // Get the owner ID from the request
+        const ownerId = req.body.ownerID || req.body.ownerId || req.body.id;
+
+        if (!ownerId) {
+            res.status(400).json({ error: 'Owner ID is required for business update' });
+            return;
         }
 
         try {
+            // Look up the business by ownerId to get the UEN
+            const existingBusiness = await BusinessModel.getBusinessByOwnerId(ownerId);
+
+            if (!existingBusiness) {
+                res.status(404).json({ error: 'Business not found for this owner' });
+                return;
+            }
+
+            // Use the existing UEN
+            const business = {
+                ownerID: ownerId,
+                uen: existingBusiness.uen,  // Use the existing UEN from database
+                businessName: req.body.businessName,
+                businessCategory: req.body.businessCategory || req.body.category,
+                description: req.body.description,
+                address: req.body.address,
+                latitude: req.body.latitude || null,
+                longitude: req.body.longitude || null,
+                open247: req.body.open247 ? 1 : 0,
+                openingHours: req.body.openingHours,
+                email: req.body.email || req.body.businessEmail,
+                phoneNumber: req.body.phoneNumber || req.body.phone,
+                websiteLink: req.body.websiteLink || req.body.website || '',
+                socialMediaLink: req.body.socialMediaLink || req.body.socialMedia || '',
+                wallpaper: req.body.wallpaper,
+                priceTier: req.body.priceTier,
+                offersDelivery: req.body.offersDelivery ? 1 : 0,
+                offersPickup: req.body.offersPickup ? 1 : 0,
+                paymentOptions: req.body.paymentOptions
+            }
+
             await BusinessModel.updateBusiness(business)
-            res.status(200).json({ message: 'business updated' });
+
+            // Fetch the updated business to return it
+            const updatedBusiness = await BusinessModel.getBusinessByUEN(business.uen);
+
+            if (!updatedBusiness) {
+                res.status(404).json({ error: 'Business not found after update' });
+                return;
+            }
+
+            // Map backend field names to frontend BusinessOwner format
+            const frontendBusiness = {
+                ownerId: updatedBusiness.ownerId,
+                uen: updatedBusiness.uen,
+                businessName: updatedBusiness.businessName,
+                role: 'business_owner' as const,
+                address: updatedBusiness.address,
+                latitude: updatedBusiness.latitude,
+                longitude: updatedBusiness.longitude,
+                operatingDays: Object.keys(updatedBusiness.openingHours),
+                businessEmail: updatedBusiness.email,
+                phone: updatedBusiness.phoneNumber,
+                website: updatedBusiness.websiteLink || '',
+                socialMedia: updatedBusiness.socialMediaLink || '',
+                wallpaper: updatedBusiness.wallpaper,
+                priceTier: updatedBusiness.priceTier,
+                offersDelivery: Boolean(updatedBusiness.offersDelivery),
+                offersPickup: Boolean(updatedBusiness.offersPickup),
+                open247: Boolean(updatedBusiness.open247),
+                paymentOptions: updatedBusiness.paymentOptions,
+                category: updatedBusiness.businessCategory,
+                description: updatedBusiness.description,
+                openingHours: updatedBusiness.openingHours
+            };
+
+            res.status(200).json({
+                message: 'business updated',
+                business: frontendBusiness
+            });
         }
         catch (err:any) {
-            console.error(`There was a problem registering the selected business: ${err}`)
+            console.error(`There was a problem updating the selected business: ${err}`)
             next(err)
         }
     }
