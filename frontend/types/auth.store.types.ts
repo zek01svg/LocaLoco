@@ -13,7 +13,7 @@ export interface BusinessOwner {
   website: string;
   socialMedia: string;
   wallpaper?: string;
-  priceTier: '' | '$' | '$$' | '$$$' | '$$$$'; 
+  priceTier:  '$' | '$$' | '$$$' ;
   offersDelivery: boolean;
   offersPickup: boolean;
   open247: boolean;
@@ -56,6 +56,7 @@ export interface SignupData {
   email: string;
   password: string;
   confirmPassword: string;
+  operatingDays: string[];
 }
 
 // ✅ Complete business signup data (all 5 steps from SignupPage)
@@ -66,6 +67,7 @@ export interface BusinessSignupData {
   businessCategory: string;
   description: string;
   address: string;
+  operatingDays: string[];
 
   // Step 2: Contact Information
   phoneNumber: string;
@@ -84,7 +86,7 @@ export interface BusinessSignupData {
   };
 
   // Step 4: Business Details
-  priceTier: '$' | '$$' | '$$$' | '$$$$' | '';
+  priceTier: '$' | '$$' | '$$$' 
   offersDelivery: boolean;
   offersPickup: boolean;
   paymentOptions: string[];
@@ -118,11 +120,12 @@ export interface BusinessVerificationData {
   websiteLink?: string;
   socialMediaLink?: string;
   wallpaper?: File | null;
-  priceTier: '$' | '$$' | '$$$' | '$$$$' | '';
+  priceTier: '$' | '$$' | '$$$' 
   offersDelivery: boolean;
   offersPickup: boolean;
   paymentOptions: string[];
   dateOfCreation?: string;
+  
 }
 export interface BusinessModeState {
   isBusinessMode: boolean;

@@ -23,6 +23,7 @@ export interface Business {
   socialMedia?: string; // from socialMediaLink
   description: string;
   image: string; // from wallpaper
+  
 
   dateOfCreation?: string; // from dateOfCreation
   avgRating?: number;
@@ -39,6 +40,7 @@ export interface Business {
       close: string;
     };
   }; // from openingHours
+  operatingDays: string[]; // ✅ Added
 
   // Add direct lat/lng properties
   lat?: number;
@@ -68,6 +70,8 @@ export interface BackendBusiness {
   websiteLink?: string;
   wallpaper: string;
   priceTier: string;
+  operatingDays: string[]; // ✅ Added
+  open247: boolean;
   openingHours: { [day: string]: { open: string; close: string } };
   offersDelivery?: boolean;
   offersPickup?: boolean;
@@ -75,6 +79,7 @@ export interface BackendBusiness {
   avgRating:number;
   reviewCount:number;
 }
+
 
 // Missing interface added here
 export interface BookmarkedBusiness {

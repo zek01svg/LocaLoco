@@ -41,7 +41,8 @@ app.use(
         "https://*.googleapis.com",      // Wildcard for all googleapis subdomains
         "https://*.gstatic.com",          // Wildcard for gstatic subdomains
         "https://maps.googleapis.com",    // Explicit for maps API
-        "https://maps.gstatic.com"        // Explicit for map tiles
+        "https://maps.gstatic.com",      
+        "https://www.onemap.gov.sg"  // Explicit for map tiles
       ],
       scriptSrcAttr: ["'unsafe-inline'"],
       scriptSrc: [

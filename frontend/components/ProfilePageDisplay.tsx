@@ -7,23 +7,19 @@ import { useAuthStore } from '../store/authStore';
 import { ProfilePage } from './pages/ProfilePage';
 import { BusinessProfilePage } from './pages/BusinessProfilePage';
 import { ROUTES } from '../constants/routes';
-import { Business } from '../types/business';
-import { BusinessOwner } from '../types/auth.store.types';
+import { Business, BusinessOwner } from '../types/business';
 import { useState, useEffect } from 'react';
 import { useUserPointsStore } from '../store/userStore';
 import { toast } from 'sonner';
 import { BusinessVerificationData } from '../types/auth.store.types';
-import { useBookmarks } from '../hooks/useBookmarks';
-import { useBusinesses } from '../hooks/useBusinesses'; 
+import { useBookmarks } from '../hooks/useBookmarks'; 
 
 const API_BASE_URL = 'http://localhost:3000';
 
-// ✅ COPIED FROM YOUR SIGNUP PAGE LOGIC
 const uploadWallpaper = async (file: File): Promise<string> => {
     const toastId = toast.loading('Uploading image...');
 
     try {
-      // Step 1: Get the secure upload URL from your backend
       const sasResponse = await fetch(
         `${API_BASE_URL}/api/url-generator?filename=${encodeURIComponent(file.name)}`
       );
@@ -34,7 +30,6 @@ const uploadWallpaper = async (file: File): Promise<string> => {
 
       const sasData = await sasResponse.json();
 
-      // Step 2: Upload the file directly to Azure Blob Storage
       const uploadResponse = await fetch(sasData.uploadUrl, {
         method: 'PUT',
         headers: {
@@ -48,7 +43,6 @@ const uploadWallpaper = async (file: File): Promise<string> => {
         throw new Error(`Image upload failed with status ${uploadResponse.status}`);
       }
 
-      // Step 3: Return the final, permanent URL of the image
       const wallpaperUrl = `https://localoco.blob.core.windows.net/images/${sasData.blobName}`;
       toast.success('Image uploaded successfully!', { id: toastId });
       return wallpaperUrl;
@@ -67,27 +61,21 @@ export function ProfilePageDisplay() {
   const { userId, role } = useAuth();
   const { isDarkMode } = useTheme();
   const { setPoints } = useUserPointsStore();
-  const { isLoading: businessesLoading } = useBusinesses(); // Ensure businesses are loaded
   const {bookmarkedBusinesses, toggleBookmark} = useBookmarks();
   
-  // Get business mode state
   const businessMode = useAuthStore((state) => state.businessMode);
   const setAvatarUrl = useAuthStore((state) => state.setAvatarUrl);
   const enableBusinessMode = useAuthStore((state) => state.enableBusinessMode);
 
-  // ✅ DEBUG: Check businessMode state on every render
   console.log('🔍 ProfilePageDisplay render - businessMode:', businessMode);
   console.log('🔍 ProfilePageDisplay render - role:', role);
 
-  // Call useUser hook unconditionally for user data
   const { user, stats, updateUser, mutate: mutateUser } = useUser(userId);
 
-  // Fetch business data when in business mode
   const { business, loading: businessLoading } = useBusinessByUen(
     businessMode.isBusinessMode ? businessMode.currentBusinessUen : null
   );
 
-  // ✅ DEBUG LOGS
   console.log('════════════════════════════════════');
   console.log('📊 ProfilePageDisplay Debug Info:');
   console.log('userId:', userId);
@@ -100,24 +88,21 @@ export function ProfilePageDisplay() {
   console.log('  - has operatingDays?', user && 'operatingDays' in user);
   console.log('════════════════════════════════════');
 
-  // Sync loyalty points with user points store
   useEffect(() => {
     if (stats?.loyaltyPoints !== undefined) {
       setPoints(stats.loyaltyPoints);
     }
   }, [stats?.loyaltyPoints, setPoints]);
 
-  // ✅ Update avatar when business wallpaper changes
   useEffect(() => {
-    if (business?.wallpaper) {
-      setAvatarUrl(business.wallpaper);
+    if (business?.image) {
+      setAvatarUrl(business.image);
     }
-  }, [business?.wallpaper, setAvatarUrl]);
+  }, [business?.image, setAvatarUrl]);
 
-  // Navigation handlers
   const handleBack = () => navigate(ROUTES.BUSINESSES);
-  const handleViewBusinessDetails = (business:Business) =>navigate(`/business/${business.uen}`);  
-const handleNavigateToVouchers = () => navigate(ROUTES.VOUCHERS);
+  const handleViewBusinessDetails = (business: Business) => navigate(`${ROUTES.BUSINESSES}/${business.uen}`);
+  const handleNavigateToVouchers = () => navigate(ROUTES.VOUCHERS);
 
   const handleAddBusiness = async (data: BusinessVerificationData) => {
     const toastId = toast.loading('Registering your business...');
@@ -134,6 +119,8 @@ const handleNavigateToVouchers = () => navigate(ROUTES.VOUCHERS);
         '$$': 'medium',
         '$$$': 'high',
       };
+      const derivedOperatingDays = Object.keys(data.openingHours || {});
+
 
       const payload = {
         ...data,
@@ -155,7 +142,9 @@ const handleNavigateToVouchers = () => navigate(ROUTES.VOUCHERS);
         latitude: 0,
         longitude: 0,
         open247: data.open247 ? 1 : 0,
-      };
+        operatingDays: derivedOperatingDays,
+
+      }
       delete (payload as any).website;
       delete (payload as any).socialMedia;
 
@@ -173,7 +162,6 @@ const handleNavigateToVouchers = () => navigate(ROUTES.VOUCHERS);
       const result = await response.json();
       toast.success('Business registered successfully! Refreshing...', { id: toastId });
 
-      // ✅ Reload to refresh sidebar's business list and hasBusiness flag
       setTimeout(() => window.location.reload(), 800);
     } catch (error: any) {
       console.error('Error registering business:', error);
@@ -181,7 +169,6 @@ const handleNavigateToVouchers = () => navigate(ROUTES.VOUCHERS);
     }
   };
 
-  // Loading state - show if no userId or no user data yet
   if (!userId || !user) {
     console.log('⏳ Showing loading state');
     return (
@@ -191,13 +178,11 @@ const handleNavigateToVouchers = () => navigate(ROUTES.VOUCHERS);
     );
   }
 
-  // ✅ Check if in business mode - fetch and show business profile
   if (role === 'business' && businessMode.isBusinessMode) {
     console.log('🏢 Business mode active');
     console.log('🏢 Current business UEN:', businessMode.currentBusinessUen);
     console.log('🏢 Business data:', business);
 
-    // Show loading while fetching business data
     if (businessLoading || !business) {
       console.log('⏳ Loading business data...');
       return (
@@ -207,13 +192,12 @@ const handleNavigateToVouchers = () => navigate(ROUTES.VOUCHERS);
       );
     }
 
-    // Convert business data to BusinessOwner format
     const businessOwner: BusinessOwner = {
       id: userId || '',
       role: 'business_owner',
       businessName: business.businessName,
       address: business.address || '',
-      operatingDays: Object.keys(business.openingHours || {}),
+      operatingDays: business.operatingDays || [],
       businessEmail: business.email || '',
       phone: business.phoneNumber || '',
       website: business.websiteLink || '',
@@ -225,6 +209,8 @@ const handleNavigateToVouchers = () => navigate(ROUTES.VOUCHERS);
       paymentOptions: business.paymentOptions || [],
       category: business.businessCategory || '',
       description: business.description || '',
+      open247: !!business.open247, // Use !! to handle 1/0 from backend
+      openingHours: business.openingHours || {},
     };
 
     console.log('🏢 Rendering BusinessProfilePage with:', businessOwner);
@@ -238,7 +224,6 @@ const handleNavigateToVouchers = () => navigate(ROUTES.VOUCHERS);
     );
   }
 
-  // ✅ Regular user profile
   console.log('👤 Rendering regular ProfilePage');
   return (
     <ProfilePage
