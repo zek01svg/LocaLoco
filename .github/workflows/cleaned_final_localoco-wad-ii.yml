@@ -23,6 +23,9 @@ jobs:
         with:
           node-version: '22.x'
 
+      - name: Install all dependencies
+        run: npm install
+
       - name: Build frontend and backend in parallel
         run: npx concurrently "cd backend && npm run build --if-present" "cd frontend && npm run build --if-present" 
       
@@ -70,3 +73,4 @@ jobs:
           package: .
 
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_674E6B775C1D48389A44BE235C6F8B8B }}
+
