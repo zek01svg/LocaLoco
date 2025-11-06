@@ -119,7 +119,7 @@ export function BusinessDetail({
   };
 
   const businessReviews = reviews.filter(review => review.businessId === business.uen);
-
+  const fallbackImage = '';     
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
@@ -184,11 +184,17 @@ export function BusinessDetail({
       {/* Hero Section */}
       <Card className="overflow-hidden">
         <div className="relative">
-          <ImageWithFallback
-            src={`https://localoco.blob.core.windows.net/images/${business.image}`}
-            alt={business.name}
-            className="w-full h-48 object-cover"
-          />
+         <ImageWithFallback
+  src={
+    business.image 
+      ? (business.image.startsWith('http') 
+          ? business.image 
+          : `https://localoco.blob.core.windows.net/images/${business.image}`)
+      : fallbackImage // Use the empty string as the fallback
+  }
+  alt={business.name}
+  className="w-full h-48 object-cover"
+/>
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
           <div className="absolute bottom-4 left-4 right-4">
             <div className="flex items-start justify-between text-white">

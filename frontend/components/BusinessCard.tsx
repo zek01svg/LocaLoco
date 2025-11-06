@@ -69,7 +69,7 @@ export function BusinessCard({
       console.error('Share failed:', error);
     }
   };
-
+const fallbackImage = ''; 
   return (
     <Card
       className={`overflow-hidden hover:shadow-lg transition-shadow duration-200 ${borderColor}`}
@@ -78,10 +78,16 @@ export function BusinessCard({
       <CardHeader className="p-0">
         <div className="relative">
           <ImageWithFallback
-            src={`https://localoco.blob.core.windows.net/images/${business.image}`}
-            alt={business.name}
-            className="w-full h-48 object-cover"
-          />
+  src={
+    business.image 
+      ? (business.image.startsWith('http') 
+          ? business.image 
+          : `https://localoco.blob.core.windows.net/images/${business.image}`)
+      : fallbackImage // Use the empty string as the fallback
+  }
+  alt={business.name}
+  className="w-full h-48 object-cover"
+/>
           <div className="absolute top-2 right-2 flex gap-2">
             {/* ✅ Share button */}
             <div className="relative">
