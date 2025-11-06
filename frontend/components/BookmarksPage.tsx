@@ -40,7 +40,7 @@ export const BookmarksPage = () => {
                 business={business}
                 isBookmarked={true}
                 onBookmarkToggle={toggleBookmark}
-                onViewDetails={(id) => navigate(`/business/${id}`)}
+                onViewDetails={(id) => navigate(`/business/${business.uen}`)}
               />
             ))}
           </div>

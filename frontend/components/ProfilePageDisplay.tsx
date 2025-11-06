@@ -7,12 +7,14 @@ import { useAuthStore } from '../store/authStore';
 import { ProfilePage } from './pages/ProfilePage';
 import { BusinessProfilePage } from './pages/BusinessProfilePage';
 import { ROUTES } from '../constants/routes';
-import { Business, BusinessOwner } from '../types/business';
+import { Business } from '../types/business';
+import { BusinessOwner } from '../types/auth.store.types';
 import { useState, useEffect } from 'react';
 import { useUserPointsStore } from '../store/userStore';
 import { toast } from 'sonner';
 import { BusinessVerificationData } from '../types/auth.store.types';
-import { useBookmarks } from '../hooks/useBookmarks'; 
+import { useBookmarks } from '../hooks/useBookmarks';
+import { useBusinesses } from '../hooks/useBusinesses'; 
 
 const API_BASE_URL = 'http://localhost:3000';
 
@@ -65,6 +67,7 @@ export function ProfilePageDisplay() {
   const { userId, role } = useAuth();
   const { isDarkMode } = useTheme();
   const { setPoints } = useUserPointsStore();
+  const { isLoading: businessesLoading } = useBusinesses(); // Ensure businesses are loaded
   const {bookmarkedBusinesses, toggleBookmark} = useBookmarks();
   
   // Get business mode state
@@ -113,8 +116,8 @@ export function ProfilePageDisplay() {
 
   // Navigation handlers
   const handleBack = () => navigate(ROUTES.BUSINESSES);
-  const handleViewBusinessDetails = (business: Business) => navigate(`${ROUTES.BUSINESSES}/${business.uen}`);
-  const handleNavigateToVouchers = () => navigate(ROUTES.VOUCHERS);
+  const handleViewBusinessDetails = (business:Business) =>navigate(`/business/${business.uen}`);  
+const handleNavigateToVouchers = () => navigate(ROUTES.VOUCHERS);
 
   const handleAddBusiness = async (data: BusinessVerificationData) => {
     const toastId = toast.loading('Registering your business...');
