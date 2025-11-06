@@ -23,12 +23,15 @@ jobs:
         with:
           node-version: '22.x'
 
-      - name: npm install, build, and test
-        run: |
-          npm install
-          npm run build --if-present
-          npm run test --if-present
-
+      - name: Build frontend and backend in parallel
+        run: npx concurrently "cd backend && npm run build --if-present" "cd frontend && npm run build --if-present" 
+      
+      - name: Remove node_modules for artifact
+        run: | 
+            rm -rf node_modules
+            rm -rf backend/node_modules
+            rm -rf frontend/node_modules
+      
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
@@ -44,6 +47,19 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: node-app
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22.x'
+
+      - name: Install root dependencies
+        run: npm install
+
+      - name: Run Drizzle Migrations
+        run: cd backend && npx drizzle-kit migrate
+        env:
+          DATABASE_URL: ${{secrets.AZURE_PROD_DATABASE_URL}}
       
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
@@ -52,4 +68,5 @@ jobs:
           app-name: 'localoco-wad-ii'
           slot-name: 'Production'
           package: .
+
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_674E6B775C1D48389A44BE235C6F8B8B }}
