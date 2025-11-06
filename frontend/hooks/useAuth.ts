@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { ROUTES } from '../constants/routes';
 import { UserRole } from '../types/auth.store.types';
-import { authClient, callbackURL } from '../lib/authClient';
+import { authClient } from '../lib/authClient';
+import { url } from '../constants/url';
 
 export const useAuth = () => {
   const navigate = useNavigate();
@@ -52,7 +53,7 @@ export const useAuth = () => {
         const { data, error } = await authClient.signIn.email({
           email,
           password,
-          callbackURL: callbackURL
+          callbackURL: url
         });
 
         if (error) {
@@ -94,7 +95,7 @@ export const useAuth = () => {
           email,
           password,
           name,
-          callbackURL: callbackURL
+          callbackURL: url
         });
 
         if (error) {

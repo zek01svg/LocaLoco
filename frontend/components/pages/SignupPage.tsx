@@ -501,7 +501,6 @@ export function SignupPage({ onSignup, onBack }: SignupPageProps = {}) {
         email: formData.email,
         password: formData.password,
         name: `${formData.firstName} ${formData.lastName}`,
-        // Don't use callbackURL - let it stay on the frontend
       });
 
       if (userError) {
