@@ -99,6 +99,15 @@ app.use(featureRouter) // router for small features
 app.use(imageUploadRouter) // router for the images
 app.all('/api/auth/{*any}', toNodeHandler(auth)); // handler for better-auth
 
+app.get("/api/runtime.js", (req,res) => {
+    return res.send(
+      `
+    window.__env = ${JSON.stringify({
+        VITE_URL: process.env.VITE_URL
+    })}
+    `.trim()
+    ).type('application/json');})
+
 // sever landing page at root
 app.get('/', (req, res) => {
     res.sendFile(path.join(frontendPath, 'landing.html'))
