@@ -37,11 +37,11 @@ const categoryMap: Record<string, BusinessCategory> = {
   'home-living': 'home-living',
 };
 
-// Map backend priceTier to frontend priceRange
+// Map backend priceTier to frontend priceRange (as symbols)
 const priceTierMap: Record<string, Business['priceRange']> = {
-  'low': 'low',
-  'medium': 'medium',
-  'high': 'high',
+  'low': '$',
+  'medium': '$$',
+  'high': '$$$',
 };
 
 /**

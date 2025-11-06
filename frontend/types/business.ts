@@ -29,7 +29,7 @@ export interface Business {
   rating?: number; // optional if backend provides
   reviewCount?: number; // optional if backend provides
 
-  priceRange: 'low' | 'medium' | 'high' | '$' | '$$' | '$$$' | '$$$$'; // from priceTier
+  priceRange: 'low' | 'medium' | 'high' | '$' | '$$' | '$$$' | '$$$$'// from priceTier
 
   open247: boolean; // from open247
   hours: {

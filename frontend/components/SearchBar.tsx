@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
 import { useThemeStore } from '../store/themeStore';
+import { BusinessSearchDropdown } from './BusinessSearchDropdown';
 
 
 interface SearchBarProps {
@@ -97,13 +98,12 @@ export function SearchBar({
     <div className={`p-6 rounded-lg shadow-sm ${borderColor}`} style={{ backgroundColor: bgColor }}>
       <div className="flex flex-col gap-4">
         <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1 relative">
-            <Search className={`absolute left-3 top-3 h-4 w-4 ${isDarkMode ? 'text-gray-400' : 'text-muted-foreground'}`} />
-            <Input
-              placeholder="Search businesses..."
+          <div className="flex-1">
+            <BusinessSearchDropdown
               value={searchTerm}
-              onChange={(e) => onSearchChange(e.target.value)}
-              className={`pl-10 ${textColor} ${isDarkMode ? 'bg-[#2a2a2a] border-gray-700' : 'bg-input-background'}`}
+              onChange={(value) => onSearchChange(value)}
+              placeholder="Search businesses by name..."
+              limit={5}
             />
           </div>
           

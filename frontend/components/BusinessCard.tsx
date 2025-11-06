@@ -26,6 +26,16 @@ export function BusinessCard({
   const [shareMessage, setShareMessage] = useState('');
 
   const cardBgColor = isDarkMode ? '#2a2a2a' : '#ffffff';
+
+  // Convert price range to symbols
+  const getPriceRangeSymbol = (priceRange: string): string => {
+    const priceMap: { [key: string]: string } = {
+      'low': '$',
+      'medium': '$$',
+      'high': '$$$',
+    };
+    return priceMap[priceRange] || priceRange;
+  };
   const textColor = isDarkMode ? 'text-white' : 'text-black';
   const mutedTextColor = isDarkMode ? 'text-gray-400' : 'text-muted-foreground';
   const borderColor = isDarkMode ? 'border-gray-700' : 'border-gray-200';
@@ -207,7 +217,7 @@ const fallbackImage = '';
               </span>
             </div>
             <span className={`text-sm font-medium ${textColor}`}>
-              {business.priceRange}
+              {getPriceRangeSymbol(business.priceRange)}
             </span>
           </div>
 
