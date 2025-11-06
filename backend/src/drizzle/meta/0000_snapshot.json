@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "02a47456-9484-4371-9b0f-9057b61a5106",
+  "id": "672fdfde-0d3c-4e48-a2d4-4f52d723deff",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "account": {
@@ -127,6 +127,164 @@
       "uniqueConstraints": {},
       "checkConstraint": {}
     },
+    "bookmarked_businesses": {
+      "name": "bookmarked_businesses",
+      "columns": {
+        "user_id": {
+          "name": "user_id",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "business_uen": {
+          "name": "business_uen",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "business_uen": {
+          "name": "business_uen",
+          "columns": [
+            "business_uen"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "bookmarked_businesses_user_id_user_id_fk": {
+          "name": "bookmarked_businesses_user_id_user_id_fk",
+          "tableFrom": "bookmarked_businesses",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "bookmarked_businesses_business_uen_businesses_uen_fk": {
+          "name": "bookmarked_businesses_business_uen_businesses_uen_fk",
+          "tableFrom": "bookmarked_businesses",
+          "tableTo": "businesses",
+          "columnsFrom": [
+            "business_uen"
+          ],
+          "columnsTo": [
+            "uen"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {
+        "bookmarked_businesses_user_id_business_uen": {
+          "name": "bookmarked_businesses_user_id_business_uen",
+          "columns": [
+            "user_id",
+            "business_uen"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "business_announcements": {
+      "name": "business_announcements",
+      "columns": {
+        "announcement_id": {
+          "name": "announcement_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "business_uen": {
+          "name": "business_uen",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "title": {
+          "name": "title",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "content": {
+          "name": "content",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "image_url": {
+          "name": "image_url",
+          "type": "varchar(500)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "(now())"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "onUpdate": true,
+          "default": "(now())"
+        }
+      },
+      "indexes": {
+        "business_uen": {
+          "name": "business_uen",
+          "columns": [
+            "business_uen"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "business_announcements_business_uen_businesses_uen_fk": {
+          "name": "business_announcements_business_uen_businesses_uen_fk",
+          "tableFrom": "business_announcements",
+          "tableTo": "businesses",
+          "columnsFrom": [
+            "business_uen"
+          ],
+          "columnsTo": [
+            "uen"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {
+        "business_announcements_announcement_id": {
+          "name": "business_announcements_announcement_id",
+          "columns": [
+            "announcement_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
     "business_opening_hours": {
       "name": "business_opening_hours",
       "columns": {
@@ -187,7 +345,7 @@
             "uen"
           ],
           "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "cascade"
         }
       },
       "compositePrimaryKeys": {
@@ -247,7 +405,7 @@
             "uen"
           ],
           "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "cascade"
         }
       },
       "compositePrimaryKeys": {
@@ -261,19 +419,113 @@
       "uniqueConstraints": {},
       "checkConstraint": {}
     },
-    "businesses": {
-      "name": "businesses",
+    "business_reviews": {
+      "name": "business_reviews",
       "columns": {
-        "uen": {
-          "name": "uen",
-          "type": "varchar(20)",
+        "id": {
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "user_email": {
+          "name": "user_email",
+          "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "password": {
-          "name": "password",
+        "business_uen": {
+          "name": "business_uen",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "rating": {
+          "name": "rating",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "body": {
+          "name": "body",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "like_count": {
+          "name": "like_count",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": 0
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "business_reviews_user_email_user_email_fk": {
+          "name": "business_reviews_user_email_user_email_fk",
+          "tableFrom": "business_reviews",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_email"
+          ],
+          "columnsTo": [
+            "email"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        },
+        "business_reviews_business_uen_businesses_uen_fk": {
+          "name": "business_reviews_business_uen_businesses_uen_fk",
+          "tableFrom": "business_reviews",
+          "tableTo": "businesses",
+          "columnsFrom": [
+            "business_uen"
+          ],
+          "columnsTo": [
+            "uen"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "business_reviews_id": {
+          "name": "business_reviews_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "businesses": {
+      "name": "businesses",
+      "columns": {
+        "owner_id": {
+          "name": "owner_id",
           "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "uen": {
+          "name": "uen",
+          "type": "varchar(20)",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -302,6 +554,20 @@
         "address": {
           "name": "address",
           "type": "varchar(500)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "latitude": {
+          "name": "latitude",
+          "type": "decimal(9,6)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "longitude": {
+          "name": "longitude",
+          "type": "decimal(9,6)",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
@@ -381,7 +647,21 @@
         }
       },
       "indexes": {},
-      "foreignKeys": {},
+      "foreignKeys": {
+        "businesses_owner_id_user_id_fk": {
+          "name": "businesses_owner_id_user_id_fk",
+          "tableFrom": "businesses",
+          "tableTo": "user",
+          "columnsFrom": [
+            "owner_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        }
+      },
       "compositePrimaryKeys": {
         "businesses_uen": {
           "name": "businesses_uen",
@@ -391,6 +671,330 @@
         }
       },
       "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "forum_posts": {
+      "name": "forum_posts",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "user_email": {
+          "name": "user_email",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "business_uen": {
+          "name": "business_uen",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "title": {
+          "name": "title",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "body": {
+          "name": "body",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "like_count": {
+          "name": "like_count",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": 0
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "(now())"
+        }
+      },
+      "indexes": {
+        "business_uen": {
+          "name": "business_uen",
+          "columns": [
+            "business_uen"
+          ],
+          "isUnique": false
+        },
+        "user_email": {
+          "name": "user_email",
+          "columns": [
+            "user_email"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "forum_posts_user_email_user_email_fk": {
+          "name": "forum_posts_user_email_user_email_fk",
+          "tableFrom": "forum_posts",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_email"
+          ],
+          "columnsTo": [
+            "email"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        },
+        "forum_posts_business_uen_businesses_uen_fk": {
+          "name": "forum_posts_business_uen_businesses_uen_fk",
+          "tableFrom": "forum_posts",
+          "tableTo": "businesses",
+          "columnsFrom": [
+            "business_uen"
+          ],
+          "columnsTo": [
+            "uen"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "forum_posts_id": {
+          "name": "forum_posts_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "forum_posts_replies": {
+      "name": "forum_posts_replies",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "post_id": {
+          "name": "post_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user_email": {
+          "name": "user_email",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "body": {
+          "name": "body",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "like_count": {
+          "name": "like_count",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": 0
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "(now())"
+        }
+      },
+      "indexes": {
+        "post_id": {
+          "name": "post_id",
+          "columns": [
+            "post_id"
+          ],
+          "isUnique": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "columns": [
+            "user_email"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "forum_posts_replies_post_id_forum_posts_id_fk": {
+          "name": "forum_posts_replies_post_id_forum_posts_id_fk",
+          "tableFrom": "forum_posts_replies",
+          "tableTo": "forum_posts",
+          "columnsFrom": [
+            "post_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "forum_posts_replies_user_email_user_email_fk": {
+          "name": "forum_posts_replies_user_email_user_email_fk",
+          "tableFrom": "forum_posts_replies",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_email"
+          ],
+          "columnsTo": [
+            "email"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {
+        "forum_posts_replies_id": {
+          "name": "forum_posts_replies_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "referrals": {
+      "name": "referrals",
+      "columns": {
+        "ref_id": {
+          "name": "ref_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "referrer_id": {
+          "name": "referrer_id",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "referred_id": {
+          "name": "referred_id",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "referral_code": {
+          "name": "referral_code",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "enum('claimed','qualified','rewarded','rejected')",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'claimed'"
+        },
+        "referred_at": {
+          "name": "referred_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        }
+      },
+      "indexes": {
+        "idx_referred": {
+          "name": "idx_referred",
+          "columns": [
+            "referred_id"
+          ],
+          "isUnique": false
+        },
+        "idx_referrer": {
+          "name": "idx_referrer",
+          "columns": [
+            "referrer_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "referrals_referrer_id_user_id_fk": {
+          "name": "referrals_referrer_id_user_id_fk",
+          "tableFrom": "referrals",
+          "tableTo": "user",
+          "columnsFrom": [
+            "referrer_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        },
+        "referrals_referred_id_user_id_fk": {
+          "name": "referrals_referred_id_user_id_fk",
+          "tableFrom": "referrals",
+          "tableTo": "user",
+          "columnsFrom": [
+            "referred_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {
+        "referrals_ref_id": {
+          "name": "referrals_ref_id",
+          "columns": [
+            "ref_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {
+        "uq_referrer_referred": {
+          "name": "uq_referrer_referred",
+          "columns": [
+            "referrer_id",
+            "referred_id"
+          ]
+        }
+      },
       "checkConstraint": {}
     },
     "session": {
@@ -514,11 +1118,11 @@
         },
         "email_verified": {
           "name": "email_verified",
-          "type": "boolean",
+          "type": "tinyint",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": false
+          "default": 0
         },
         "image": {
           "name": "image",
@@ -542,6 +1146,34 @@
           "notNull": true,
           "autoincrement": false,
           "default": "(now())"
+        },
+        "has_business": {
+          "name": "has_business",
+          "type": "tinyint",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "referral_code": {
+          "name": "referral_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "referred_by_user_id": {
+          "name": "referred_by_user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "bio": {
+          "name": "bio",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
         }
       },
       "indexes": {},
@@ -562,6 +1194,52 @@
           ]
         }
       },
+      "checkConstraint": {}
+    },
+    "user_points": {
+      "name": "user_points",
+      "columns": {
+        "user_email": {
+          "name": "user_email",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "points": {
+          "name": "points",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "user_points_user_email_user_email_fk": {
+          "name": "user_points_user_email_user_email_fk",
+          "tableFrom": "user_points",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_email"
+          ],
+          "columnsTo": [
+            "email"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {
+        "user_points_user_email": {
+          "name": "user_points_user_email",
+          "columns": [
+            "user_email"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
       "checkConstraint": {}
     },
     "verification": {
@@ -619,6 +1297,123 @@
           "name": "verification_id",
           "columns": [
             "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "vouchers": {
+      "name": "vouchers",
+      "columns": {
+        "voucher_id": {
+          "name": "voucher_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "ref_id": {
+          "name": "ref_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "amount": {
+          "name": "amount",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "enum('issued','used','expired','revoked')",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'issued'"
+        },
+        "issued_at": {
+          "name": "issued_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "idx_v_expires": {
+          "name": "idx_v_expires",
+          "columns": [
+            "expires_at"
+          ],
+          "isUnique": false
+        },
+        "idx_v_status": {
+          "name": "idx_v_status",
+          "columns": [
+            "status"
+          ],
+          "isUnique": false
+        },
+        "idx_v_user": {
+          "name": "idx_v_user",
+          "columns": [
+            "user_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "vouchers_user_id_user_id_fk": {
+          "name": "vouchers_user_id_user_id_fk",
+          "tableFrom": "vouchers",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        },
+        "vouchers_ref_id_referrals_ref_id_fk": {
+          "name": "vouchers_ref_id_referrals_ref_id_fk",
+          "tableFrom": "vouchers",
+          "tableTo": "referrals",
+          "columnsFrom": [
+            "ref_id"
+          ],
+          "columnsTo": [
+            "ref_id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {
+        "vouchers_voucher_id": {
+          "name": "vouchers_voucher_id",
+          "columns": [
+            "voucher_id"
           ]
         }
       },

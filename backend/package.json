@@ -7,10 +7,11 @@
     "dev": "tsc & nodemon -r ./dist/loadEnv.js dist/index.js",
     "build": "tsc",
     "start": "tsc && node -r ./dist/loadEnv.js dist/index.js",
-    "auth:generate": "npx @better-auth/cli generate --output src/database/auth-schema.ts --config src/lib/auth.ts",
-    "db:pull": "node -r ./dist/loadEnv.js ../node_modules/drizzle-kit/bin.cjs pull",
-    "db:push": "node -r ./dist/loadEnv.js ../node_modules/drizzle-kit/bin.cjs push",
-    "db:view": "node -r ./dist/loadEnv.js ../node_modules/drizzle-kit/bin.cjs studio"
+    "auth:generate": "dotenv -e ../.env -- npx @better-auth/cli generate --output src/database/auth-schema.ts --config src/lib/auth.ts",
+    "db:pull": "dotenv -e ../.env -- drizzle-kit pull",
+    "db:push": "dotenv -e ../.env -- drizzle-kit push",
+    "db:generate": "dotenv -e ../.env -- drizzle-kit generate",
+    "db:view": "dotenv -e ../.env -- drizzle-kit studio"
   },
   "keywords": [],
   "author": "",
