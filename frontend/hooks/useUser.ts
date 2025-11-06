@@ -156,5 +156,49 @@ export const useUser = (userId: string | null) => {
     []
   );
 
-  return { user, stats, vouchers, updateUser, loading, error };
+  const refetch = useCallback(() => {
+    const controller = new AbortController();
+    const fetchUserProfile = async () => {
+      if (!userId) return;
+      setLoading(true);
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/users/profile/${userId}`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          signal: controller.signal,
+        });
+        if (!response.ok) throw new Error('Failed to fetch');
+        const data = await response.json();
+        const profileData = data.profile || data;
+        const userData = {
+          id: profileData.id,
+          role: 'user',
+          name: profileData.name || 'User',
+          email: profileData.email || 'user@email.com',
+          avatarUrl: profileData.image || undefined,
+          memberSince: profileData.createdAt?.split('T')[0] || new Date().toISOString().split('T')[0],
+          bio: profileData.bio || '',
+          location: profileData.location || 'Singapore',
+        };
+        setUser(userData);
+        setVouchers(data.vouchers || []);
+        setStats({
+          vouchersCount: data.vouchers?.length || 0,
+          reviewsCount: data.reviews?.length || 0,
+          loyaltyPoints: data.points || 0,
+        });
+      } catch (err) {
+        if (err instanceof Error && err.name !== 'AbortError') {
+          setError(err.message);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUserProfile();
+    return () => controller.abort();
+  }, [userId]);
+
+  return { user, stats, vouchers, updateUser, refetch, loading, error };
 };

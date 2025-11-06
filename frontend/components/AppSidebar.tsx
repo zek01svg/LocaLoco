@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { useUserBusinesses } from '../hooks/useUserBusinesses';
 import { authClient } from '../lib/authClient';
+import { useUser } from '../hooks/useUser';
 import {
   Home,
   Box,
@@ -85,6 +86,7 @@ export function AppSidebar({
   const [transitionIcon, setTransitionIcon] = useState<'user' | 'business'>('user');
   const [isFadingOut, setIsFadingOut] = useState(false);
   const role = useAuthStore((state) => state.role);
+  const userId = useAuthStore((state) => state.userId);
 
   // Business mode state
   const businessMode = useAuthStore((state) => state.businessMode);
@@ -98,6 +100,9 @@ export function AppSidebar({
 
   // Fetch user's businesses
   const { businesses, isLoading: businessesLoading } = useUserBusinesses();
+
+  // Fetch user data for avatar
+  const { user, refetch: refetchUser } = useUser(userId);
   
   // Detect screen size
   useEffect(() => {
@@ -192,9 +197,21 @@ export function AppSidebar({
       .toUpperCase();
   };
 
-  const handleBusinessModeToggle = () => {
+  const handleBusinessModeToggle = async () => {
     if (businessMode.isBusinessMode) {
-      // Switch back to user mode
+      // Switch back to user mode - fetch fresh user avatar from DB
+      try {
+        const response = await fetch(`http://localhost:3000/api/users/profile/${userId}`);
+        if (response.ok) {
+          const data = await response.json();
+          const profileData = data.profile || data;
+          const freshAvatar = profileData.image || '';
+          useAuthStore.getState().setAvatarUrl(freshAvatar);
+        }
+      } catch (err) {
+        console.error('Failed to fetch user avatar:', err);
+      }
+
       setTransitionText('User Mode');
       setTransitionIcon('user');
       setShowTransition(true);
@@ -218,9 +235,11 @@ export function AppSidebar({
         setIsFadingOut(false);
       }, 2200);
     } else {
-      // Switch to business mode with the first business
+      // Switch to business mode with the first business - clear user avatar
       if (businesses.length > 0) {
         const firstBusiness = businesses[0];
+        useAuthStore.getState().setAvatarUrl(firstBusiness.wallpaper || '');
+
         setTransitionText(`Business Mode`);
         setTransitionIcon('business');
         setShowTransition(true);
@@ -248,6 +267,12 @@ export function AppSidebar({
   };
 
   const handleBusinessSwitch = (uen: string, name: string) => {
+    // Update avatar to new business wallpaper
+    const business = businesses.find(b => b.uen === uen);
+    if (business?.wallpaper) {
+      useAuthStore.getState().setAvatarUrl(business.wallpaper);
+    }
+
     setTransitionText(name); // Show the business name
     setTransitionIcon('business');
     setShowTransition(true);
@@ -521,11 +546,12 @@ export function AppSidebar({
                         );
                       }
 
-                      // ✅ Otherwise use user avatar
-                      return avatarUrl ? (
+                      // ✅ Otherwise use user avatar (prioritize authStore for real-time updates)
+                      const userAvatar = avatarUrl || user?.avatarUrl;
+                      return userAvatar ? (
                         <AvatarImage
                           key="user"
-                          src={avatarUrl}
+                          src={userAvatar}
                           alt={userName}
                           className="animate-in fade-in duration-300"
                         />
@@ -683,8 +709,8 @@ export function AppSidebar({
                   >
                     {isAvatar ? (
                       <Avatar className="w-6 h-6">
-                        {avatarUrl ? (
-                          <AvatarImage src={avatarUrl} alt={userName} />
+                        {avatarUrl || user?.avatarUrl ? (
+                          <AvatarImage src={avatarUrl || user?.avatarUrl} alt={userName} />
                         ) : (
                           <AvatarFallback className={`${avatarBgColor} ${textColor} text-xs`}>
                             {getInitials(userName)}
