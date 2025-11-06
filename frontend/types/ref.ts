@@ -1,6 +1,7 @@
 import axios from "axios";
+import { url } from "../constants/url";
 
-export const API_BASE = "http://localhost:3000/api";
+export const API_BASE = `${url}/api`;
 
 // Note: signup and login are now handled by better-auth
 // Use the auth-client instead:

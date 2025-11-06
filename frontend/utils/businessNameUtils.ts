@@ -1,3 +1,5 @@
+import { url } from "../constants/url";
+
 /**
  * Sanitizes and normalizes business name input for matching
  * - Converts to lowercase
@@ -60,7 +62,7 @@ export async function fetchBusinessUenByName(businessName: string): Promise<stri
   try {
     const sanitizedName = sanitizeBusinessName(businessName);
     const response = await fetch(
-      `http://localhost:3000/api/businesses/search?name=${encodeURIComponent(sanitizedName)}`
+      `${url}/api/businesses/search?name=${encodeURIComponent(sanitizedName)}`
     );
 
     if (!response.ok) {

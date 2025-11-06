@@ -1,6 +1,5 @@
 import { ForumDiscussion, ForumReply } from '../types/forum';
 
-// Backend types (matching your API response from http://localhost:3000/api/forum-posts)
 interface BackendForumPost {
   id: number;
   userEmail: string;

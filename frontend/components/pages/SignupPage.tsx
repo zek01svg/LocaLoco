@@ -16,9 +16,10 @@ import {
 } from '../ui/select';
 import { useThemeStore } from '../../store/themeStore';
 import { toast } from 'sonner';
-import { authClient, callbackURL } from '../../lib/authClient';
+import { authClient } from '../../lib/authClient';
 import { useAuthStore } from '../../store/authStore';
 import { ReferralCodeDialog } from '../ReferralCodeDialog';
+import { url } from '../../constants/url';
 
 interface SignupPageProps {
   onSignup?: (data: any, role: UserRole) => void;
@@ -348,7 +349,7 @@ export function SignupPage({ onSignup, onBack }: SignupPageProps = {}) {
 
       // Check email uniqueness
       try {
-        const response = await fetch(`http://localhost:3000/api/check-email?email=${encodeURIComponent(formData.email)}`);
+        const response = await fetch(`${url}/api/check-email?email=${encodeURIComponent(formData.email)}`);
         const data = await response.json();
         if (!data.available) {
           setError('This email is already registered');
@@ -375,7 +376,7 @@ export function SignupPage({ onSignup, onBack }: SignupPageProps = {}) {
 
         // Check UEN uniqueness
         try {
-          const response = await fetch(`http://localhost:3000/api/check-uen?uen=${encodeURIComponent(currentBusiness.uen)}`);
+          const response = await fetch(`${url}/api/check-uen?uen=${encodeURIComponent(currentBusiness.uen)}`);
           const data = await response.json();
           if (!data.available) {
             setError('This UEN is already registered');
@@ -402,7 +403,7 @@ export function SignupPage({ onSignup, onBack }: SignupPageProps = {}) {
 
         // Check business email uniqueness
         try {
-          const response = await fetch(`http://localhost:3000/api/check-email?email=${encodeURIComponent(currentBusiness.businessEmail)}`);
+          const response = await fetch(`${url}/api/check-email?email=${encodeURIComponent(currentBusiness.businessEmail)}`);
           const data = await response.json();
           if (!data.available) {
             setError('This business email is already registered');
@@ -555,7 +556,7 @@ export function SignupPage({ onSignup, onBack }: SignupPageProps = {}) {
         // Send all business registrations CONCURRENTLY
         const results = await Promise.allSettled(
           businessRegistrations.map(payload =>
-            fetch('http://localhost:3000/api/register-business', {
+            fetch(`${url}/api/register-business`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(payload)
@@ -615,7 +616,7 @@ const handleReferralSubmit = async (referralCode: string) => {
     setIsLoading(true);
     
     // Call your referral API endpoint
-    const response = await fetch('http://localhost:3000/api/referrals/apply', {
+    const response = await fetch(`${url}/api/referrals/apply`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

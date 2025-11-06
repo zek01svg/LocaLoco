@@ -16,6 +16,7 @@ import { Upload, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useThemeStore } from '../../store/themeStore';
 import { useAuthStore } from '../../store/authStore';
+import { url } from '../../constants/url';
 
 
 interface EditProfileDialogProps {
@@ -46,7 +47,7 @@ export function EditProfileDialog({
   useEffect(() => {
     const checkAuthProvider = async () => {
       try {
-        const response = await fetch(`http://localhost:3000/api/users/auth-provider/${user.id}`);
+        const response = await fetch(`${url}/api/users/auth-provider/${user.id}`);
         if (response.ok) {
           const data = await response.json();
           // If user has a Google account linked, they're a Google user
@@ -72,7 +73,7 @@ export function EditProfileDialog({
     setSaving(true);
 
     try {
-      const response = await fetch('http://localhost:3000/api/user/update-profile', {
+      const response = await fetch(`${url}/api/user/update-profile`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -137,7 +138,7 @@ export function EditProfileDialog({
 
     try {
       // Step 1: Get upload URL from backend
-      const urlResponse = await fetch(`http://localhost:3000/api/url-generator?filename=${encodeURIComponent(file.name)}`);
+      const urlResponse = await fetch(`${url}/api/url-generator?filename=${encodeURIComponent(file.name)}`);
       if (!urlResponse.ok) {
         throw new Error('Failed to get upload URL');
       }

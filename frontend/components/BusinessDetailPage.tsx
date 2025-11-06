@@ -7,6 +7,7 @@ import { useTheme } from "../hooks/useTheme";
 import { useReviews } from "../hooks/useReviews";
 import { BusinessDetail } from "./BusinessDetail";
 import { ForumDiscussion } from "../types/forum";
+import { url } from "../constants/url";
 
 export const BusinessDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -30,7 +31,7 @@ export const BusinessDetailPage = () => {
 
       setThreadsLoading(true);
       try {
-        const response = await fetch(`http://localhost:3000/api/forum-posts/business?uen=${business.uen}`);
+        const response = await fetch(`${url}/api/forum-posts/business?uen=${business.uen}`);
         if (!response.ok) throw new Error('Failed to fetch threads');
 
         const data = await response.json();

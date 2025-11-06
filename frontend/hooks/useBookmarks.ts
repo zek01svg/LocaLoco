@@ -3,8 +3,9 @@ import { useMemo, useCallback, useEffect } from 'react';
 import { useBusinessStore } from '../store/businessStore';
 import { useAuthStore } from '../store/authStore';
 import { toast } from 'sonner';
+import { url } from '../constants/url';
 
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = `${url}/api`;
 
 export const useBookmarks = () => {
   const store = useBusinessStore();

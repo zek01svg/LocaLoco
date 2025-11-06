@@ -72,7 +72,7 @@ export function AnnouncementsPage({
         setLoading(true);
         try {
             const response = axios.post(
-                "http://localhost:3000/api/announcements",
+                "/api/announcements",
                 {
                     uen: businessUen,
                 }

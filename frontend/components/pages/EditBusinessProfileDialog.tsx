@@ -26,6 +26,7 @@ import {
 import { Separator } from '../ui/separator';
 import { Alert, AlertDescription } from '../ui/alert';
 import { AlertCircle, ChevronLeft, ChevronRight, Upload, X } from 'lucide-react';
+import { url } from '../../constants/url';
 
 
 
@@ -256,7 +257,7 @@ export function EditBusinessProfileDialog({
 
 
     try {
-      const urlResponse = await fetch(`http://localhost:3000/api/url-generator?filename=${encodeURIComponent(file.name)}`);
+      const urlResponse = await fetch(`${url}/api/url-generator?filename=${encodeURIComponent(file.name)}`);
       if (!urlResponse.ok) throw new Error('Failed to get upload URL');
       const { uploadUrl } = await urlResponse.json();
 
@@ -358,7 +359,7 @@ export function EditBusinessProfileDialog({
     setError(null);
 
     try {
-        const response = await fetch('http://localhost:3000/api/update-business', {
+        const response = await fetch('${url}/api/update-business', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
