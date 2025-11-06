@@ -1,9 +1,11 @@
-STEPS FOR USAGE:
-1. Ater cloning the repo, run `npm install` to install all required dependencies.
-2. After installing dependencies, start your WAMP/MAMP server to get MySQL running. 
-3. Run `npm run db:setup` to create all the needed tables
+backend runs on **http://localhost:3000** while the frontend runs on **http://localhost:5173**
+
+steps for usage:
+1. after cloning the repo, run `npm install` to install all dependencies within the frontend and backend
+2. after installing dependencies, start your WAMP/MAMP server to get MySQL running. 
+3. run `npm run db:setup` to create all the needed tables
 4. after table insertion, copy and paste the dummy data in `database/dummy.sql` into your mysql workbench and run the insertions
-5. finally, run `npm run dev` to start both development servers
+5. finally, run `npm start` to start both development servers
 
 # 🏫 IS216 Web Application Development II
 
@@ -24,6 +26,8 @@ G10 Group 3
 | **Pamika Lim** | UI / Frontend — Assets & styles; Google Maps API/UI + distance/geolocate + forum, profile page, OneMap API + postal code/address conversion |
 | **Lin Hui** | Backend Developer — Business UEN verification, Google Safe Browsing link verification (API), referral code UI and backend |
 
+
+
 ---
 
 ## Business Problem
@@ -32,7 +36,6 @@ G10 Group 3
 > Our web application provides a one-stop-for-all platform for shoppers to support and explore different local businesses, and for local entrepreneurs to reach more customers and grow their presence.
 
 Github URL: https://github.com/zek01svg/LocaLoco.git
-Deployed application URL: https://localoco.azurewebsites.net
 
 ---
 
@@ -71,21 +74,22 @@ Explain the core features and the benefit each provides.
 | 🖥️ | **React.js + TypeScript** | Frontend framework for building a responsive, interactive UI with strong typing and reusable components. |
 | 🎨 | **Tailwind CSS** | Utility-first CSS framework for consistent, fast, and mobile-responsive styling. |
 | ⚙️ | **Node.js + TypeScript** | Backend runtime and language used to handle API logic, authentication, and integrations. (Migrated from PHP for better scalability and maintainability.) |
-| 🗄️ | **MySQL** | Relational database storing business listings, user accounts, bookmarks, and reviews. |
+| 🗄️ | **MySQL + Express.js** | Relational database storing business listings, user accounts, bookmarks, and reviews. |
 | ☁️ | **GitHub + Azure** | Used for version control, continuous integration, and cloud deployment of the application. |
 | 🗺️ | **Google Maps JavaScript API** | Powers live maps, markers, and location-based discovery. Also used for geocoding (address → latitude/longitude) and directions display. |
 | 📍 | **OneMap API (Singapore)** | Converts postal codes into formatted addresses, which are then passed to Google Maps API for coordinate generation and storage in the database. |
-| 🔗 | **Google Safe Browsing API** | Verifies URLs submitted by businesses to prevent unsafe or malicious links from being shared. |
+| 🔗 | **Better-Auth + Drizzle orm** | Secure authentication system for users & sessions, Type-safe ORM with automatic TS inference.  |
+
+
 
 
 ---
 
 ## Use Case & User Journey
 
-Provide screenshots and captions showing how users interact with your app.
 
-1. **Landing Page**  
-   <img src="screenshots/landing.png" width="600">  
+1. **Map Page**  
+   <img src="screenshots/maps.png" width="600">  
    - Displays the homepage with google maps navigation options.
 
 2. **Search Feature**  
@@ -99,7 +103,7 @@ Provide screenshots and captions showing how users interact with your app.
    <img src="screenshots/forum.png" width="600">  
    - Shows different users coming together to share their experiences about local businesses they have visited.
 5. **Notifications**
-<img src="screenshots/Notifications.png" width="600">  
+<img src="screenshots/notifications.png" width="600">  
    - Shows user related activity, new revies, upcoming events and points updates.
 6. **Vouchers**
 <img src="screenshots/vouchers.png" width="600">  
@@ -122,7 +126,7 @@ Comprehensive steps to help other developers or evaluators run and test LocaLoco
 
 ### 1) Download the Project
 ```bash
-git clone https://github.com/<org-or-user>/LocaLoco.git
+git clone https://github.com/zek01svg/LocaLoco.git
 cd LocaLoco
 npm install
 cd backend
@@ -148,15 +152,13 @@ DATABASE_URL=mysql://root:your_mysql_password@localhost:3306/wad2_project
 BETTER_AUTH_SECRET=<insert>
 BETTER_AUTH_URL=http://localhost:3000
 
-# Google Maps API (Optional - for map features)
-VITE_GOOGLE_MAPS_API_KEY=<insert>
-# Azure Storage (Optional - for image uploads)
-AZURE_STORAGE_CONNECTION_STRING=<insert>
-AZURE_STORAGE_CONTAINER_NAME=y<insert>
+# for better-auth
+BETTER_AUTH_SECRET=IL2bYHh4ztTrsgiFcLBrE5t8iykNCVh7
+BETTER_AUTH_URL=http://localhost:3000
+
 ```
 
-> Never commit the `.env` file to your repository.  
-> Instead, include a `.env.example` file with placeholder values.
+
 
 ---
 
@@ -188,9 +190,18 @@ AZURE_STORAGE_CONTAINER_NAME=y<insert>
 
 ---
 
-### 4) Run the Application Built for Production
+### 4) Run the Application
 
-#### 
+#### Development Mode 
+Start both frontend and backend concurrently:
+```bash
+npm run dev
+```
+
+- **Frontend**: [http://localhost:5173](http://localhost:5173)
+- **Backend**: [http://localhost:3000](http://localhost:3000)
+
+#### Production Build
 ```bash
 npm start
 ```
@@ -211,10 +222,7 @@ npm start
 | **Map View** | Browse businesses on map | Markers display, clicking shows business details |
 | **Logout** | Click logout button | User logged out, redirected to welcome page |
 
-#### Test Accounts
-After running the database setup, you can use:
-- Email: `john2@gmail.com`
-- Password: asdasdasd
+
 
 ---
 
@@ -257,3 +265,12 @@ LocaLoco/
 ├── .env                     # Environment variables (DO NOT COMMIT)
 └── README.md
 ```
+
+---
+
+## Group Reflection
+
+Each member should contribute 2–3 sentences on their learning and project experience.
+
+> **Example Template:**  
+> - *Pamika:* Understood how Gmaps API and OneMaps API works, exploration of Figma, and reinforced knowledge on how to retrieve, convert and store coordinates in the database.
