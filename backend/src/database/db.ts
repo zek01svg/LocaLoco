@@ -6,11 +6,11 @@ const sslConfig = process.env.NODE_ENV === 'production'
   : { rejectUnauthorized: false }
 
 const db = drizzle(mysql.createPool({
-    host: String(process.env.DB_HOST),
-    user: String(process.env.DB_USER),
-    password: String(process.env.DB_PASSWORD),
-    database: String(process.env.DB_NAME),
-    port: Number(process.env.DB_PORT),
+    host: "localhost",
+    user: "root",
+    password: "",
+    database: "wad2_project",
+    port: 3308,
     ssl: sslConfig
 }));
 
