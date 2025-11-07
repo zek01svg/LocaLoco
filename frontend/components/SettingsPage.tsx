@@ -27,6 +27,7 @@ import {
 import { toast } from 'sonner';
 import { useThemeStore } from '../store/themeStore';
 import { useAuthStore } from '../store/authStore';
+import { url } from '../constants/url';
 
 interface SettingsPageProps {
   onBack?: () => void;
@@ -79,7 +80,7 @@ export function SettingsPage({ onBack}: SettingsPageProps) {
   const handleDeleteAccount = async () => {
     try {
       const endpoint = role === 'business' ? '/api/delete-business' : '/api/user/delete-profile';
-      const response = await fetch(`http://localhost:3000${endpoint}`, {
+      const response = await fetch(`${url}${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
