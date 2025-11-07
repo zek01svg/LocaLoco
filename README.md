@@ -137,7 +137,7 @@ npx concurrently "cd backend && npm install" "cd frontend && npm install" # inst
    - Make sure your MySQL server is running on `localhost:3306`
    
 2. **Create Database**
-    Using MySQL Workbench, run the first three uncommented lines of the SQL script.
+    Using MySQL Workbench, run the first three uncommented lines of the SQL script that which is located in /backend/src/database.
 
 3. **Create Tables**
    Inside your chosen IDE (e.g., VSCode)
