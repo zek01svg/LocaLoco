@@ -80,32 +80,6 @@ This project is built with a modern full-stack TypeScript ecosystem — ensuring
 
 ---
 
-## Use Case & User Journey
-
-Provide screenshots and captions showing how users interact with your app.
-
-1. **Landing Page**  
-   <img src="screenshots/landing.png" width="600">  
-   - Displays the homepage with google maps navigation options.
-
-2. **Search Feature**  
-   <img src="screenshots/search.png" width="600">  
-   - Users can browse and filter stores by criteria.
-
-3. **Profile Page**  
-   <img src="screenshots/profile.png" width="600">  
-   - Shows user's details, vouchers, reviews, loyalty points, referrals and bookmarked businesses.
-4. **Forum**  
-   <img src="screenshots/forum.png" width="600">  
-   - Shows different users coming together to share their experiences about local businesses they have visited.
-5. **Notifications**
-<img src="screenshots/Notifications.png" width="600">  
-   - Shows user related activity, new revies, upcoming events and points updates.
-6. **Vouchers**
-<img src="screenshots/vouchers.png" width="600">  
-   - Shows user's points and list vouchers that the user can use their points to reedeem to use in stores. Shows users the vouchers they currently have, as well as expiry date.
----
-
 ## Developers Setup Guide
 
 Comprehensive steps to help other developers or evaluators run and test LocaLoco.
