@@ -448,12 +448,12 @@ class BusinessModel {
                 await db.delete(businessPaymentOptions).where(eq(businessPaymentOptions.uen, business.uen))
 
                 await Promise.all(
-                    business.paymentOptions.map(option =>
-                        db.insert(businessPaymentOptions).values({
+                    business.paymentOptions.map(option => {
+                        return db.insert(businessPaymentOptions).values({
                             uen: business.uen,
                             paymentOption: option
-                        } as typeof businessPaymentOptions.$inferInsert)
-                    )
+                        } as typeof businessPaymentOptions.$inferInsert);
+                    })
                 );
             }
 
@@ -490,6 +490,64 @@ class BusinessModel {
         catch (err: any) {
             console.error(`Error deleting business: ${err}`)
             throw err;
+        }
+    }
+
+    public static async getBusinessByOwnerId(ownerId: string): Promise<BusinessForBusinessList | null> {
+        try {
+            const result = await db.select().from(businesses).where(eq(businesses.ownerId, ownerId)).limit(1);
+            if (result.length === 0 || !result[0]) {
+                return null;
+            }
+
+            const business = result[0]!; // Non-null assertion since we checked above
+
+            // Fetch opening hours
+            const hours = await db.select().from(businessOpeningHours).where(eq(businessOpeningHours.uen, business.uen));
+            const openingHours: Record<DayOfWeek, HourEntry> = {} as Record<DayOfWeek, HourEntry>;
+            hours.forEach((hour) => {
+                openingHours[hour.dayOfWeek] = {
+                    open: hour.openTime,
+                    close: hour.closeTime,
+                };
+            });
+
+            // Fetch payment options
+            const paymentOptionsResult = await db.select().from(businessPaymentOptions).where(eq(businessPaymentOptions.uen, business.uen));
+            const paymentOptions = paymentOptionsResult.map(po => po.paymentOption);
+
+            // Calculate average rating
+            const reviewsResult = await db.select().from(businessReviews).where(eq(businessReviews.businessUen, business.uen));
+            const avgRating = reviewsResult.length > 0
+                ? reviewsResult.reduce((sum, r) => sum + r.rating, 0) / reviewsResult.length
+                : 0;
+
+            return {
+                ownerId: business.ownerId,
+                uen: business.uen,
+                businessName: business.businessName,
+                businessCategory: business.businessCategory || '',
+                description: business.description || '',
+                avgRating,
+                address: business.address || '',
+                latitude: business.latitude || null,
+                longitude: business.longitude || null,
+                open247: business.open247 || 0,
+                openingHours,
+                email: business.email || '',
+                phoneNumber: business.phoneNumber || '',
+                websiteLink: business.websiteLink || null,
+                socialMediaLink: business.socialMediaLink || null,
+                wallpaper: business.wallpaper || '',
+                dateOfCreation: business.dateOfCreation || '',
+                priceTier: business.priceTier || '',
+                offersDelivery: business.offersDelivery || 0,
+                offersPickup: business.offersPickup || 0,
+                paymentOptions,
+            };
+        } catch (error) {
+            console.error('Error getting business by ownerId:', error);
+            throw error;
         }
     }
 

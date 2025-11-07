@@ -26,7 +26,8 @@ import {
 } from './ui/alert-dialog';
 import { toast } from 'sonner';
 import { useThemeStore } from '../store/themeStore';
-
+import { useAuthStore } from '../store/authStore';
+import { url } from '../constants/url';
 
 interface SettingsPageProps {
   onBack?: () => void;
@@ -35,18 +36,20 @@ interface SettingsPageProps {
 export function SettingsPage({ onBack}: SettingsPageProps) {
   const isDarkMode = useThemeStore(state => state.isDarkMode);
   const toggleTheme = useThemeStore(state => state.toggleTheme);
-  const { logout } = useAuth();
+  const { logout, user } = useAuth(); // Assuming useAuth provides the user object
   const navigate = useNavigate();
+  const role = useAuthStore((state) => state.role);
 
   const onThemeToggle = (checked: boolean) => {
-    toggleTheme(); // toggle theme in store
+    toggleTheme();
   };
 
   const handleSignOut = () => {
     logout();
     toast.success('Signed out successfully');
-    navigate('/');
+    navigate('/login'); // Redirect to login
   };
+  
   const [notifications, setNotifications] = useState({
     email: true,
     push: true,
@@ -69,25 +72,40 @@ export function SettingsPage({ onBack}: SettingsPageProps) {
   const textColor = isDarkMode ? '#ffffff' : '#000000';
 
   const handleClearCache = () => {
-    // Simulate cache clearing
     toast.success('Cache cleared successfully', {
       description: 'All cached data has been removed.',
     });
   };
 
-  const handleDeleteAccount = () => {
-    // Simulate account deletion
-    toast.error('Account deleted', {
-      description: 'Your account has been permanently deleted.',
-    });
-    setShowDeleteDialog(false);
-    // In a real app, this would log the user out and redirect
+  const handleDeleteAccount = async () => {
+    try {
+      const endpoint = role === 'business' ? '/api/delete-business' : '/api/user/delete-profile';
+      const response = await fetch(`${url}${endpoint}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // You might need to include an authorization token here
+        },
+        body: JSON.stringify({ userId: user?.id }), // Assuming you need to send the user ID
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete account');
+      }
+
+      toast.success('Account deleted successfully');
+      logout();
+      navigate('/login'); // Redirect to login
+    } catch (error) {
+      toast.error('Failed to delete account. Please try again.');
+    } finally {
+      setShowDeleteDialog(false);
+    }
   };
 
   return (
     <div className="min-h-screen md:pl-6" style={{ backgroundColor: bgColor }}>
       <div className="max-w-3xl mx-auto px-4 py-4">
-        {/* Header */}
         <div className="mb-3">
           <h1 className="text-3xl" style={{ color: textColor }}>Settings</h1>
           <p className="text-muted-foreground text-sm">Manage your account settings and preferences</p>
@@ -100,7 +118,6 @@ export function SettingsPage({ onBack}: SettingsPageProps) {
               <div className="p-1.5 bg-primary rounded-lg">
                 <User className="w-4 h-4 text-white" />
               </div>
-              {/* <h2 className="text-lg">Account Settings</h2> */}
             </div>
             <div className="space-y-2">
               <div className="space-y-1">
@@ -144,7 +161,6 @@ export function SettingsPage({ onBack}: SettingsPageProps) {
             </div>
           </Card>
 
-          {/* Appearance */}
           <Card className="p-3" style={{ backgroundColor: cardBg, color: textColor }}>
             <div className="flex items-center gap-2 mb-2">
               <div className="p-1.5 bg-primary rounded-lg">
@@ -164,7 +180,6 @@ export function SettingsPage({ onBack}: SettingsPageProps) {
             </div>
           </Card>
 
-          {/* Notifications */}
           <Card className="p-3" style={{ backgroundColor: cardBg, color: textColor }}>
             <div className="flex items-center gap-2 mb-2">
               <div className="p-1.5 bg-primary rounded-lg">
@@ -219,7 +234,6 @@ export function SettingsPage({ onBack}: SettingsPageProps) {
             </div>
           </Card>
 
-          {/* Privacy */}
           <Card className="p-3" style={{ backgroundColor: cardBg, color: textColor }}>
             <div className="flex items-center gap-2 mb-2">
               <div className="p-1.5 bg-primary rounded-lg">
@@ -263,7 +277,6 @@ export function SettingsPage({ onBack}: SettingsPageProps) {
             </div>
           </Card>
 
-          {/* Account Actions */}
           <Card className="p-3" style={{ backgroundColor: cardBg, color: textColor }}>
             <h3 className="text-lg mb-2" style={{ color: textColor }}>Account Actions</h3>
             <div className="space-y-2">
@@ -278,7 +291,6 @@ export function SettingsPage({ onBack}: SettingsPageProps) {
             </div>
           </Card>
 
-          {/* Danger Zone */}
           <Card className="p-3 border-destructive" style={{ backgroundColor: cardBg, color: textColor }}>
             <h3 className="text-destructive text-lg mb-2">Danger Zone</h3>
             <div className="space-y-2">
@@ -303,7 +315,6 @@ export function SettingsPage({ onBack}: SettingsPageProps) {
         </div>
       </div>
 
-      {/* Delete Account Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent style={{ backgroundColor: cardBg, color: textColor, borderColor: isDarkMode ? '#404040' : '#e5e7eb' }}>
           <AlertDialogHeader>
@@ -339,3 +350,4 @@ export function SettingsPage({ onBack}: SettingsPageProps) {
     </div>
   );
 }
+
