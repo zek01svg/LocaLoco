@@ -9,12 +9,11 @@
 
 | Name | Role & Contributions |
 |------|------------------------|
-| **Suan Loong** | Frontend Developer — UI responsiveness, navigation bar, styling & animation, advanced search overlay |
-| **Jolene** | Frontend Developer — Business card & details components, explore page, bookmark UX, UI polish |
+| **Suan Loong** | Frontend Developer: UI responsiveness, navigation bar, styling & animation, advanced search overlay |
+| **Jolene** | Frontend Developer: Business card & details components, explore page, bookmark UX, UI polish |
+| **Pamika** | Frontend Developer: Google Maps & API + postal code -> address conversion |
+| **Lin Hui** | Frontend Developer: Referral code UI |
 | **Charles** | Backend Developer |
-| **Pamika** | Google Maps &  API + postal code -> address conversion |
-| **Lin Hui** | Referral code UI |
-
 ---
 
 ## Business Problem
@@ -30,8 +29,8 @@ Deployed application URL: https://localoco-wad-ii.azurewebsites.net
 ## Web Solution Overview
 
 ### 🎯 Intended Users
-Primary - users looking for nearby local/independent shops/small businesses to support
-Secondary - independent, local businesses that need discovery and have troubles reaching customers
+- Users looking for nearby local/independent shops/small businesses to support
+- Independent, local businesses that need discovery and have troubles reaching customers
 
 ### 💡 What Users Can Do & Benefits
 
