@@ -1,1 +1,1 @@
-export const url = import.meta.env.VITE_URL
+export const url = window.__env?.VITE_URL
