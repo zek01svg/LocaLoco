@@ -23,8 +23,8 @@ G10 Group 3
 | **Suan Loong** | UI/Frontend Developer — Landing map UI, sidebar, advanced search overlay |
 | **Jolene** | UI/Frontend Developer — Business card & details components, explore page, bookmark UX, UI polish |
 | **Charles** | Backend Developer — BE lead: data feed, filter logic/endpoints, local storage, build & deploy |
-| **Pamika Lim** | Frontend — Google Maps API, OneMap API + postal code/address conversion |
-| **Lin Hui** | Backend — Google Safe Browsing link verification (API), referral code 
+| **Pamika Lim** | Google Maps & OneMap API + postal code -> address conversion |
+| **Lin Hui** | Referral code 
 
 
 
