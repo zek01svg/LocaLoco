@@ -20,11 +20,11 @@ G10 Group 3
 
 | Name | Role & Contributions |
 |------|------------------------|
-| **Suan Loong** | Frontend Developer — Landing map UI, sidebar, advanced search overlay |
-| **Jolene** | Frontend Developer — Business card & details components, explore page, bookmark UX, UI polish |
+| **Suan Loong** | UI/Frontend Developer — Landing map UI, sidebar, advanced search overlay |
+| **Jolene** | UI/Frontend Developer — Business card & details components, explore page, bookmark UX, UI polish |
 | **Charles** | Backend Developer — BE lead: data feed, filter logic/endpoints, local storage, build & deploy |
-| **Pamika Lim** | UI / Frontend — Assets & styles; Google Maps API/UI + distance/geolocate + forum, profile page, OneMap API + postal code/address conversion |
-| **Lin Hui** | Backend Developer — Business UEN verification, Google Safe Browsing link verification (API), referral code UI and backend |
+| **Pamika Lim** | Frontend — Google Maps API, OneMap API + postal code/address conversion |
+| **Lin Hui** | Backend — Google Safe Browsing link verification (API), referral code 
 
 
 
@@ -255,7 +255,7 @@ LocaLoco/
 │   │   └── index.ts         # Server entry point
 │   ├── package.json
 │   └── tsconfig.json
-├── src/
+├── frontend/
 │   ├── components/          # React components
 │   ├── hooks/               # Custom hooks (useAuth, useUser)
 │   ├── store/               # Zustand state management
